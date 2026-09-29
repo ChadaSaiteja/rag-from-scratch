@@ -1,0 +1,22 @@
+# Direct dependencies, pinned to the versions verified in .venv/
+# (chromadb 1.5.9, langchain 1.4.0, Python 3.12)
+
+# --- Vector store ---
+chromadb==1.5.9
+langchain-chroma==1.1.0
+
+# --- LLM / embeddings ---
+langchain-google-genai==4.4.0
+
+# --- Retrieval strategies ---
+langchain-community==0.4.2   # BM25Retriever (lexical)
+langchain-classic==1.0.8     # EnsembleRetriever (hybrid)
+rank-bm25==0.2.2
+
+# --- Core / text processing ---
+langchain==1.4.0
+langchain-core==1.6.2
+langchain-text-splitters==1.1.2
+
+# --- Config ---
+python-dotenv==1.2.3

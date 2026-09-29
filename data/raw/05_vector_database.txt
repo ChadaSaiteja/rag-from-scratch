@@ -1,0 +1,67 @@
+VECTOR DATABASES FOR RAG
+
+A vector database stores embeddings and supports similarity search.
+
+Conceptual record:
+
+ID
+TEXT
+VECTOR
+METADATA
+
+Example:
+
+ID:
+chunk-123
+
+TEXT:
+"The installation appointment is scheduled after all dependencies are resolved."
+
+VECTOR:
+[0.14, -0.28, 0.91, ...]
+
+METADATA:
+source = installation.md
+section = scheduling
+page = 7
+
+When a user asks a question:
+1. Convert the question into an embedding.
+2. Search the vector database.
+3. Find nearby vectors.
+4. Return their associated text and metadata.
+
+Top-k means how many results are returned.
+
+For example:
+top_k = 5
+
+The system retrieves the five highest-ranked candidates.
+
+More results are not automatically better.
+
+If top_k is too small, relevant evidence may be missed.
+If top_k is too large, the context may contain noise.
+
+Metadata filtering can greatly improve retrieval.
+
+Example:
+Retrieve only:
+document_type = "installation_guide"
+version = "3.2"
+
+Vector databases are useful for semantic retrieval, but they do not replace ordinary databases.
+
+Use a relational database when you need:
+- transactions
+- exact records
+- joins
+- constraints
+- reliable updates
+
+Use vector search when you need:
+- semantic similarity
+- natural-language retrieval
+- fuzzy conceptual matching
+
+Many real applications use both.

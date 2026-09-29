@@ -1,0 +1,42 @@
+RAG FUNDAMENTALS
+
+Retrieval-Augmented Generation (RAG) is an architecture where an application retrieves relevant information from an external knowledge source and gives that information to a language model before generating an answer.
+
+Basic flow:
+User question -> retrieve relevant data -> build context -> LLM -> answer
+
+Why RAG?
+LLMs have limited knowledge of private company data, can have stale knowledge, and may hallucinate. RAG lets an application ground an answer in data stored outside the model.
+
+Typical RAG components:
+1. Documents: PDFs, Markdown, HTML, database records, tickets, manuals, etc.
+2. Ingestion: loading, cleaning, parsing, and splitting documents.
+3. Embeddings: converting text into numerical vectors.
+4. Vector database: storing vectors and metadata.
+5. Retrieval: finding relevant chunks for a query.
+6. Prompt construction: placing retrieved chunks into model context.
+7. Generation: asking the LLM to answer using the retrieved context.
+
+A useful mental model:
+RAG is not training the model. The model parameters do not change when you ingest documents. You are giving the model relevant external information at inference time.
+
+Example:
+A company has an installation guide containing:
+"Service Wire Center dependencies must be resolved before installation."
+
+A user asks:
+"Why is my installation delayed?"
+
+A RAG system searches its knowledge base, retrieves the relevant section, and gives it to the LLM. The LLM can then answer using that evidence.
+
+RAG is especially useful for:
+- Internal documentation
+- Product manuals
+- Customer support knowledge
+- Engineering runbooks
+- Policies
+- Contracts
+- Frequently changing information
+- Private company data
+
+RAG does not automatically guarantee correctness. Bad parsing, poor chunking, weak retrieval, missing metadata, or irrelevant retrieved chunks can still produce bad answers.

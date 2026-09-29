@@ -1,0 +1,54 @@
+EMBEDDINGS AND VECTOR SEARCH
+
+An embedding converts text into a numerical vector representing semantic information.
+
+Example:
+
+"The customer cannot install the service because the network dependency is incomplete."
+
+might become a vector such as:
+
+[0.12, -0.44, 0.83, ...]
+
+The actual vector contains many dimensions.
+
+Texts with similar meaning tend to have vectors that are closer according to an appropriate similarity metric.
+
+Example:
+"Installation is delayed because a network dependency is unresolved."
+and
+"The unresolved network dependency is blocking installation."
+should generally be semantically similar.
+
+This enables semantic retrieval.
+
+Important distinction:
+Text -> embedding model -> vector
+
+The vector is not the original text. A production system normally stores both the vector and the original chunk or a reference to it.
+
+A record might contain:
+
+{
+  "id": "chunk-001",
+  "text": "Installation is delayed...",
+  "embedding": [0.12, -0.44, ...],
+  "metadata": {
+      "source": "guide.pdf",
+      "page": 18
+  }
+}
+
+Similarity measures:
+- cosine similarity
+- dot product
+- Euclidean distance
+
+The exact choice depends on the embedding model and vector database.
+
+A key concept:
+Embedding quality determines how well semantic relationships can be represented.
+
+If two chunks are semantically related but their embeddings are not close, retrieval may fail.
+
+Do not assume vector search is always enough. Exact identifiers, dates, order numbers, product codes, and names can sometimes be better handled using keyword search, metadata filtering, or hybrid retrieval.

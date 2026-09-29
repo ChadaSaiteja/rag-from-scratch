@@ -1,0 +1,68 @@
+EVALUATING A RAG SYSTEM
+
+Do not evaluate RAG only by asking:
+"Does the answer sound good?"
+
+Separate retrieval quality from generation quality.
+
+Retrieval questions:
+- Did we retrieve the correct chunk?
+- Did we retrieve enough supporting evidence?
+- Did we retrieve irrelevant chunks?
+- Was the correct source ranked highly?
+
+Generation questions:
+- Did the answer use the retrieved evidence?
+- Did it introduce unsupported facts?
+- Did it answer the actual question?
+- Did it cite the correct source?
+
+Example test case:
+
+Question:
+"What is the latest applicable dependency date for ORD-123?"
+
+Expected evidence:
+Service Wire Center = September 10
+Missing Drop = September 12
+Damage Drop = September 9
+
+Expected answer:
+September 12.
+
+If the correct chunks were never retrieved, this is a retrieval problem.
+
+If the correct chunks were retrieved but the model answered September 10, this is primarily a generation/reasoning problem.
+
+Build a small evaluation dataset:
+
+[
+  {
+    "question": "...",
+    "expected_answer": "...",
+    "expected_source": "..."
+  }
+]
+
+Test changes to:
+- chunk size
+- overlap
+- embedding model
+- top_k
+- metadata filters
+- reranking
+- prompt
+
+Change one important variable at a time.
+
+Useful measurements include:
+- retrieval recall
+- precision
+- answer correctness
+- groundedness
+- citation correctness
+- latency
+- token usage
+- cost
+
+A simple manual evaluation set of 20-50 questions can already reveal major retrieval problems.

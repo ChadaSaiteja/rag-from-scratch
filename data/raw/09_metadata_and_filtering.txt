@@ -1,0 +1,49 @@
+METADATA IN RAG
+
+Metadata describes where and what a chunk came from.
+
+Example:
+
+{
+  "source": "network_installation.pdf",
+  "page": 42,
+  "section": "Dependencies",
+  "document_type": "installation_guide",
+  "version": "5.1",
+  "product": "Fiber"
+}
+
+Metadata can be used for:
+- filtering
+- citations
+- debugging
+- access control
+- versioning
+- source display
+
+Suppose the user asks about Fiber service.
+
+Instead of searching every document, filter:
+product = "Fiber"
+
+Suppose the company has versions 4.0 and 5.1.
+
+A query about current behavior should usually retrieve the correct current version.
+
+Metadata also helps debug RAG.
+
+If an answer is wrong, inspect:
+- which chunks were retrieved
+- from which document
+- from which page
+- which version
+- their similarity scores
+
+Without metadata, debugging becomes much harder.
+
+Access control is particularly important.
+
+If users have different permissions, do not rely on the LLM to hide restricted information. Apply authorization and metadata filters before giving content to the model.
+
+A useful principle:
+Security filtering belongs in the application/retrieval layer, not in the model's goodwill.

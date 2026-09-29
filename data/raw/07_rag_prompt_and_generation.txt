@@ -1,0 +1,47 @@
+PROMPT CONSTRUCTION AND GENERATION
+
+After retrieval, the application needs to provide the retrieved evidence to the LLM.
+
+Conceptually:
+
+SYSTEM INSTRUCTIONS
++
+USER QUESTION
++
+RETRIEVED CONTEXT
+=
+MODEL INPUT
+
+Example:
+
+System:
+Answer using the supplied context. If the answer is not present, say you do not have enough information.
+
+Context:
+[1] Service Wire Center must be resolved before installation.
+
+[2] The current estimated resolution date is September 15.
+
+Question:
+"When can installation proceed?"
+
+The model can produce:
+"Installation can proceed after the Service Wire Center dependency is resolved. The estimated resolution date is September 15."
+
+The application should clearly separate retrieved context from the user's request.
+
+A useful rule:
+Do not ask the model to invent information that retrieval did not provide.
+
+For knowledge-grounded systems, consider requiring the model to cite the source chunk.
+
+Example:
+"Installation can proceed after the dependency is resolved. [Source: installation_guide.pdf, page 18]"
+
+The LLM is the generation layer, not the database.
+
+The vector database should retrieve evidence.
+The application should construct the prompt.
+The LLM should interpret the evidence and produce a useful response.
+
+RAG does not eliminate hallucination. It reduces the need for the model to rely only on its internal knowledge.

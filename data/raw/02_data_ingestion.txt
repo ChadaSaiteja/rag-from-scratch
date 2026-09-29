@@ -1,0 +1,58 @@
+DATA INGESTION FOR RAG
+
+Ingestion is the process of taking raw source data and preparing it for retrieval.
+
+Typical pipeline:
+Source -> loader -> parser -> cleaner -> chunker -> metadata -> embeddings -> vector store
+
+Possible sources:
+- PDF
+- Markdown
+- TXT
+- HTML
+- Word documents
+- Web pages
+- Database rows
+- JSON
+- Support tickets
+- API responses
+
+The first goal is to preserve meaning.
+
+For a PDF, extraction should ideally preserve:
+- headings
+- paragraphs
+- lists
+- tables
+- page information
+- section relationships
+
+A scanned PDF may contain images instead of selectable text. Such a document may require OCR.
+
+Cleaning should remove useless artifacts such as repeated headers, page numbers, navigation text, and broken formatting, but should not remove information that changes meaning.
+
+Metadata is extremely valuable. Example:
+
+{
+  "source": "installation_guide.pdf",
+  "page": 18,
+  "section": "Installation Dependencies",
+  "document_type": "technical_guide",
+  "version": "3.2"
+}
+
+Metadata can later be used for filtering and citations.
+
+Good ingestion is not just:
+read file -> split text.
+
+It is:
+understand the source -> preserve structure -> clean carefully -> attach metadata -> create meaningful chunks.
+
+For structured business data, consider whether a database or API should be the source of truth instead of forcing everything into a vector database.
+
+Example:
+A policy document is a good RAG candidate.
+The current status of order ORD-123 may be better retrieved directly from an order API.
+
+A strong production system often combines RAG with normal APIs.

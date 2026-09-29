@@ -1,0 +1,61 @@
+CHUNKING IN RAG
+
+Chunking divides a large document into smaller retrieval units.
+
+Why chunk?
+Sending an entire 100-page document for every question is expensive and often irrelevant. Retrieval works better when the system can select focused pieces.
+
+Two important parameters are:
+- chunk size
+- chunk overlap
+
+Chunk size determines approximately how much text is stored in each chunk.
+
+Small chunks:
+Pros: precise retrieval, less irrelevant context.
+Cons: important relationships may be split.
+
+Large chunks:
+Pros: more context and complete ideas.
+Cons: retrieval becomes less focused and uses more context.
+
+Overlap repeats a portion of the previous chunk in the next chunk.
+
+Example:
+Chunk size = 500 tokens
+Overlap = 100 tokens
+
+Chunk 1: tokens 1-500
+Chunk 2: tokens 401-900
+Chunk 3: tokens 801-1300
+
+The 100-token overlap helps preserve context around boundaries.
+
+Do not choose chunk size only because a tutorial says "500 tokens."
+
+Ask:
+- What is the natural unit of meaning?
+- Are headings important?
+- Are tables important?
+- Do paragraphs depend on each other?
+- Does the source contain procedures?
+- Are there references such as "as described above"?
+
+Semantic boundaries are often better than arbitrary boundaries.
+
+Examples:
+FAQ -> one question/answer can be a chunk.
+Technical documentation -> heading plus related paragraphs.
+Code -> function/class/module.
+Legal document -> clause or logically connected section.
+
+A good chunk should ideally answer or substantially support a question by itself.
+
+Chunk quality can be evaluated by asking:
+1. Is the chunk understandable without its neighbors?
+2. Does it preserve important entities and relationships?
+3. Does it contain unnecessary unrelated content?
+4. Would embedding this chunk represent the intended concept?
+5. Can the retrieved chunk provide enough evidence for the LLM?
+
+Chunking is an experiment, not a fixed constant.

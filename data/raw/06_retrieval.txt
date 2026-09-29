@@ -1,0 +1,59 @@
+RETRIEVAL IN RAG
+
+Retrieval is the process of finding the most useful pieces of information for a user query.
+
+Basic semantic retrieval:
+
+query
+ -> embedding
+ -> vector search
+ -> top-k chunks
+
+Example query:
+"Why is installation delayed?"
+
+Possible retrieved chunks:
+1. "Installation cannot proceed until Service Wire Center is resolved."
+2. "The appointment is scheduled for September 18."
+3. "Customer billing information is stored in Salesforce."
+
+The first chunk is highly relevant.
+The second may be somewhat relevant.
+The third is probably irrelevant.
+
+A good RAG system must rank useful evidence above noise.
+
+Retrieval quality can be improved with:
+- better chunking
+- better embeddings
+- metadata filters
+- query rewriting
+- hybrid search
+- reranking
+- domain-specific indexing
+
+Query rewriting can transform:
+"why delayed?"
+
+into something more explicit:
+"What dependency is currently preventing installation from proceeding?"
+
+Hybrid retrieval combines semantic search with lexical/exact matching.
+
+This is useful for identifiers:
+ORD-123
+WO-987
+Drop_Commit_Date__c
+
+A pure semantic search may not reliably prioritize exact identifiers.
+
+Reranking is a second-stage process:
+1. Retrieve a larger candidate set.
+2. Score candidates more carefully.
+3. Keep the strongest evidence.
+
+Example:
+Initial retrieval top_k = 20
+Reranker keeps top 5.
+
+Retrieval is one of the most important parts of RAG. A powerful LLM cannot compensate for consistently retrieving the wrong evidence.

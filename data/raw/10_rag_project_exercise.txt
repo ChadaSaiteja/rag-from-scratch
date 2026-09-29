@@ -1,0 +1,88 @@
+RAG HANDS-ON PROJECT
+
+Build a small local RAG system from the supplied learning documents.
+
+Goal:
+Ask questions and retrieve the most relevant chunks.
+
+Stage 1: Ingestion
+Load all .txt or .md files from a directory.
+
+For each document:
+- read text
+- split into chunks
+- attach source filename
+- store chunks
+
+Stage 2: Chunking experiment
+Create two versions.
+
+Version A:
+chunk_size = 500
+overlap = 0
+
+Version B:
+chunk_size = 500
+overlap = 100
+
+Inspect at least 10 chunks from both.
+
+Ask:
+- Which chunks preserve complete ideas?
+- Where are boundaries awkward?
+- Which version contains more duplicate text?
+
+Stage 3: Embeddings
+Create embeddings for every chunk.
+
+Store:
+chunk_id
+text
+source
+embedding
+
+Stage 4: Retrieval
+For a query:
+- create query embedding
+- calculate similarity
+- return top 3 or top 5 chunks
+
+Try:
+"What is the difference between chunk size and overlap?"
+
+Then try:
+"Why might exact order IDs require more than semantic vector search?"
+
+Stage 5: Generation
+Send the retrieved chunks to an LLM.
+
+Prompt:
+"Answer the question using only the supplied context. If the context does not contain the answer, say that the information is unavailable."
+
+Stage 6: Evaluation
+Create 10 questions.
+
+For each question record:
+- expected source
+- retrieved top 3
+- answer
+- whether evidence was sufficient
+
+Then change chunking and compare results.
+
+The objective is not to build a sophisticated application.
+
+The objective is to understand the pipeline:
+
+Documents
+ -> ingestion
+ -> chunks
+ -> embeddings
+ -> vector storage
+ -> query embedding
+ -> retrieval
+ -> context
+ -> LLM
+ -> answer
+
+Once you understand this pipeline, frameworks become much easier to learn because you know what the framework is actually doing.

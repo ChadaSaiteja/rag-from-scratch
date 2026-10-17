@@ -1,0 +1,2341 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAG from Scratch</title>
+<meta name="description" content="A from-scratch Retrieval-Augmented Generation pipeline with LangChain, ChromaDB and Gemini, plus study notes covering every stage.">
+<style>
+:root {
+  --bg: #f7f6f2; --surface: #ffffff; --surface-2: #efede6; --text: #1d1d1b; --muted: #5f5e58;
+  --border: #dcd9cf; --accent: #2f5d50; --accent-soft: #e2ece8; --code-bg: #f1efe8; --code-text: #2a2a27;
+  --sidebar-w: 280px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161714; --surface: #1f201d; --surface-2: #2a2b27; --text: #e8e6df; --muted: #a3a197;
+    --border: #383935; --accent: #8cc4b0; --accent-soft: #233630; --code-bg: #262723; --code-text: #e2e0d8;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #161714; --surface: #1f201d; --surface-2: #2a2b27; --text: #e8e6df; --muted: #a3a197;
+  --border: #383935; --accent: #8cc4b0; --accent-soft: #233630; --code-bg: #262723; --code-text: #e2e0d8;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 16px; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+a { color: var(--accent); }
+code, pre { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: 0.88em; }
+:not(pre) > code { background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 4px; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 14px 16px; border-radius: 8px;
+  overflow-x: auto; line-height: 1.5; border: 1px solid var(--border); }
+
+.layout { display: flex; min-height: 100vh; }
+.sidebar { width: var(--sidebar-w); flex-shrink: 0; position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  background: var(--surface); border-right: 1px solid var(--border); padding: 24px 16px; }
+.brand { font-weight: 700; font-size: 1.1rem; margin: 0 8px 4px; }
+.brand-sub { color: var(--muted); font-size: 0.85rem; margin: 0 8px 20px; }
+.sidebar h2 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted);
+  margin: 20px 8px 6px; }
+.sidebar ul { list-style: none; margin: 0; padding: 0; }
+.sidebar a { display: flex; gap: 10px; align-items: baseline; padding: 6px 8px; border-radius: 6px;
+  color: var(--text); text-decoration: none; font-size: 0.92rem; }
+.sidebar a:hover { background: var(--surface-2); }
+.sidebar a.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.num { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 0.8rem; min-width: 1.4em; }
+.theme-toggle { margin: 20px 8px 0; background: var(--surface-2); color: var(--text); border: 1px solid var(--border);
+  border-radius: 6px; padding: 6px 10px; cursor: pointer; font: inherit; font-size: 0.85rem; }
+
+main { flex: 1; min-width: 0; padding: 40px 48px 80px; max-width: 980px; }
+.hero h1 { font-size: 2.2rem; line-height: 1.2; margin: 0 0 12px; }
+.hero p { color: var(--muted); font-size: 1.08rem; max-width: 720px; }
+.stats { display: flex; flex-wrap: wrap; gap: 12px; margin: 24px 0 8px; }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; }
+.stat b { display: block; font-size: 1.3rem; }
+.stat span { color: var(--muted); font-size: 0.85rem; }
+section { margin-top: 56px; }
+section > h2 { font-size: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 16px 0; }
+.flow .box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px;
+  font-size: 0.9rem; }
+.flow .box small { display: block; color: var(--muted); font-size: 0.75rem; }
+.flow .arrow { color: var(--muted); }
+
+.file-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px;
+  margin: 14px 0; }
+.file-head { display: flex; gap: 14px; align-items: center; }
+.file-head h3 { margin: 0; font-size: 1rem; }
+.stage { margin: 2px 0 0; color: var(--muted); font-size: 0.85rem; }
+.step { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+  background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+details summary { cursor: pointer; color: var(--accent); font-size: 0.9rem; }
+details pre { max-height: 480px; }
+
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 4px 20px 12px; }
+
+.note { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 8px 32px 20px; }
+.note-body h1 { font-size: 1.7rem; line-height: 1.25; margin-top: 24px; }
+.note-body h2 { font-size: 1.3rem; margin-top: 32px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+.note-body h3 { font-size: 1.1rem; margin-top: 24px; }
+.note-body blockquote { margin: 16px 0; padding: 8px 16px; border-left: 4px solid var(--accent);
+  background: var(--accent-soft); border-radius: 0 8px 8px 0; }
+.note-body blockquote p { margin: 6px 0; }
+.note-body hr { border: 0; border-top: 1px solid var(--border); margin: 28px 0; }
+.note-body img { max-width: 100%; }
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+th { background: var(--surface-2); }
+.back { text-align: right; font-size: 0.85rem; margin: 20px 0 0; }
+footer { margin-top: 64px; color: var(--muted); font-size: 0.85rem; }
+
+.menu-btn { display: none; }
+@media (max-width: 860px) {
+  .layout { display: block; }
+  .sidebar { position: static; width: auto; height: auto; border-right: 0; border-bottom: 1px solid var(--border);
+    padding: 12px 16px; }
+  .sidebar nav { display: none; }
+  .sidebar.open nav { display: block; }
+  .menu-btn { display: inline-block; float: right; background: var(--surface-2); color: var(--text);
+    border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; font: inherit; }
+  .brand-sub { margin-bottom: 4px; }
+  main { padding: 24px 16px 60px; }
+  .hero h1 { font-size: 1.7rem; }
+  .cols { grid-template-columns: 1fr; }
+  .note { padding: 4px 16px 16px; }
+}
+</style>
+</head>
+<body id="top">
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <button class="menu-btn" id="menu-btn" aria-expanded="false" aria-controls="sidebar">Menu</button>
+    <p class="brand">RAG from Scratch</p>
+    <p class="brand-sub">Pipeline + study notes</p>
+    <nav>
+      <h2>The repo</h2>
+      <ul>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#architecture">Architecture</a></li>
+        <li><a href="#pipeline">Pipeline files</a></li>
+        <li><a href="#run">Setup &amp; usage</a></li>
+        <li><a href="#corpus">Corpus &amp; known issues</a></li>
+      </ul>
+      <h2>Study notes</h2>
+      <ul>
+<li><a href="#notes-guide"><span class="num">★</span>Notes — Building a RAG Application</a></li>
+<li><a href="#note-00_introduction_to_rag"><span class="num">00</span>Introduction to RAG</a></li>
+<li><a href="#note-01_foundations_transformers"><span class="num">01</span>Foundations — Transformers, Tokens &amp; LLM Settings</a></li>
+<li><a href="#note-02_embeddings_and_vectors"><span class="num">02</span>Embeddings — Turning Words into Numbers</a></li>
+<li><a href="#note-03_prompting_techniques"><span class="num">03</span>Prompting Techniques — Talking to the LLM</a></li>
+<li><a href="#note-04_chunking_strategies"><span class="num">04</span>Chunking Strategies — Breaking Documents into Bites</a></li>
+<li><a href="#note-05_vector_databases"><span class="num">05</span>Vector Databases — Your AI&#x27;s Memory</a></li>
+<li><a href="#note-06_retrieval_mechanics"><span class="num">06</span>Retrieval Mechanics — Finding the Needle</a></li>
+<li><a href="#note-07_agentic_rag_and_tools"><span class="num">07</span>Agentic RAG &amp; Tool Calling</a></li>
+<li><a href="#note-08_building_your_first_rag_app"><span class="num">08</span>Build Your First RAG Application</a></li>
+<li><a href="#note-09_rag_evaluation"><span class="num">09</span>Evaluating Your RAG Application</a></li>
+<li><a href="#note-10_document_ingestion_and_parsing"><span class="num">10</span>Document Ingestion &amp; Parsing — The Forgotten Half</a></li>
+      </ul>
+      <button class="theme-toggle" id="theme-toggle" type="button">Toggle theme</button>
+    </nav>
+  </aside>
+
+  <main>
+    <section class="hero" id="overview" style="margin-top:0">
+      <h1>RAG from Scratch</h1>
+      <p>A Retrieval-Augmented Generation pipeline built stage by stage with LangChain, ChromaDB and Google Gemini —
+      implemented by hand to learn how each part works, not wired together from one high-level helper.
+      The corpus it searches is a set of short lessons about RAG itself, so the pipeline can answer questions about its own subject.</p>
+      <div class="stats">
+        <div class="stat"><b>6</b><span>pipeline scripts</span></div>
+        <div class="stat"><b>10</b><span>corpus lessons</span></div>
+        <div class="stat"><b>11</b><span>study notes</span></div>
+        <div class="stat"><b>2</b><span>retrieval strategies</span></div>
+      </div>
+      <p>What it demonstrates:</p>
+      <ul>
+        <li><strong>Ingestion with provenance</strong> — every chunk carries its source filename.</li>
+        <li><strong>Two retrievers to compare</strong> — pure vector search vs. hybrid BM25 + vector.</li>
+        <li><strong>Query expansion</strong> — <code>MultiQueryRetriever</code> rephrases the question to close the wording gap.</li>
+        <li><strong>Cited, grounded answers</strong> — the model must cite filenames or say it doesn’t know.</li>
+        <li><strong>Separate evaluation</strong> — retrieval accuracy and generation accuracy scored independently.</li>
+      </ul>
+    </section>
+
+    <section id="architecture">
+      <h2>Architecture</h2>
+      <p>Data flows left to right. Ingestion runs once to build the vector store; every question then goes through retrieval and generation.</p>
+      <div class="flow" aria-label="Pipeline flow">
+        <div class="box">data/raw/*.txt<small>lesson files</small></div><span class="arrow">→</span>
+        <div class="box">ingest.py<small>chunk + tag filename</small></div><span class="arrow">→</span>
+        <div class="box">Chroma<small>vector store</small></div><span class="arrow">→</span>
+        <div class="box">hybrid_search.py<small>BM25 + multi-query vector</small></div><span class="arrow">→</span>
+        <div class="box">generation.py<small>[Source] prompt → Gemini</small></div><span class="arrow">→</span>
+        <div class="box">Cited answer</div>
+      </div>
+      <p><code>evaluation.py</code> sits beside the flow: it scores what hybrid search retrieved and what Gemini answered, separately.</p>
+    </section>
+
+    <section id="pipeline">
+      <h2>Pipeline files</h2>
+      <p>Read these in order alongside the matching lesson in <code>data/raw/</code>. Expand a card to read its source.</p>
+
+        <article class="file-card">
+          <div class="file-head"><span class="step">0</span><div><h3><code>src/pipeline/config.py</code></h3><p class="stage">Shared settings</p></div></div>
+          <p>Loads the API key, model names, chunk size and top-k from <code>.env</code>, so every other script is retargeted by editing <code>.env</code> only.</p>
+          <details><summary>View source</summary><pre><code>&quot;&quot;&quot;Single source of truth for API keys and tunable constants, loaded from .env.
+
+Every pipeline script imports from here instead of hardcoding values, so the whole
+pipeline can be retargeted (model, collection, store location, chunk/retrieval sizes)
+by editing .env only.
+&quot;&quot;&quot;
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# --- Secrets ---
+GOOGLE_API_KEY = os.getenv(&quot;GOOGLE_API_KEY&quot;)
+
+# --- Models ---
+EMBEDDING_MODEL = os.getenv(&quot;EMBEDDING_MODEL&quot;, &quot;models/gemini-embedding-001&quot;)
+GENERATION_MODEL = os.getenv(&quot;GENERATION_MODEL&quot;, &quot;gemini-3.5-flash&quot;)
+
+# --- Vector store ---
+COLLECTION_NAME = os.getenv(&quot;COLLECTION_NAME&quot;, &quot;gemini_collection&quot;)
+PERSIST_DIRECTORY = os.getenv(&quot;PERSIST_DIRECTORY&quot;, &quot;./chroma_gemini_db&quot;)
+
+# --- Chunking / retrieval tuning ---
+CHUNK_SIZE = int(os.getenv(&quot;CHUNK_SIZE&quot;, &quot;1000&quot;))
+RETRIEVAL_K = int(os.getenv(&quot;RETRIEVAL_K&quot;, &quot;3&quot;))
+</code></pre></details>
+        </article>
+
+        <article class="file-card">
+          <div class="file-head"><span class="step">1</span><div><h3><code>src/pipeline/ingest.py</code></h3><p class="stage">Stages 1–4 · Load → chunk → embed → store</p></div></div>
+          <p>Reads every lesson in <code>data/raw/</code>, splits it into ~1000-character chunks, tags each chunk with its source <code>filename</code>, embeds it with Gemini and persists it to Chroma.</p>
+          <details><summary>View source</summary><pre><code>&quot;&quot;&quot;Ingestion stage: load the raw corpus, chunk it, embed it, and persist it to Chroma.&quot;&quot;&quot;
+from pathlib import Path
+from langchain_core.documents import Document
+from langchain_chroma import Chroma
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from config import CHUNK_SIZE, COLLECTION_NAME, EMBEDDING_MODEL, GOOGLE_API_KEY, PERSIST_DIRECTORY
+
+
+# Default corpus location: &lt;repo_root&gt;/data/raw
+file_path = str(Path(__file__).resolve().parents[2] / &quot;data&quot; / &quot;raw&quot;)
+
+def ingest(file_path: str, is_directory: bool = True):
+    &quot;&quot;&quot;Load .txt files into Documents, tagging each with its source path as metadata.&quot;&quot;&quot;
+    try:
+        paths = sorted(Path(file_path).glob(&quot;*.txt&quot;)) if is_directory else [Path(file_path)]
+        documents = [
+            Document(page_content=path.read_text(encoding=&quot;utf-8&quot;), metadata={&quot;source&quot;: str(path), &quot;filename&quot;: str(path.name)})
+            for path in paths
+        ]
+
+        print(f&quot;Loaded {len(documents)} documents from {file_path}&quot;)
+        return documents
+    except Exception as e:
+        print(f&quot;[ingest] error: {e}&quot;)
+        raise
+
+def chunk(documents, chunk_size=CHUNK_SIZE):
+    &quot;&quot;&quot;Split each document into smaller chunks, preserving the parent&#x27;s metadata.&quot;&quot;&quot;
+    try:
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size)
+        chunks = []
+        for document in documents:
+            for chunk in text_splitter.split_text(document.page_content):
+                chunks.append(Document(page_content=chunk, metadata=document.metadata))
+        return chunks
+    except Exception as e:
+        print(f&quot;[chunk] error: {e}&quot;)
+        raise
+
+
+def ingest_pipeline(file_path: str = file_path, is_directory: bool = True):
+    &quot;&quot;&quot;Load, chunk, embed, and persist the corpus into the Chroma vector store.&quot;&quot;&quot;
+    try:
+        documents=ingest(file_path, is_directory=is_directory)    
+        chunks=chunk(documents)
+        
+        # This can be in-memory or persisted to a directory
+        embeddings = GoogleGenerativeAIEmbeddings(model=EMBEDDING_MODEL, google_api_key=GOOGLE_API_KEY)
+        vector_store = Chroma.from_documents(
+            documents=chunks,
+            embedding=embeddings,
+            collection_name=COLLECTION_NAME,
+            persist_directory=PERSIST_DIRECTORY  # Optional: omit if you want in-memory only
+        )
+        
+        print(f&quot;Created {len(chunks)} chunks from {len(documents)} documents&quot;)
+        return chunks
+    except Exception as e:
+        print(f&quot;[ingest_pipeline] error: {e}&quot;)
+        raise
+    
+
+if __name__ == &quot;__main__&quot;:
+    ingest_pipeline(file_path)</code></pre></details>
+        </article>
+
+        <article class="file-card">
+          <div class="file-head"><span class="step">2</span><div><h3><code>src/pipeline/vector_retrieval.py</code></h3><p class="stage">Stage 5a · Semantic retrieval</p></div></div>
+          <p>The simplest retriever: top-k nearest neighbours by embedding similarity. Useful as a baseline to compare hybrid search against.</p>
+          <details><summary>View source</summary><pre><code>&quot;&quot;&quot;Pure semantic (vector) retrieval demo against the persisted Chroma store.&quot;&quot;&quot;
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_chroma import Chroma
+from config import COLLECTION_NAME, EMBEDDING_MODEL, GOOGLE_API_KEY, PERSIST_DIRECTORY, RETRIEVAL_K
+
+embeddings = GoogleGenerativeAIEmbeddings(model=EMBEDDING_MODEL, google_api_key=GOOGLE_API_KEY)
+
+vector_store = Chroma(
+    collection_name=COLLECTION_NAME,
+    embedding_function=embeddings,
+    persist_directory=PERSIST_DIRECTORY
+)
+
+# Top-k nearest neighbours by embedding similarity
+results = vector_store.similarity_search(
+    query=&quot;How to retrieve data using vectors?&quot;,
+    k=RETRIEVAL_K
+)
+
+print(results)</code></pre></details>
+        </article>
+
+        <article class="file-card">
+          <div class="file-head"><span class="step">3</span><div><h3><code>src/pipeline/hybrid_search.py</code></h3><p class="stage">Stage 5b · Hybrid retrieval</p></div></div>
+          <p>BM25 (exact keywords) and a multi-query-expanded vector retriever, fused 50/50 by an <code>EnsembleRetriever</code>.</p>
+          <details><summary>View source</summary><pre><code>&quot;&quot;&quot;Hybrid retrieval: combines lexical (BM25) and semantic (vector) search via an ensemble.&quot;&quot;&quot;
+from langchain_community.retrievers import BM25Retriever
+from langchain_classic.retrievers import EnsembleRetriever, MultiQueryRetriever
+from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
+from langchain_chroma import Chroma
+from langchain_core.documents import Document
+from config import COLLECTION_NAME, EMBEDDING_MODEL, GENERATION_MODEL, GOOGLE_API_KEY, PERSIST_DIRECTORY, RETRIEVAL_K
+
+embeddings = GoogleGenerativeAIEmbeddings(model=EMBEDDING_MODEL, google_api_key=GOOGLE_API_KEY)
+
+vector_store = Chroma(
+    collection_name=COLLECTION_NAME,
+    embedding_function=embeddings,
+    persist_directory=PERSIST_DIRECTORY
+)
+
+# BM25 needs the raw documents in memory; pull everything back out of Chroma
+info= vector_store.get()
+doc=[]
+
+for text,metadata in zip(info[&#x27;documents&#x27;], info[&#x27;metadatas&#x27;]):
+    doc.append(Document(page_content=text, metadata=metadata))
+    
+bm25retriever = BM25Retriever.from_documents(documents=doc)
+bm25retriever.k = RETRIEVAL_K
+
+base_vector_retriever = vector_store.as_retriever(search_kwargs={&quot;k&quot;: RETRIEVAL_K})
+
+# MultiQueryRetriever asks the LLM to rephrase the question a few ways and unions the
+# results, which helps recall when the user&#x27;s wording doesn&#x27;t match the corpus wording.
+query_expansion_llm = ChatGoogleGenerativeAI(model=GENERATION_MODEL, google_api_key=GOOGLE_API_KEY, temperature=0)
+vector_retriever = MultiQueryRetriever.from_llm(
+    retriever=base_vector_retriever,
+    llm=query_expansion_llm,
+)
+
+# Combine both using the EnsembleRetriever (Hybrid Search)
+# weights=[0.5, 0.5] splits the relevance evenly between BM25 and Vector search
+hybrid_retriever = EnsembleRetriever(
+    retrievers=[bm25retriever, vector_retriever],
+    weights=[0.5, 0.5]
+)
+
+
+def hybrid_search(query):
+    &quot;&quot;&quot;Run hybrid (BM25 + multi-query-expanded vector) search and return matched documents.&quot;&quot;&quot;
+    try:
+        return hybrid_retriever.invoke(query)
+    except Exception as e:
+        print(f&quot;[hybrid_search] error: {e}&quot;)
+        raise
+
+
+if __name__ == &quot;__main__&quot;:
+    query = &quot;How to retrieve data using vectors?&quot;
+    print(hybrid_search(query))</code></pre></details>
+        </article>
+
+        <article class="file-card">
+          <div class="file-head"><span class="step">4</span><div><h3><code>src/pipeline/generation.py</code></h3><p class="stage">Stages 6–7 · Prompt + generate</p></div></div>
+          <p>Wraps each retrieved chunk in a <code>[Source: …]</code> tag and asks Gemini to answer only from that context, cite filenames, and say “I don’t know” otherwise.</p>
+          <details><summary>View source</summary><pre><code>&quot;&quot;&quot;Generation stage: retrieve context via hybrid search, then ask Gemini to answer.&quot;&quot;&quot;
+from pathlib import Path
+from google import genai
+from google.genai import errors, types
+from hybrid_search import hybrid_search
+from config import GENERATION_MODEL, GOOGLE_API_KEY
+
+model = GENERATION_MODEL
+# Client-side timeout so a slow/overloaded API fails fast instead of hanging silently.
+client = genai.Client(api_key=GOOGLE_API_KEY, http_options=types.HttpOptions(timeout=20000))
+
+
+def call_google_api(question, retrievedInfo, prompt=None):
+    &quot;&quot;&quot;Call the Google API with the retrieved context and the user&#x27;s question.&quot;&quot;&quot;
+    if not prompt:
+        prompt = (
+            &quot;You are a helpful assistant. Answer the question using ONLY the context below.\n&quot;
+            &quot;Each context block is tagged with its source filename in [Source: ...] form.\n&quot;
+            &quot;After every sentence or claim you make, cite the filename(s) it came from, &quot;
+            &quot;e.g. &#x27;Chunking improves recall (Source: 03_chunking.txt).&#x27;\n&quot;
+            &quot;If the answer isn&#x27;t in the context, say you don&#x27;t know instead of guessing.\n\n&quot;
+            f&quot;Context:\n{retrievedInfo}\n\n&quot;
+            f&quot;Question: {question}&quot;
+        )
+    try:
+        response = client.models.generate_content(
+            model=model,
+            contents=prompt,
+        )
+    except errors.ServerError:
+        return &quot;The model is temporarily overloaded (HTTP 503). Please try again in a moment.&quot;
+    except Exception as e:
+        print(f&quot;[call_google_api] error: {e}&quot;)
+        raise
+    return response.text or &quot;&quot;
+
+
+def format_context(docs):
+    &quot;&quot;&quot;Join retrieved chunks, tagging each with its source filename for citation.&quot;&quot;&quot;
+    try:
+        tagged = []
+        for doc in docs:
+            # older chunks may predate the dedicated &quot;filename&quot; field, fall back to &quot;source&quot;
+            filename = doc.metadata.get(&quot;filename&quot;) or Path(doc.metadata.get(&quot;source&quot;, &quot;&quot;)).name or &quot;unknown&quot;
+            tagged.append(f&quot;[Source: {filename}]\n{doc.page_content}&quot;)
+        return &quot;\n\n&quot;.join(tagged)
+    except Exception as e:
+        print(f&quot;[format_context] error: {e}&quot;)
+        raise
+
+
+if __name__ == &quot;__main__&quot;:
+    question = input(&quot;Enter your question: &quot;)
+    docs = hybrid_search(question)
+    retrievedInfo = format_context(docs)
+    # print(retrievedInfo)
+    answer = call_google_api(question, retrievedInfo)
+    print(answer)
+</code></pre></details>
+        </article>
+
+        <article class="file-card">
+          <div class="file-head"><span class="step">5</span><div><h3><code>src/pipeline/evaluation.py</code></h3><p class="stage">Stage 8 · Evaluation</p></div></div>
+          <p>Runs fixed question → expected-source cases and scores retrieval (right file found?) and generation (expected concept in answer?) separately.</p>
+          <details><summary>View source</summary><pre><code>&quot;&quot;&quot;Lightweight RAG evaluation: scores retrieval and generation separately.
+
+Implements the approach described in data/raw/08_rag_evaluation.txt — don&#x27;t judge a RAG
+system only by &quot;does the answer sound good?&quot;; check whether retrieval actually found the
+right source, independently of how fluent the generated answer reads.
+&quot;&quot;&quot;
+from pathlib import Path
+from hybrid_search import hybrid_search
+from generation import call_google_api, format_context
+
+# Each case: a question, the filename that should be retrieved, and a keyword
+# expected to appear in a grounded answer. Extend this list as the corpus grows.
+EVAL_CASES = [
+    {
+        &quot;question&quot;: &quot;What is the difference between chunk size and overlap?&quot;,
+        &quot;expected_source&quot;: &quot;03_chunking.txt&quot;,
+        &quot;expected_keyword&quot;: &quot;overlap&quot;,
+    },
+    {
+        &quot;question&quot;: &quot;How does a vector database find similar embeddings?&quot;,
+        &quot;expected_source&quot;: &quot;05_vector_database.txt&quot;,
+        &quot;expected_keyword&quot;: &quot;vector&quot;,
+    },
+    {
+        &quot;question&quot;: &quot;What does the retriever stage do in a RAG pipeline?&quot;,
+        &quot;expected_source&quot;: &quot;06_retrieval.txt&quot;,
+        &quot;expected_keyword&quot;: &quot;retriev&quot;,
+    },
+    {
+        &quot;question&quot;: &quot;How should a prompt be constructed for the generation stage?&quot;,
+        &quot;expected_source&quot;: &quot;07_rag_prompt_and_generation.txt&quot;,
+        &quot;expected_keyword&quot;: &quot;prompt&quot;,
+    },
+    {
+        &quot;question&quot;: &quot;Why should retrieval and generation quality be evaluated separately?&quot;,
+        &quot;expected_source&quot;: &quot;08_rag_evaluation.txt&quot;,
+        &quot;expected_keyword&quot;: &quot;evaluat&quot;,
+    },
+]
+
+
+def evaluate_retrieval(case):
+    &quot;&quot;&quot;Check whether the expected source file shows up anywhere in the retrieved chunks.&quot;&quot;&quot;
+    try:
+        docs = hybrid_search(case[&quot;question&quot;])
+        # same fallback as format_context(): older chunks may lack &quot;filename&quot; metadata
+        retrieved_sources = {
+            doc.metadata.get(&quot;filename&quot;) or Path(doc.metadata.get(&quot;source&quot;, &quot;&quot;)).name
+            for doc in docs
+        }
+        hit = case[&quot;expected_source&quot;] in retrieved_sources
+        return hit, docs
+    except Exception as e:
+        print(f&quot;[evaluate_retrieval] error: {e}&quot;)
+        raise
+
+
+def evaluate_generation(case, docs):
+    &quot;&quot;&quot;Check whether the generated answer contains the expected keyword (crude groundedness proxy).&quot;&quot;&quot;
+    try:
+        retrieved_info = format_context(docs)
+        answer = call_google_api(case[&quot;question&quot;], retrieved_info)
+        hit = case[&quot;expected_keyword&quot;].lower() in answer.lower()
+        return hit, answer
+    except Exception as e:
+        print(f&quot;[evaluate_generation] error: {e}&quot;)
+        raise
+
+
+def run_evaluation(cases=EVAL_CASES):
+    &quot;&quot;&quot;Run every eval case and print a retrieval-vs-generation scorecard.&quot;&quot;&quot;
+    results = []
+    for case in cases:
+        retrieval_hit, docs = evaluate_retrieval(case)
+        generation_hit, answer = evaluate_generation(case, docs)
+        results.append({
+            &quot;question&quot;: case[&quot;question&quot;],
+            &quot;expected_source&quot;: case[&quot;expected_source&quot;],
+            &quot;retrieval_hit&quot;: retrieval_hit,
+            &quot;generation_hit&quot;: generation_hit,
+            &quot;answer&quot;: answer,
+        })
+
+    retrieval_score = sum(r[&quot;retrieval_hit&quot;] for r in results)
+    generation_score = sum(r[&quot;generation_hit&quot;] for r in results)
+    total = len(results)
+
+    print(f&quot;\n{&#x27;Question&#x27;:&lt;60} {&#x27;Retrieval&#x27;:&lt;10} {&#x27;Generation&#x27;:&lt;10}&quot;)
+    print(&quot;-&quot; * 82)
+    for r in results:
+        print(f&quot;{r[&#x27;question&#x27;][:58]:&lt;60} {str(r[&#x27;retrieval_hit&#x27;]):&lt;10} {str(r[&#x27;generation_hit&#x27;]):&lt;10}&quot;)
+    print(&quot;-&quot; * 82)
+    print(f&quot;Retrieval accuracy:  {retrieval_score}/{total}&quot;)
+    print(f&quot;Generation accuracy: {generation_score}/{total}&quot;)
+    return results
+
+
+if __name__ == &quot;__main__&quot;:
+    run_evaluation()
+</code></pre></details>
+        </article>
+    </section>
+
+    <section id="run">
+      <h2>Setup &amp; usage</h2>
+<pre><code>python -m venv .venv
+.venv\Scripts\activate          # Windows
+pip install -r requirements.txt
+copy .env.example .env          # then paste your GOOGLE_API_KEY
+
+cd src/pipeline
+python ingest.py                # build the vector store
+python hybrid_search.py         # try retrieval
+python generation.py            # ask a question, get a cited answer
+python evaluation.py            # retrieval vs. generation scorecard</code></pre>
+      <p>Settings such as <code>GENERATION_MODEL</code>, <code>CHUNK_SIZE</code> and <code>RETRIEVAL_K</code> live in <code>.env</code>; defaults are in <code>config.py</code>.</p>
+    </section>
+
+    <section id="corpus">
+      <h2>Corpus &amp; known issues</h2>
+      <div class="cols">
+        <div class="panel"><h3>Lessons in <code>data/raw/</code></h3><ul>
+<li><code>01_rag_fundamentals.txt</code></li>
+<li><code>02_data_ingestion.txt</code></li>
+<li><code>03_chunking.txt</code></li>
+<li><code>04_embeddings_and_vectors.txt</code></li>
+<li><code>05_vector_database.txt</code></li>
+<li><code>06_retrieval.txt</code></li>
+<li><code>07_rag_prompt_and_generation.txt</code></li>
+<li><code>08_rag_evaluation.txt</code></li>
+<li><code>09_metadata_and_filtering.txt</code></li>
+<li><code>10_rag_project_exercise.txt</code></li>
+        </ul></div>
+        <div class="panel"><h3>Known issues</h3><ul>
+<li><strong>Relative persist directory.</strong> <code>./chroma_gemini_db</code> resolves against the working directory, so ingesting and querying from different folders use different stores.</li>
+<li><strong>Re-ingest duplicates data.</strong> <code>ingest_pipeline</code> appends with no reset or deterministic IDs; running it twice doubles the corpus.</li>
+<li><strong>Import-time side effects.</strong> <code>vector_retrieval.py</code> and <code>hybrid_search.py</code> do real work (API calls, index build) when imported.</li>
+<li><strong>No relevance floor.</strong> Retrieval always returns top-k, so off-topic questions still feed chunks to the LLM.</li>
+<li><strong>Flat imports.</strong> Scripts import each other as <code>from config import …</code>, so they only run from <code>src/pipeline/</code>.</li>
+<li><strong>Weak generation check.</strong> A 503 returns an apology string that evaluation still scores, and the keyword check passes easily.</li>
+<li><strong>No automated tests.</strong> <code>evaluation.py</code> checks behaviour, but there is no pytest suite.</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <section id="notes">
+      <h2>Study notes</h2>
+      <p>The full contents of <code>notes/</code>, from “what is RAG?” to production evaluation and ingestion. Start with the guide, then read 00 → 10.</p>
+    </section>
+<section class="note" id="notes-guide"><div class="note-body"><h1 id="notes-guide--notes-building-a-rag-application">📓 Notes — Building a RAG Application</h1>
+<blockquote>
+<p>Beginner-friendly study notes for building a <strong>Retrieval-Augmented Generation (RAG)</strong> application.
+Written from the existing docs in <code>AI/day1</code> … <code>AI/day11</code>, improved with added explanations, analogies, runnable code, and 2026 production best practices.</p>
+</blockquote>
+<hr />
+<h2 id="notes-guide--the-idea-behind-these-notes">💡 The Idea Behind These Notes</h2>
+<p><strong>What this is:</strong> a complete, self-paced path from "what is an LLM?" to "a production-grade RAG system" — one concept at a time, each module building directly on the last.</p>
+<p><strong>Who it's for:</strong> beginners who know basic Python but have never built a RAG app, and practitioners who want the modern (2026) retrieval stack — hybrid search, reranking, evaluation — in one place.</p>
+<p><strong>How it differs from the source docs (<code>AI/day*</code>):</strong>
+- Plain-English analogies &amp; "beginner trap" warnings in every module
+- Runnable code snippets adapted from the <code>day*</code> Python files
+- Modern topics the original docs skip: <strong>reranking</strong> (cross-encoders), <strong>hybrid search</strong> (BM25 + vector + RRF), <strong>query rewriting/HyDE</strong>, <strong>RAG evaluation</strong> (RAGAS), <strong>CI quality gates</strong> (promptfoo), and <strong>document ingestion &amp; parsing</strong> (layout-aware parsing, OCR, metadata, incremental indexing)
+- A <strong>production checklist</strong> and an end-to-end <strong>capstone build</strong> (Module 8)</p>
+<p><strong>The through-line:</strong> RAG = <em>ingest → chunk → embed → store → retrieve → generate</em>. Every module owns exactly one stage of that pipeline, so by Module 8 you can see how all the pieces snap together.</p>
+<hr />
+<h2 id="notes-guide--how-to-go-through-these-notes">🧭 How to Go Through These Notes</h2>
+<h3 id="notes-guide--the-golden-rule">The golden rule</h3>
+<p><strong>Read in order, 00 → 10.</strong> Each module assumes the previous one (e.g., chunking needs context windows from Module 1, embeddings need Module 2, retrieval needs Modules 2 + 4 + 5). Skipping around will leave gaps.</p>
+<h3 id="notes-guide--the-study-loop-repeat-per-module">The study loop (repeat per module)</h3>
+<ol>
+<li><strong>Read</strong> the concept + analogy.</li>
+<li><strong>Run</strong> the code snippet — don't just read it.</li>
+<li><strong>Try the 🧪 beginner experiment</strong> at the end of most modules (change a parameter, observe the result).</li>
+<li><strong>Review the ✅ Key Takeaways</strong>, then follow the ➡️ Next link.</li>
+</ol>
+<blockquote>
+<p>Budget ~30–45 min per module; Module 8 (capstone) takes 1.5–2 hours.</p>
+</blockquote>
+<h3 id="notes-guide--choose-your-path">Choose your path</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Your situation</th>
+<th>Path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Absolute beginner</strong></td>
+<td>00 → 01 → … → 10 in strict order; run every code cell</td>
+</tr>
+<tr>
+<td><strong>Already know embeddings/LLMs</strong></td>
+<td>Skim 00–02, then 03 → 04 → 05 → 06 → 07 → 08</td>
+</tr>
+<tr>
+<td><strong>Want production RAG now</strong></td>
+<td>00 → 04 → 06 → 08, then backfill 01–03, 05 as needed; finish with 09 (eval) and 10 (ingestion)</td>
+</tr>
+<tr>
+<td><strong>Debugging a broken RAG app</strong></td>
+<td>Go straight to 06 (retrieval) + 09 (evaluation) to learn what to measure, then 04 (chunking)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="notes-guide--module-map-dependencies">Module map &amp; dependencies</h3>
+<pre><code>00 Intro ──→ 01 Foundations (tokens, context window)
+                 │
+                 ├──→ 02 Embeddings ──→ 05 Vector DBs ──┐
+                 │                                      ├──→ 06 Retrieval ──→ 07 Agentic RAG
+                 └──→ 03 Prompting ─────────────────────┘         │
+                                                                  ▼
+04 Chunking (needs 01, 02) ───────────────────────────────→ 08 Build the App
+                                                                 │
+                                            09 Evaluation ←──────┘ ← deep dive on RAGAS/CI gates
+                                            10 Ingestion &amp; Parsing ← pre-04 stage for real docs
+</code></pre>
+<hr />
+<h2 id="notes-guide--index">📚 Index</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Note</th>
+<th>Covers</th>
+<th>Source docs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td><a href="#note-00_introduction_to_rag">Introduction to RAG</a></td>
+<td>What/Why RAG, workflow, benefits</td>
+<td>—</td>
+</tr>
+<tr>
+<td>1</td>
+<td><a href="#note-01_foundations_transformers">Foundations: Transformers &amp; Tokens</a></td>
+<td>Tokens, parameters, settings, context window, hallucinations</td>
+<td><code>day1</code>, <code>day7</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><a href="#note-02_embeddings_and_vectors">Embeddings &amp; Vectors</a></td>
+<td>Semantic vectors, cosine similarity, embedding code</td>
+<td><code>day2</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td><a href="#note-03_prompting_techniques">Prompting Techniques</a></td>
+<td>Zero/One/Few-shot, CoT, chaining, RAG prompt template</td>
+<td><code>day3</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td><a href="#note-04_chunking_strategies">Chunking Strategies</a></td>
+<td>Fixed, recursive, semantic, contextual chunking + code</td>
+<td><code>day9</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td><a href="#note-05_vector_databases">Vector Databases</a></td>
+<td>Pinecone/Chroma/FAISS/pgvector, upsert + query code</td>
+<td><code>day8</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td><a href="#note-06_retrieval_mechanics">Retrieval Mechanics</a></td>
+<td>Sparse/dense/hybrid, RRF, reranking, query rewriting</td>
+<td><code>day11</code> + research</td>
+</tr>
+<tr>
+<td>7</td>
+<td><a href="#note-07_agentic_rag_and_tools">Agentic RAG &amp; Tool Calling</a></td>
+<td>Structured output, tool calls, ReAct, agentic RAG</td>
+<td><code>day4</code></td>
+</tr>
+<tr>
+<td>8</td>
+<td><a href="#note-08_building_your_first_rag_app">Build Your First RAG App</a></td>
+<td>End-to-end capstone, RAGAS evaluation, production checklist</td>
+<td>all</td>
+</tr>
+<tr>
+<td>9</td>
+<td><a href="#note-09_rag_evaluation">RAG Evaluation (Deep Dive)</a></td>
+<td>RAGAS metrics math, test-set generation, LLM-as-judge, CI gates</td>
+<td>research</td>
+</tr>
+<tr>
+<td>10</td>
+<td><a href="#note-10_document_ingestion_and_parsing">Document Ingestion &amp; Parsing</a></td>
+<td>PDF/DOCX/scans/OCR/tables, Docling, metadata, incremental indexing</td>
+<td>research</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="notes-guide--conventions-used-in-every-module">Conventions used in every module</h3>
+<ul>
+<li>🧠 <strong>Analogy</strong> — the one mental model that makes the idea stick</li>
+<li>⚠️ <strong>Beginner trap</strong> — the mistake everyone makes once</li>
+<li>🧪 <strong>Experiment</strong> — a 5-minute tweak that proves the concept</li>
+<li>✅ <strong>Key takeaways</strong> — the 3–5 lines worth remembering</li>
+</ul>
+<hr />
+<h2 id="notes-guide--quick-start">▶️ Quick start</h2>
+<p><strong>Prerequisites:</strong> Python 3.10+, a <code>GOOGLE_API_KEY</code> in a <code>.env</code> file (free Google AI Studio key), and (optionally) a local Pinecone instance for the storage examples.</p>
+<pre><code class="language-bash">pip install google-genai pinecone langchain-text-splitters python-dotenv ragas datasets docling
+</code></pre>
+<p>Then follow <a href="#note-08_building_your_first_rag_app">Module 8</a> step by step — it wires Modules 1–7 into one working pipeline, and you can come back to earlier modules whenever a step is unclear.</p>
+<p><strong>Original docs:</strong> <code>AI/day1</code> … <code>AI/day11</code> · <strong>Code samples:</strong> <code>embedding.py</code>, <code>chunking.py</code>, <code>pine_cone.py</code>, <code>toolcalling.py</code></p></div><p class="back"><a href="#top">↑ Back to top</a></p></section>
+<section class="note" id="note-00_introduction_to_rag"><div class="note-body"><h1 id="note-00_introduction_to_rag--introduction-to-rag-retrieval-augmented-generation">🚀 Introduction to RAG (Retrieval-Augmented Generation)</h1>
+<p>Welcome to the world of RAG! If you've ever used ChatGPT and wished it knew about your private documents, or wished it wouldn't "hallucinate" (make things up), then <strong>RAG is the solution you've been looking for.</strong></p>
+<h2 id="note-00_introduction_to_rag--what-is-rag">❓ What is RAG?</h2>
+<p><strong>RAG</strong> stands for <strong>Retrieval-Augmented Generation</strong>. </p>
+<p>Think of a Large Language Model (LLM) like a very smart student who has read almost everything on the internet but doesn't have access to your personal files or today's news. If you ask them about your private company policy, they might guess (and potentially lie).</p>
+<p><strong>RAG gives that student an open textbook.</strong></p>
+<p>Instead of relying solely on what they already know (their training data), the student:
+1. <strong>Retrieves</strong> relevant information from a provided textbook (your documents).
+2. <strong>Augments</strong> their knowledge with that information.
+3. <strong>Generates</strong> a response based on the retrieved facts.</p>
+<hr />
+<h2 id="note-00_introduction_to_rag--the-rag-workflow-the-big-picture">🛠️ The RAG Workflow (The Big Picture)</h2>
+<p>Here is how a RAG application actually works under the hood:</p>
+<ol>
+<li>
+<p><strong>Data Ingestion (The Preparation Phase):</strong></p>
+<ul>
+<li><strong>Load:</strong> Take your documents (PDFs, Text, Markdown, etc.).</li>
+<li><strong>Chunk:</strong> Break long documents into smaller, manageable pieces called "chunks".</li>
+<li><strong>Embed:</strong> Convert these chunks into mathematical vectors (numbers) using an <strong>Embedding Model</strong>.</li>
+<li><strong>Store:</strong> Save these vectors in a special database called a <strong>Vector Database</strong>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Retrieval (The Search Phase):</strong></p>
+<ul>
+<li><strong>User Query:</strong> A user asks a question (e.g., <em>"What is our company's vacation policy?"</em>).</li>
+<li><strong>Query Embedding:</strong> Convert the user's question into a vector using the <em>same</em> embedding model used before.</li>
+<li><strong>Similarity Search:</strong> Look into the Vector Database to find the chunks whose vectors are "closest" (most similar) to the query vector.</li>
+</ul>
+</li>
+<li>
+<p><strong>Generation (The Answer Phase):</strong></p>
+<ul>
+<li><strong>Prompt Augmentation:</strong> Combine the user's original question + the retrieved chunks into one big prompt.</li>
+<li><strong>LLM Generation:</strong> Send this augmented prompt to the LLM.</li>
+<li><strong>Final Answer:</strong> The LLM reads the context and provides a factual, grounded response.</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="note-00_introduction_to_rag--why-use-rag">🌟 Why use RAG?</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th style="text-align: left;">Feature</th>
+<th style="text-align: left;">Without RAG (Standard LLM)</th>
+<th style="text-align: left;">With RAG</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Knowledge</strong></td>
+<td style="text-align: left;">Limited to training data (cutoff date)</td>
+<td style="text-align: left;">Access to real-time &amp; private data</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Accuracy</strong></td>
+<td style="text-align: left;">Prone to hallucinations</td>
+<td style="text-align: left;">Grounded in provided facts</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Cost</strong></td>
+<td style="text-align: left;">High (if you try to fine-tune)</td>
+<td style="text-align: left;">Low (just add new documents)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Transparency</strong></td>
+<td style="text-align: left;">"Trust me, I'm an AI"</td>
+<td style="text-align: left;">"According to document X..."</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="note-00_introduction_to_rag--whats-next">📚 What's Next?</h2>
+<p>In this series of notes, we will break down every single component of this process. We will go from the mathematical foundations of how AI "reads" (Transformers) to building a full-scale agentic RAG system.</p>
+<p><strong>The Learning Path:</strong>
+1.  <a href="#note-01_foundations_transformers">Foundations: Transformers &amp; Tokens</a>
+2.  <a href="#note-02_embeddings_and_vectors">Embeddings: The Language of Numbers</a>
+3.  <a href="#note-03_prompting_techniques">Prompting: Talking to AI</a>
+4.  <a href="#note-04_chunking_strategies">Chunking: Breaking Down Info</a>
+5.  <a href="#note-05_vector_databases">Vector Databases: Your AI's Memory</a>
+6.  <a href="#note-06_retrieval_mechanics">Retrieval Mechanics: Finding the Needle</a>
+7.  <a href="#note-07_agentic_rag_and_tools">Agentic RAG: Tools &amp; Actions</a>
+8.  <a href="#note-08_building_your_first_rag_app">Final Project: Building Your App</a></p>
+<p><strong>Happy Learning! 🚀</strong></p></div><p class="back"><a href="#top">↑ Back to top</a></p></section>
+<section class="note" id="note-01_foundations_transformers"><div class="note-body"><h1 id="note-01_foundations_transformers--module-1-foundations-transformers-tokens-llm-settings">🧱 Module 1: Foundations — Transformers, Tokens &amp; LLM Settings</h1>
+<blockquote>
+<p><em>Source: <code>AI/day1/Transformer.md</code> + <code>AI/day7/contextwindow.md</code></em></p>
+</blockquote>
+<p>Before you build a RAG app, you need to understand the engine inside every LLM: the <strong>Transformer</strong>.</p>
+<hr />
+<h2 id="note-01_foundations_transformers--tokens-the-atoms-of-language">🔤 Tokens — the "atoms" of language</h2>
+<p>Models don't read words; they read <strong>tokens</strong> (words, sub-words, characters, or byte-pairs).</p>
+<p><strong>Why it matters:</strong> everything is billed, limited, and measured in tokens. Your RAG prompt = user question + retrieved chunks, so chunk size directly controls token cost.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Key Concept</th>
+<th>Plain-English Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Simplification</td>
+<td>Break text into small learnable units</td>
+</tr>
+<tr>
+<td>Standardization</td>
+<td>Same text → same tokens, every time</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="note-01_foundations_transformers--parameters-the-models-knobs">⚙️ Parameters — the model's "knobs"</h2>
+<p>Parameters are the learned variables that decide how the model behaves. They change during training to reduce prediction error.</p>
+<ul>
+<li><strong>Weights (<code>w</code>)</strong> — how <em>important</em> each feature is.</li>
+<li><strong>Biases (<code>b</code>)</strong> — a baseline shift so a neuron can still fire.</li>
+</ul>
+<pre><code>z = wx + b
+</code></pre>
+<ul>
+<li><strong>Learning rate</strong> — how <em>big</em> each adjustment step is (too big = unstable, too small = slow).</li>
+<li><strong>Activation functions</strong> — convert input signal → output signal (e.g., <strong>ReLU</strong>, <strong>sigmoid</strong>).</li>
+</ul>
+<hr />
+<h2 id="note-01_foundations_transformers--inference-settings-every-rag-developer-must-know">🎛️ Inference settings every RAG developer must know</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>What it does</th>
+<th>Beginner tip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Context window</strong></td>
+<td>Max tokens the model can "see" at once</td>
+<td>Keep retrieved chunks small enough to fit</td>
+</tr>
+<tr>
+<td><strong>Temperature (0–2)</strong></td>
+<td>Randomness. 0 = accurate, 2 = creative, 1 = balanced</td>
+<td>Use <strong>low temp (0–0.3)</strong> for factual RAG answers</td>
+</tr>
+<tr>
+<td><strong>Top-K</strong></td>
+<td>Only sample from the K most likely next tokens</td>
+<td>K=40 is common</td>
+</tr>
+<tr>
+<td><strong>Top-P (nucleus)</strong></td>
+<td>Sample until cumulative probability hits a threshold (e.g. 0.9)</td>
+<td>Alternative to Top-K</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="note-01_foundations_transformers--next-token-prediction-how-llms-talk">🔮 Next-Token Prediction — how LLMs "talk"</h2>
+<p>LLMs don't compose sentences; they <strong>predict the next token</strong> from the previous ones, billions of times over.</p>
+<pre><code>Training loop:
+  predict next token → compare with real answer → adjust weights → repeat
+</code></pre>
+<h3 id="note-01_foundations_transformers--why-hallucinations-happen-day-1">🤥 Why hallucinations happen (Day 1)</h3>
+<ul>
+<li><strong>Confidence in patterns</strong> — plausible-sounding ≠ true.</li>
+<li><strong>No ground truth</strong> — training never verifies facts.</li>
+<li><strong>Training data limits</strong> — bad data in, bad data out.</li>
+<li><strong>Probabilistic nature</strong> — it's guessing, not knowing.</li>
+<li><strong>No real understanding</strong> — statistics, not semantics.</li>
+</ul>
+<blockquote>
+<p>💡 <strong>RAG is the antidote:</strong> give the model real documents as context so it <em>grounds</em> its next-token guesses in facts.</p>
+</blockquote>
+<hr />
+<h2 id="note-01_foundations_transformers--why-context-windows-have-limits-day-7">📏 Why Context Windows Have Limits (Day 7)</h2>
+<ol>
+<li><strong>Quadratic self-attention cost</strong> — every token attends to every other token. 10,000 tokens = <strong>100M comparisons</strong> (O(n²)).</li>
+<li><strong>KV cache memory</strong> — Key/Value vectors stored in VRAM for every generated token; long chats need hundreds of GBs.</li>
+<li><strong>Training length limit</strong> — quality degrades beyond the length seen in training.</li>
+</ol>
+<h3 id="note-01_foundations_transformers--solutions-worth-knowing-for-big-document-rag">Solutions (worth knowing for big-document RAG)</h3>
+<ul>
+<li><strong>Sparse attention (BigBird)</strong> — sliding window + global tokens + random links → quadratic → linear.</li>
+<li><strong>Sliding window attention</strong> — attend only to a fixed neighborhood (O(n·w)); used by Longformer, Mistral.</li>
+<li><strong>KV cache compression</strong> — evict/quantize/merge less important K/V pairs → O(n²) → O(n).</li>
+<li><strong>Summary-based memory</strong> — keep a rolling summary of intent/constraints/decisions instead of the full transcript (LangChain's <code>ConversationSummaryMemory</code>).</li>
+</ul>
+<blockquote>
+<p>🔗 <strong>Connect to RAG:</strong> chunking exists <em>because</em> of the context window. A good chunking strategy (Module 4) keeps the most relevant facts inside the window while they're still cheap to process.</p>
+</blockquote>
+<hr />
+<h2 id="note-01_foundations_transformers--key-takeaways">✅ Key Takeaways</h2>
+<ul>
+<li>Tokens are the unit of cost, limit, and measurement.</li>
+<li>Temperature/Top-K/Top-P control <em>how</em> the model guesses.</li>
+<li>Hallucinations are inevitable in pure LLMs → <strong>that's why RAG exists</strong>.</li>
+<li>Context windows are finite → chunking + retrieval are mandatory.</li>
+</ul>
+<p>➡️ Next: <a href="#note-02_embeddings_and_vectors">Embeddings — turning words into numbers</a></p></div><p class="back"><a href="#top">↑ Back to top</a></p></section>
+<section class="note" id="note-02_embeddings_and_vectors"><div class="note-body"><h1 id="note-02_embeddings_and_vectors--module-2-embeddings-turning-words-into-numbers">🔢 Module 2: Embeddings — Turning Words into Numbers</h1>
+<blockquote>
+<p><em>Source: <code>AI/day2/embedding.md</code> + <code>AI/day2/embedding.py</code></em></p>
+</blockquote>
+<p>Computers don't understand language — they understand <strong>numbers</strong>. An <strong>embedding</strong> is a numerical representation (a vector) that captures the <em>meaning</em> of a word, sentence, or document.</p>
+<hr />
+<h2 id="note-02_embeddings_and_vectors--the-core-idea-meaning-position-in-space">🧭 The Core Idea: Meaning = Position in Space</h2>
+<p>Every piece of text becomes a point in a multi-dimensional space. <strong>Similar meanings land near each other.</strong></p>
+<pre><code>A = &quot;I love football&quot;
+B = &quot;I love soccer&quot;
+→ A and B point in almost the same direction, even though the words differ.
+</code></pre>
+<p>This is the magic that powers RAG retrieval: your query and the right document can use <em>different words</em> but still be <em>semantically close</em>.</p>
+<hr />
+<h2 id="note-02_embeddings_and_vectors--process-of-creating-vector-embeddings">🏭 Process of Creating Vector Embeddings</h2>
+<ol>
+<li><strong>Get the raw data</strong> — documents, PDFs, web pages.</li>
+<li><strong>Clean the data</strong> — tokenization, noise removal, preprocessing.</li>
+<li><strong>Break into tokens</strong> — small individual pieces.</li>
+<li><strong>Convert tokens → numerical vectors</strong> — via an embedding model (e.g., <code>gemini-embedding-2</code>, OpenAI <code>text-embedding-3</code>, Cohere, BAAI/bge).</li>
+</ol>
+<hr />
+<h2 id="note-02_embeddings_and_vectors--measuring-similarity-cosine-similarity">📐 Measuring Similarity: Cosine Similarity</h2>
+<p>Instead of distance, we measure the <strong>angle</strong> between two vectors:</p>
+<pre><code>cosine_similarity(A, B) = (A · B) / (||A|| × ||B||)
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Score</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1.0</strong></td>
+<td>Very similar direction</td>
+</tr>
+<tr>
+<td><strong>0.8</strong></td>
+<td>Strongly similar</td>
+</tr>
+<tr>
+<td><strong>0.5</strong></td>
+<td>Somewhat related</td>
+</tr>
+<tr>
+<td><strong>0.0</strong></td>
+<td>Little/no relationship</td>
+</tr>
+<tr>
+<td><strong>-1.0</strong></td>
+<td>Opposite direction</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="note-02_embeddings_and_vectors--semantic-relationships">🧠 Semantic Relationships</h2>
+<p>Embeddings capture <em>meaning</em>, so math works on concepts:</p>
+<pre><code>        KING (●)
+         ↑  gender relationship
+        MAN (●)
+
+  Replace &quot;man&quot; with &quot;woman&quot;  →  KING − MAN + WOMAN ≈ QUEEN
+</code></pre>
+<hr />
+<h2 id="note-02_embeddings_and_vectors--code-generate-compare-embeddings-from-day2embeddingpy">💻 Code: Generate &amp; Compare Embeddings (from <code>day2/embedding.py</code>)</h2>
+<pre><code class="language-python">import os
+import numpy as np
+from dotenv import load_dotenv
+load_dotenv()
+from google import genai
+
+client = genai.Client(api_key=os.getenv(&quot;GOOGLE_API_KEY&quot;))
+
+sentences = [
+    &quot;I love playing football.&quot;,
+    &quot;I really enjoy playing soccer.&quot;,
+    &quot;Football is my favorite sport.&quot;,
+    &quot;I like eating pizza.&quot;,
+    &quot;The weather is very cold today.&quot;,
+]
+
+# 1. Convert each sentence into a vector
+embedding_list = [
+    client.models.embed_content(
+        model=&quot;gemini-embedding-2&quot;, contents=sentence
+    ).embeddings[0].values
+    for sentence in sentences
+]
+
+# 2. Compare every pair with cosine similarity
+def cosine_similarity(a, b):
+    return np.dot(a, b) / np.linalg.norm(a) / np.linalg.norm(b)
+
+for i in range(len(embedding_list)):
+    for j in range(i + 1, len(embedding_list)):
+        sim = cosine_similarity(np.array(embedding_list[i]), np.array(embedding_list[j]))
+        print(f&quot;{sentences[i]}  ↔  {sentences[j]}  →  {sim:.4f}&quot;)
+</code></pre>
+<p><strong>Expected insight:</strong> football/soccer sentences will score <strong>high (~0.8+)</strong>; pizza/weather sentences will score <strong>low</strong>. That's semantic similarity in action.</p>
+<h3 id="note-02_embeddings_and_vectors--try-this-beginner-experiment">🧪 Try this beginner experiment</h3>
+<p>Add <code>"I adore playing soccer"</code> to the list. Its similarity to <code>"I love playing football."</code> will still be high — even though <em>no word overlaps</em>. That's why embeddings beat keyword search for RAG.</p>
+<blockquote>
+<p>⚠️ <strong>Beginner trap:</strong> always embed the <strong>query</strong> and the <strong>chunks</strong> with the <em>same</em> model. Mixing models = apples vs. oranges.</p>
+</blockquote>
+<hr />
+<h2 id="note-02_embeddings_and_vectors--key-takeaways">✅ Key Takeaways</h2>
+<ul>
+<li>Embeddings = meaning as numbers.</li>
+<li>Cosine similarity measures <em>directional</em> closeness (0→1 scale).</li>
+<li>Same embedding model for documents AND queries — non-negotiable.</li>
+<li>This is the "Retrieval" fuel in RAG.</li>
+</ul>
+<p>➡️ Next: <a href="#note-03_prompting_techniques">Prompting Techniques — talking to the LLM</a></p></div><p class="back"><a href="#top">↑ Back to top</a></p></section>
+<section class="note" id="note-03_prompting_techniques"><div class="note-body"><h1 id="note-03_prompting_techniques--module-3-prompting-techniques-talking-to-the-llm">🗣️ Module 3: Prompting Techniques — Talking to the LLM</h1>
+<blockquote>
+<p><em>Source: <code>AI/day3/prompt.md</code> + <code>AI/day3/prompt.py</code></em></p>
+</blockquote>
+<p><strong>Prompting</strong> is writing clear instructions so the model generates responses that meet your requirements. In RAG, your prompt is where the retrieved chunks and the user's question finally meet.</p>
+<hr />
+<h2 id="note-03_prompting_techniques--types-of-prompting">📋 Types of Prompting</h2>
+<h3 id="note-03_prompting_techniques--1-short-prompting">1. Short Prompting</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Technique</th>
+<th>What it is</th>
+<th>When to use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Zero-Shot</strong></td>
+<td>Instruction only, no examples</td>
+<td>Straightforward questions</td>
+</tr>
+<tr>
+<td><strong>One-Shot</strong></td>
+<td>Instruction + <strong>1 example</strong></td>
+<td>Need to show a specific pattern/format</td>
+</tr>
+<tr>
+<td><strong>Few-Shot</strong></td>
+<td>Instruction + <strong>2–5 examples</strong> (a.k.a. <em>in-context learning</em>)</td>
+<td>Specific tasks, exact output formats</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="note-03_prompting_techniques--2-chain-of-thought-cot">2. Chain-of-Thought (CoT)</h3>
+<p>Combine few-shot prompting with <strong>step-by-step reasoning</strong>. Ask the LLM to <em>explain its thinking</em>. Great for complex logic and math.</p>
+<h3 id="note-03_prompting_techniques--3-prompt-chaining">3. Prompt Chaining</h3>
+<p>Break a complex task into <strong>multiple sequential prompts</strong>; the output of one becomes the input of the next.</p>
+<h3 id="note-03_prompting_techniques--4-react-reason-act">4. ReAct (Reason + Act)</h3>
+<p>The model <strong>reasons</strong> about what to do, then <strong>acts</strong> (e.g., calls a tool), then reasons about the result. This is the backbone of <strong>Agentic RAG</strong> (Module 7).</p>
+<hr />
+<h2 id="note-03_prompting_techniques--code-prompting-with-the-gemini-api-from-day3promptpy">💻 Code: Prompting with the Gemini API (from <code>day3/prompt.py</code>)</h2>
+<pre><code class="language-python">import os
+from dotenv import load_dotenv
+load_dotenv()
+from google import genai
+
+client = genai.Client(api_key=os.getenv(&quot;GOOGLE_API_KEY&quot;))
+
+# The same base question, reframed for different audiences:
+base_prompt = &quot;Explain how machine learning works and its applications&quot;
+
+prompt_simple = &quot;What is machine learning? Explain it in simple words that a 10-year-old can understand.&quot;
+
+prompt_technical = (&quot;Provide a detailed technical explanation of supervised learning, &quot;
+                    &quot;unsupervised learning, and reinforcement learning with mathematical &quot;
+                    &quot;foundations and algorithmic complexity analysis.&quot;)
+
+prompt_business = (&quot;How can organizations implement machine learning to improve business &quot;
+                   &quot;outcomes? Include real-world examples and ROI considerations.&quot;)
+
+interaction = client.interactions.create(
+    model=&quot;gemini-3.7-flash&quot;,
+    input=base_prompt
+)
+print(interaction.output_text)
+</code></pre>
+<p><strong>Beginner lesson:</strong> the <em>same model</em>, the <em>same topic</em> — but the wording of the prompt changes the answer's depth, tone, and audience. Prompt design is a skill, not a chore.</p>
+<hr />
+<h2 id="note-03_prompting_techniques--the-rag-prompt-template-how-it-all-comes-together">🧩 The RAG Prompt Template (how it all comes together)</h2>
+<p>In a real RAG app, your prompt looks like this:</p>
+<pre><code>You are a helpful assistant. Answer using ONLY the provided context.
+
+CONTEXT:
+{retrieved_chunk_1}
+{retrieved_chunk_2}
+{retrieved_chunk_3}
+
+QUESTION: {user_question}
+
+If the answer isn't in the context, say &quot;I don't know&quot;.
+</code></pre>
+<h3 id="note-03_prompting_techniques--best-practices-for-rag-prompts">🔑 Best practices for RAG prompts</h3>
+<ul>
+<li><strong>"Answer only from the context"</strong> → reduces hallucination.</li>
+<li><strong>Include an "I don't know" escape</strong> → prevents confident guessing.</li>
+<li><strong>Ask for citations</strong> → e.g., "cite the source document".</li>
+<li><strong>Keep the system prompt short</strong> → leaves room for retrieved context.</li>
+</ul>
+<blockquote>
+<p>⚠️ <strong>Beginner trap:</strong> stuffing too many chunks into the prompt. The LLM suffers "context rot" — relevant info buried in the middle gets ignored (see Module 1). Retrieval quality beats retrieval quantity.</p>
+</blockquote>
+<hr />
+<h2 id="note-03_prompting_techniques--key-takeaways">✅ Key Takeaways</h2>
+<ul>
+<li>Zero/One/Few-shot control <em>format</em>; CoT controls <em>reasoning</em>; Chaining controls <em>complexity</em>.</li>
+<li>The RAG prompt = instructions + retrieved context + question.</li>
+<li>Explicit constraints ("only from context", "say I don't know") are your first defense against hallucinations.</li>
+</ul>
+<p>➡️ Next: <a href="#note-04_chunking_strategies">Chunking Strategies — breaking documents into bites</a></p></div><p class="back"><a href="#top">↑ Back to top</a></p></section>
+<section class="note" id="note-04_chunking_strategies"><div class="note-body"><h1 id="note-04_chunking_strategies--module-4-chunking-strategies-breaking-documents-into-bites">✂️ Module 4: Chunking Strategies — Breaking Documents into Bites</h1>
+<blockquote>
+<p><em>Source: <code>AI/day9/chunkingStrategies.md</code> + <code>AI/day9/chunking.py</code></em></p>
+</blockquote>
+<p><strong>Chunking</strong> = breaking a large document into smaller segments. The trick: chunks big enough to hold meaning, small enough to stay focused.</p>
+<hr />
+<h2 id="note-04_chunking_strategies--why-do-we-need-chunking">❓ Why do we need chunking?</h2>
+<ul>
+<li>LLMs have a <strong>context limit</strong> (Module 1).</li>
+<li>Loading everything = hallucinations + excessive token usage.</li>
+<li>Retrieval works best when the unit of search matches the unit of answer.</li>
+</ul>
+<h2 id="note-04_chunking_strategies--choosing-a-strategy-ask-yourself">🤔 Choosing a strategy — ask yourself:</h2>
+<ol>
+<li><strong>What kind of data?</strong> (PDF, HTML, Markdown, code, tables)</li>
+<li><strong>Which embedding model?</strong> (domain-specific models chunk differently)</li>
+<li><strong>How long/complex are user queries?</strong> (short queries → smaller, focused chunks)</li>
+<li><strong>How will results be used?</strong> (semantic search vs. RAG vs. agentic workflow)</li>
+</ol>
+<hr />
+<h2 id="note-04_chunking_strategies--chunking-methods">🔨 Chunking Methods</h2>
+<h3 id="note-04_chunking_strategies--1-fixed-size-chunking">1. Fixed-size chunking</h3>
+<p>Pick a size (e.g. 500 tokens) + overlap (e.g. 50) and slice. Fast, but can cut mid-sentence.</p>
+<h3 id="note-04_chunking_strategies--2-content-aware-chunking">2. Content-aware chunking</h3>
+<p>Respects the document's structure:
+- <strong>Naive splitter</strong> — splits on <code>,</code>, <code>.</code>, newlines, whitespace.
+- <strong>NLTK</strong> — trained sentence tokenizer → more meaningful chunks.
+- <strong>spaCy</strong> — powerful NLP library for sentence/entity-aware splitting.</p>
+<h3 id="note-04_chunking_strategies--3-recursive-character-level-chunking">3. Recursive character-level chunking ⭐</h3>
+<p>LangChain's <code>RecursiveCharacterTextSplitter</code> splits on a priority list of separators (e.g. <code>["\n\n", "\n", ".", " "]</code>) until chunks fit the size. <strong>Best default for general text.</strong></p>
+<h3 id="note-04_chunking_strategies--4-document-structure-based">4. Document structure-based</h3>
+<ul>
+<li><strong>PDF</strong> — headings/subheadings first (LangChain has cleanup utilities).</li>
+<li><strong>HTML</strong> — parse tags, or use LangChain splitters.</li>
+<li><strong>Markdown</strong> — chunk by headers/sections.</li>
+<li><strong>LaTeX</strong> — chunk by its own syntax.</li>
+</ul>
+<h3 id="note-04_chunking_strategies--5-semantic-chunking">5. Semantic chunking</h3>
+<ol>
+<li>Break into sentences.</li>
+<li>Group sentences with neighbors.</li>
+<li>Embed each group.</li>
+<li>Split where consecutive embeddings <em>diverge</em> (topic shift).</li>
+</ol>
+<h3 id="note-04_chunking_strategies--6-contextual-chunking">6. Contextual chunking</h3>
+<p>Add a small context prefix to each chunk (e.g., the doc title + section heading) so chunks make sense <em>out of context</em> — a 2024–2026 best practice that boosts retrieval recall.</p>
+<hr />
+<h2 id="note-04_chunking_strategies--code-recursive-splitting-in-action-from-day9chunkingpy">💻 Code: Recursive Splitting in Action (from <code>day9/chunking.py</code>)</h2>
+<pre><code class="language-python">from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+text = &quot;&quot;&quot;# Order Installation Guide
+
+## 1. Order Lifecycle
+When a customer places an order, the order is first created in the ordering system...
+...
+&quot;&quot;&quot;
+
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=10)
+texts = text_splitter.split_text(text)
+
+print(texts)          # list of chunks
+print(len(texts))     # how many chunks we got
+</code></pre>
+<p><strong>Why overlap?</strong> A sentence split across two chunks can be found from <em>either</em> side. Overlap (typically 10–20% of chunk size) prevents "lost information" at boundaries.</p>
+<h3 id="note-04_chunking_strategies--beginner-experiment">🧪 Beginner experiment</h3>
+<p>Run the same text with <code>chunk_size=100</code> vs <code>chunk_size=500</code> and compare <code>len(texts)</code>. Then embed each chunk (Module 2) and search for <em>"When is an order created?"</em> — notice which chunk size retrieves the right answer.</p>
+<hr />
+<h2 id="note-04_chunking_strategies--2026-best-practice-stack-from-production-research">🏆 2026 Best-Practice Stack (from production research)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Strategy</td>
+<td>Structure-aware first (headers/sections), then recursive fallback</td>
+</tr>
+<tr>
+<td>Size</td>
+<td>300–800 tokens for most docs; smaller for FAQs, larger for narrative</td>
+</tr>
+<tr>
+<td>Overlap</td>
+<td>10–20% of chunk size</td>
+</tr>
+<tr>
+<td>Metadata</td>
+<td>Attach <code>source</code>, <code>page</code>, <code>section</code>, <code>date</code> to every chunk</td>
+</tr>
+<tr>
+<td>Contextual prefix</td>
+<td>Prepend doc title + heading to each chunk before embedding</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>💡 <strong>Golden rule:</strong> your embedding model's max input length caps your chunk size. Never exceed it.</p>
+</blockquote>
+<hr />
+<h2 id="note-04_chunking_strategies--key-takeaways">✅ Key Takeaways</h2>
+<ul>
+<li>Chunk size is the #1 lever of RAG quality.</li>
+<li>Recursive character splitting is the safe default.</li>
+<li>Semantic + contextual chunking = premium retrieval.</li>
+<li>Always carry metadata — it powers filtering later.</li>
+</ul>
+<p>➡️ Next: <a href="#note-05_vector_databases">Vector Databases — your AI's memory</a></p></div><p class="back"><a href="#top">↑ Back to top</a></p></section>
+<section class="note" id="note-05_vector_databases"><div class="note-body"><h1 id="note-05_vector_databases--module-5-vector-databases-your-ais-memory">🗄️ Module 5: Vector Databases — Your AI's Memory</h1>
+<blockquote>
+<p><em>Source: <code>AI/day8/vectordb.md</code> + <code>AI/day8/pine_cone.py</code></em></p>
+</blockquote>
+<p>A <strong>Vector Database</strong> stores data as <strong>embeddings</strong> — numerical representations of <em>meaning</em>, not keywords. It solves the three things a raw LLM can't do:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Why it matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>No memory</strong></td>
+<td>LLM forgets between sessions</td>
+</tr>
+<tr>
+<td><strong>No private data access</strong></td>
+<td>It only knows its training data</td>
+</tr>
+<tr>
+<td><strong>No retrieval</strong></td>
+<td>It can't search a large corpus by itself</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="note-05_vector_databases--the-typical-rag-flow">🔁 The Typical RAG Flow</h2>
+<ol>
+<li><strong>Split</strong> documents into chunks (Module 4).</li>
+<li><strong>Embed</strong> each chunk → vector (Module 2).</li>
+<li><strong>Store</strong> vectors + metadata in the vector DB.</li>
+<li><strong>Embed</strong> the incoming query the same way.</li>
+<li><strong>Search</strong> for the top-k nearest vectors (similarity search).</li>
+<li><strong>Feed</strong> the retrieved chunks to the LLM as context (Module 3).</li>
+</ol>
+<p>The key trick: a query is compared by <strong>semantic similarity</strong> (e.g., cosine similarity), so it works even when the query and document use <em>different words</em>.</p>
+<hr />
+<h2 id="note-05_vector_databases--how-to-choose-a-vector-db">🧭 How to Choose a Vector DB</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>pgvector</strong></td>
+<td>Postgres extension</td>
+<td>Already on Postgres? Relational + vector in one place</td>
+</tr>
+<tr>
+<td><strong>ChromaDB</strong></td>
+<td>Lightweight/embedded</td>
+<td>Easy local setup — <strong>best for prototyping</strong></td>
+</tr>
+<tr>
+<td><strong>Pinecone</strong></td>
+<td>Managed/hosted</td>
+<td>Fully managed, scales well, zero infra</td>
+</tr>
+<tr>
+<td><strong>Weaviate</strong></td>
+<td>Managed/self-hosted</td>
+<td>Built-in <strong>hybrid</strong> search (keyword + vector)</td>
+</tr>
+<tr>
+<td><strong>FAISS</strong></td>
+<td>Library (in-process)</td>
+<td>Blazing fast, no server — but no built-in persistence</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Consider:</strong> scale (vector count + query volume), hosted vs self-managed, hybrid search support, metadata filtering, and existing infra.</p>
+<hr />
+<h2 id="note-05_vector_databases--code-embed-documents-upsert-to-pinecone-from-day8pine-conepy">💻 Code: Embed Documents &amp; Upsert to Pinecone (from <code>day8/pine_cone.py</code>)</h2>
+<pre><code class="language-python">import os
+from dotenv import load_dotenv
+from google import genai
+from pinecone import Pinecone, ServerlessSpec
+load_dotenv()
+
+pc = Pinecone(api_key=&quot;pclocal&quot;, host=&quot;http://localhost:5080&quot;)
+client = genai.Client(api_key=os.getenv(&quot;GOOGLE_API_KEY&quot;))
+
+documents = [
+    {&quot;id&quot;: &quot;doc-1&quot;, &quot;text&quot;: &quot;Customers can request a refund within 30 days of purchase.&quot;, &quot;category&quot;: &quot;refund&quot;},
+    {&quot;id&quot;: &quot;doc-2&quot;, &quot;text&quot;: &quot;Installation appointments can be rescheduled up to 24 hours before.&quot;, &quot;category&quot;: &quot;installation&quot;},
+    {&quot;id&quot;: &quot;doc-3&quot;, &quot;text&quot;: &quot;Technical support is available Monday–Friday, 9 AM to 6 PM.&quot;, &quot;category&quot;: &quot;support&quot;},
+]
+
+# 1. Embed every document text
+embedding_list = [
+    client.models.embed_content(
+        model=&quot;gemini-embedding-2&quot;, contents=doc[&quot;text&quot;]
+    ).embeddings[0].values
+    for doc in documents
+]
+
+# 2. Create an index (dimension must match your embedding model)
+# if &quot;order&quot; not in pc.list_indexes():
+#     pc.create_index(
+#         name=&quot;order&quot;,
+#         dimension=len(embedding_list[0]),
+#         metric=&quot;cosine&quot;,
+#         spec=ServerlessSpec(cloud=&quot;aws&quot;, region=&quot;us-east-1&quot;)
+#     )
+
+index = pc.Index(host=&quot;http://localhost:5081&quot;)
+
+# 3. Build vectors: id + values + metadata (keep the raw text for display!)
+vectors = [
+    {
+        &quot;id&quot;: doc[&quot;id&quot;],
+        &quot;values&quot;: embedding_list[i],
+        &quot;metadata&quot;: {&quot;category&quot;: doc[&quot;category&quot;], &quot;text&quot;: doc[&quot;text&quot;]},
+    }
+    for i, doc in enumerate(documents)
+]
+
+# 4. Upsert (insert or update)
+index.upsert(vectors=vectors)
+print(index.describe_index_stats())
+</code></pre>
+<h3 id="note-05_vector_databases--then-at-query-time">🔍 Then, at query time:</h3>
+<pre><code class="language-python">query_vec = client.models.embed_content(
+    model=&quot;gemini-embedding-2&quot;, contents=&quot;Can I get a refund?&quot;
+).embeddings[0].values
+
+results = index.query(vector=query_vec, top_k=3, include_metadata=True)
+# results.matches → [{&quot;id&quot;: &quot;doc-1&quot;, &quot;score&quot;: 0.92, &quot;metadata&quot;: {...}}, ...]
+</code></pre>
+<blockquote>
+<p>💡 <strong>Beginner tip:</strong> store the <strong>original text in metadata</strong>. The vector is only for matching; you need the readable text to build the LLM prompt.</p>
+</blockquote>
+<hr />
+<h2 id="note-05_vector_databases--key-takeaways">✅ Key Takeaways</h2>
+<ul>
+<li>Vector DB = semantic search engine over your documents.</li>
+<li>Match dimension to your embedding model; keep raw text as metadata.</li>
+<li>Prototype with ChromaDB/FAISS; scale with Pinecone/pgvector.</li>
+<li><code>upsert</code> = insert-or-update; <code>top_k</code> controls how much context you fetch.</li>
+</ul>
+<p>➡️ Next: <a href="#note-06_retrieval_mechanics">Retrieval Mechanics — finding the needle</a></p></div><p class="back"><a href="#top">↑ Back to top</a></p></section>
+<section class="note" id="note-06_retrieval_mechanics"><div class="note-body"><h1 id="note-06_retrieval_mechanics--module-6-retrieval-mechanics-finding-the-needle">🎯 Module 6: Retrieval Mechanics — Finding the Needle</h1>
+<blockquote>
+<p><em>Source: <code>AI/day11/retrievalMechanism.md</code> + production best-practice research (2026)</em></p>
+</blockquote>
+<p><strong>Retrieval</strong> is the process of finding the most relevant pieces of information from a knowledge store, given a user query. It's the "R" in RAG — and the stage that most determines answer quality.</p>
+<hr />
+<h2 id="note-06_retrieval_mechanics--the-4-stages-of-retrieval">🔄 The 4 Stages of Retrieval</h2>
+<h3 id="note-06_retrieval_mechanics--1-query-processing">1. Query Processing</h3>
+<ul>
+<li><strong>Tokenization</strong> — split into tokens/words.</li>
+<li><strong>Lowercasing</strong> — consistent matching.</li>
+<li><strong>Stop-word removal</strong> — drop "the", "a", "is".</li>
+<li><strong>Stemming</strong> (sparse) — <code>running</code> → <code>run</code>.</li>
+<li><strong>Embedding generation</strong> (dense) — turn the query into a vector.</li>
+</ul>
+<h3 id="note-06_retrieval_mechanics--2-knowledge-base-representation">2. Knowledge Base Representation</h3>
+<ul>
+<li><strong>Chunking</strong> — small, self-contained units (Module 4).</li>
+<li><strong>Indexing</strong> — data structure for fast search:</li>
+<li><strong>Inverted index</strong> → keyword→chunk map (sparse)</li>
+<li><strong>Vector index</strong> → ANN search over embeddings (dense)</li>
+<li><strong>Graph structure</strong> → entities &amp; relationships (nodes/edges)</li>
+</ul>
+<h3 id="note-06_retrieval_mechanics--3-matching-scoring">3. Matching / Scoring</h3>
+<ul>
+<li><strong>Sparse</strong> — term overlap; scored by <strong>TF-IDF</strong> or <strong>BM25</strong>.</li>
+<li><strong>Dense</strong> — vector comparison via <strong>cosine similarity</strong> / dot product.</li>
+<li><strong>Graph</strong> — traverse connected nodes; score by similarity, path length, relation type.</li>
+</ul>
+<h3 id="note-06_retrieval_mechanics--4-ranking-selection">4. Ranking &amp; Selection</h3>
+<p>Score every chunk, rank, and return the <strong>top-k</strong>.</p>
+<hr />
+<h2 id="note-06_retrieval_mechanics--hybrid-retrieval-sparse-dense">🏅 Hybrid Retrieval (Sparse + Dense) ⭐</h2>
+<p>The 2026 production standard: run <strong>both</strong> methods in parallel and merge.</p>
+<pre><code>Query ──┬── BM25 (keyword)  ──┐
+        └── Vector (semantic) ──┴── Reciprocal Rank Fusion (RRF) ──→ ranked list
+</code></pre>
+<p><strong>Why hybrid?</strong> Dense vectors miss exact identifiers (e.g., <code>SKU-992</code>, <code>ERR_4297</code>), while BM25 misses synonyms. Each covers the other's blind spot.</p>
+<p><strong>RRF merge formula:</strong> a chunk's fused score = Σ <code>1 / (k + rank_i)</code> across both lists (k ≈ 60). Simple, no score normalization needed.</p>
+<hr />
+<h2 id="note-06_retrieval_mechanics--reranking-the-not-optional-stage">🔁 Reranking — the "not optional" stage ⭐</h2>
+<p>First-stage search is a <em>fast approximation</em>. A <strong>reranker (cross-encoder)</strong> reads query+chunk <em>together</em> and outputs one precise relevance score.</p>
+<p><strong>Two-stage pattern:</strong>
+1. Fast retrieval → top ~30 candidates (milliseconds)
+2. Reranker scores all 30 (150–300 ms)
+3. Top 4–6 chunks go into the LLM prompt</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Reranker type</th>
+<th>How it works</th>
+<th>Trade-off</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Syntactic proximity</strong></td>
+<td>Query keywords close together in the chunk score higher</td>
+<td>Free, fast, interpretable</td>
+</tr>
+<tr>
+<td><strong>Neural cross-encoder</strong> (e.g., <code>ms-marco-MiniLM-L-6-v2</code>, Cohere Rerank, Voyage)</td>
+<td>Model trained on query-passage relevance</td>
+<td>Slower, but far more accurate</td>
+</tr>
+<tr>
+<td><strong>LLM reranker</strong> (RankZephyr, Qwen3-Reranker)</td>
+<td>"yes/no" relevance probability</td>
+<td>Best quality; costly — route only hard queries</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>Reranking also fights <strong>context rot</strong>: it moves the best chunks to the <em>start/end</em> of the prompt, where LLMs pay the most attention.</p>
+</blockquote>
+<hr />
+<h2 id="note-06_retrieval_mechanics--query-rewriting-before-you-search">✍️ Query Rewriting (before you search)</h2>
+<ul>
+<li><strong>Decompose</strong> multi-part questions into sub-queries.</li>
+<li><strong>HyDE</strong> (Hypothetical Document Embeddings): ask the LLM to <em>write a hypothetical answer</em>, embed <em>that</em>, and search with it.</li>
+<li><strong>Multi-query</strong>: generate 2–3 phrasings of the same question, retrieve, merge.</li>
+</ul>
+<hr />
+<h2 id="note-06_retrieval_mechanics--specialized-techniques">🧩 Specialized techniques</h2>
+<ul>
+<li><strong>Multi-vector retrieval</strong> — one document gets <em>several</em> embeddings (per sentence/aspect) for fine-grained matching.</li>
+<li><strong>Graph-based retrieval</strong> — follow entity relationships (great for "who worked on X that depends on Y").</li>
+</ul>
+<hr />
+<h2 id="note-06_retrieval_mechanics--choosing-a-method">📊 Choosing a Method</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Strength</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Sparse (BM25)</strong></td>
+<td>Efficiency + exact keyword matching</td>
+</tr>
+<tr>
+<td><strong>Dense (vector)</strong></td>
+<td>Semantic understanding</td>
+</tr>
+<tr>
+<td><strong>Hybrid</strong></td>
+<td>Best balance — the default for production</td>
+</tr>
+<tr>
+<td><strong>Graph / multi-vector</strong></td>
+<td>Specialized, evolving approaches</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="note-06_retrieval_mechanics--key-takeaways">✅ Key Takeaways</h2>
+<ul>
+<li>Retrieval = query processing → indexing → matching → ranking.</li>
+<li><strong>Hybrid + rerank</strong> is the modern default, not a luxury.</li>
+<li>Rewrite hard queries <em>before</em> searching.</li>
+<li>Top-k is a dial: too low = missing facts, too high = noise + cost.</li>
+</ul>
+<p>➡️ Next: <a href="#note-07_agentic_rag_and_tools">Agentic RAG &amp; Tool Calling</a></p></div><p class="back"><a href="#top">↑ Back to top</a></p></section>
+<section class="note" id="note-07_agentic_rag_and_tools"><div class="note-body"><h1 id="note-07_agentic_rag_and_tools--module-7-agentic-rag-tool-calling">🤖 Module 7: Agentic RAG &amp; Tool Calling</h1>
+<blockquote>
+<p><em>Source: <code>AI/day4/toolcalling.md</code> + <code>AI/day4/toolcalling.py</code></em></p>
+</blockquote>
+<p><strong>Tool calling</strong> lets an LLM interact with external tools and functions in a controlled, predictable way. Combined with <strong>structured output</strong>, it turns a chatbot into an <strong>agent</strong> — the foundation of <em>Agentic RAG</em>.</p>
+<hr />
+<h2 id="note-07_agentic_rag_and_tools--what-is-structured-output">📦 What is Structured Output?</h2>
+<p>Constraining the LLM's output to a predictable, type-safe format instead of free-form text.</p>
+<p><strong>Benefits:</strong> predictable format • type safety • easy extraction (no regex) • fewer errors • seamless app integration.</p>
+<hr />
+<h2 id="note-07_agentic_rag_and_tools--mental-model-the-llm-does-not-execute-anything">🧠 Mental Model: The LLM does NOT execute anything</h2>
+<pre><code>User Input
+    ↓
+LLM (analyzes and suggests an action)
+    ↓
+&quot;Call get_weather(city='Hyderabad')&quot;
+    ↓
+YOUR PYTHON CODE (executes the actual function)
+    ↓
+get_weather(&quot;Hyderabad&quot;)
+    ↓
+Tool Result (weather data)
+    ↓
+LLM (processes result)
+    ↓
+Final Response to User
+</code></pre>
+<p><strong>Key insight:</strong> the LLM <em>proposes</em> actions via structured output; <strong>your application controls execution.</strong></p>
+<hr />
+<h2 id="note-07_agentic_rag_and_tools--common-use-cases">🎯 Common Use Cases</h2>
+<ul>
+<li>Weather APIs, database queries, calculations, web search</li>
+<li><strong>Multi-step workflows</strong> — chaining multiple tool calls</li>
+<li><strong>RAG-specific:</strong> query a vector store, fetch a document by ID, run a SQL report, call a calculator, hit a live API</li>
+</ul>
+<hr />
+<h2 id="note-07_agentic_rag_and_tools--code-tool-calling-with-gemini-from-day4toolcallingpy">💻 Code: Tool Calling with Gemini (from <code>day4/toolcalling.py</code>)</h2>
+<pre><code class="language-python">import os, json
+from dotenv import load_dotenv
+load_dotenv()
+from google import genai
+
+client = genai.Client(api_key=os.getenv(&quot;GOOGLE_API_KEY&quot;))
+
+def get_weather(city):
+    weather = {
+        &quot;hyderabad&quot;: {&quot;temperature&quot;: &quot;30°C&quot;, &quot;condition&quot;: &quot;Sunny&quot;},
+        &quot;bangalore&quot;: {&quot;temperature&quot;: &quot;28°C&quot;, &quot;condition&quot;: &quot;Cloudy&quot;},
+    }
+    return weather.get(city.lower(), {&quot;temperature&quot;: &quot;N/A&quot;, &quot;condition&quot;: &quot;N/A&quot;})
+
+# 1. Declare the tool (name + description + JSON schema)
+tool = {
+    &quot;type&quot;: &quot;function&quot;,
+    &quot;name&quot;: &quot;get_weather&quot;,
+    &quot;description&quot;: &quot;Get the current weather for a city&quot;,
+    &quot;parameters&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {&quot;city&quot;: {&quot;type&quot;: &quot;string&quot;}},
+        &quot;required&quot;: [&quot;city&quot;],
+    },
+}
+
+# 2. Ask the model — it may decide to call the tool
+result = client.interactions.create(
+    model=&quot;gemini-3.5-flash&quot;,
+    input=&quot;Get the current weather for Hyderabad&quot;,
+    tools=[tool],
+)
+
+# 3. Find the function-call step in the response
+fc_step = next((s for s in result.steps if s.type == &quot;function_call&quot;), None)
+
+# 4. YOUR CODE executes it (never trust the LLM to run it)
+tool_result = get_weather(fc_step.arguments.get(&quot;city&quot;)) if fc_step else None
+
+# 5. Send the tool result back for a grounded final answer
+final_result = client.interactions.create(
+    model=&quot;gemini-3.5-flash&quot;,
+    tools=[tool],
+    previous_interaction_id=result.id,
+    input=[{
+        &quot;type&quot;: &quot;function_result&quot;,
+        &quot;name&quot;: fc_step.name,
+        &quot;call_id&quot;: fc_step.id,
+        &quot;result&quot;: [{&quot;type&quot;: &quot;text&quot;, &quot;text&quot;: json.dumps(tool_result)}],
+    }],
+)
+print(final_result.output_text)
+</code></pre>
+<hr />
+<h2 id="note-07_agentic_rag_and_tools--from-tools-agentic-rag">🔀 From Tools → Agentic RAG</h2>
+<p>A RAG app becomes <strong>agentic</strong> when the LLM <em>decides</em> whether/how to retrieve:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Classic RAG</th>
+<th>Agentic RAG</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Always retrieves for every question</td>
+<td>Decides <em>if</em> retrieval is needed</td>
+</tr>
+<tr>
+<td>Single retrieval pass</td>
+<td>Multiple rounds (query → retrieve → check → re-query)</td>
+</tr>
+<tr>
+<td>Fixed pipeline</td>
+<td>LLM plans steps, calls tools, self-reflects</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>When to use agentic RAG:</strong> multi-hop questions ("compare policy X and Y"), mixed data sources (DB + docs + API), and tasks needing computation or live data.</p>
+<blockquote>
+<p>⚠️ <strong>Beginner trap:</strong> agentic ≠ better. It adds latency, cost, and failure modes. Start with classic RAG; add agents only when you <em>need</em> decisions, not just retrieval.</p>
+</blockquote>
+<hr />
+<h2 id="note-07_agentic_rag_and_tools--key-takeaways">✅ Key Takeaways</h2>
+<ul>
+<li>LLM proposes → your code executes → result returns.</li>
+<li>Declare tools with clear names, descriptions, and JSON schemas.</li>
+<li>Agentic RAG = LLM controls the retrieve/reason loop.</li>
+<li>Use ReAct-style reasoning for multi-step tasks.</li>
+</ul>
+<p>➡️ Next: <a href="#note-08_building_your_first_rag_app">Build Your First RAG App — the full project</a></p></div><p class="back"><a href="#top">↑ Back to top</a></p></section>
+<section class="note" id="note-08_building_your_first_rag_app"><div class="note-body"><h1 id="note-08_building_your_first_rag_app--module-8-build-your-first-rag-application-capstone">🚀 Module 8: Build Your First RAG Application (Capstone)</h1>
+<blockquote>
+<p><em>Synthesizes Modules 1–7 + the <code>AI/day*</code> code samples</em></p>
+</blockquote>
+<p>Everything you've learned, wired into one working pipeline.</p>
+<hr />
+<h2 id="note-08_building_your_first_rag_app--the-architecture">🏗️ The Architecture</h2>
+<pre><code>                  ┌──────────────── OFFLINE (indexing) ────────────────┐
+                  │  Documents → Parse → Chunk → Embed → Vector DB     │
+                  └────────────────────────────────────────────────────┘
+
+                  ┌──────────────── ONLINE (query time) ───────────────┐
+  User Question → │ Query Embed → Hybrid Search → Rerank → Prompt → LLM │ → Answer
+                  │              (top-k)      (cross-encoder)  +context│
+                  └────────────────────────────────────────────────────┘
+</code></pre>
+<hr />
+<h2 id="note-08_building_your_first_rag_app--step-by-step-build">📋 Step-by-Step Build</h2>
+<h3 id="note-08_building_your_first_rag_app--step-0-setup">Step 0 — Setup</h3>
+<pre><code class="language-bash">pip install google-genai pinecone langchain-text-splitters python-dotenv
+</code></pre>
+<pre><code class="language-bash"># .env
+GOOGLE_API_KEY=your_key
+</code></pre>
+<h3 id="note-08_building_your_first_rag_app--step-1-ingest-chunk-module-4">Step 1 — Ingest &amp; Chunk (Module 4)</h3>
+<pre><code class="language-python">from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+text = open(&quot;your_document.md&quot;).read()
+splitter = RecursiveCharacterTextSplitter(chunk_size=400, chunk_overlap=40)
+chunks = splitter.split_text(text)
+</code></pre>
+<h3 id="note-08_building_your_first_rag_app--step-2-embed-store-modules-2-5">Step 2 — Embed &amp; Store (Modules 2 &amp; 5)</h3>
+<pre><code class="language-python">import os
+from dotenv import load_dotenv
+from google import genai
+from pinecone import Pinecone, ServerlessSpec
+load_dotenv()
+
+client = genai.Client(api_key=os.getenv(&quot;GOOGLE_API_KEY&quot;))
+pc = Pinecone(api_key=&quot;pclocal&quot;, host=&quot;http://localhost:5080&quot;)
+
+def embed(text):
+    return client.models.embed_content(
+        model=&quot;gemini-embedding-2&quot;, contents=text
+    ).embeddings[0].values
+
+index = pc.Index(host=&quot;http://localhost:5081&quot;)
+vectors = [
+    {
+        &quot;id&quot;: f&quot;chunk-{i}&quot;,
+        &quot;values&quot;: embed(c),
+        &quot;metadata&quot;: {&quot;text&quot;: c, &quot;source&quot;: &quot;your_document.md&quot;},
+    }
+    for i, c in enumerate(chunks)
+]
+index.upsert(vectors=vectors)
+</code></pre>
+<h3 id="note-08_building_your_first_rag_app--step-3-retrieve-module-6">Step 3 — Retrieve (Module 6)</h3>
+<pre><code class="language-python">def retrieve(question, top_k=5):
+    qv = embed(question)
+    res = index.query(vector=qv, top_k=top_k, include_metadata=True)
+    return [m.metadata[&quot;text&quot;] for m in res.matches]
+</code></pre>
+<h3 id="note-08_building_your_first_rag_app--step-4-generate-with-a-rag-prompt-module-3">Step 4 — Generate with a RAG Prompt (Module 3)</h3>
+<pre><code class="language-python">def answer(question):
+    contexts = retrieve(question)
+    prompt = (
+        &quot;Answer using ONLY the context below. &quot;
+        &quot;If unsure, say 'I don't know'.\n\n&quot;
+        f&quot;CONTEXT:\n{''.join('- ' + c + '\n' for c in contexts)}\n\n&quot;
+        f&quot;QUESTION: {question}&quot;
+    )
+    return client.interactions.create(
+        model=&quot;gemini-3.5-flash&quot;, input=prompt
+    ).output_text
+</code></pre>
+<h3 id="note-08_building_your_first_rag_app--step-5-upgrade-rerank-before-prompting-module-6">Step 5 (Upgrade) — Rerank before prompting (Module 6)</h3>
+<p>Fetch <code>top_k=30</code>, then rerank with a cross-encoder and keep the top 4–6.</p>
+<h3 id="note-08_building_your_first_rag_app--step-6-upgrade-tool-calling-guardrails-module-7">Step 6 (Upgrade) — Tool-calling guardrails (Module 7)</h3>
+<p>Let the LLM <em>choose</em> whether to retrieve, and add a "no-documents-found" tool.</p>
+<hr />
+<h2 id="note-08_building_your_first_rag_app--evaluating-your-rag-ragas-the-missing-piece-most-beginners-skip">📏 Evaluating Your RAG (RAGAS) — the missing piece most beginners skip</h2>
+<p>You can't improve what you don't measure. RAG splits evaluation into <strong>retriever</strong> and <strong>generator</strong>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Measures</th>
+<th>Component</th>
+<th>Direction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Faithfulness</strong></td>
+<td>Are claims in the answer supported by retrieved context? (anti-hallucination)</td>
+<td>Generator</td>
+<td>↑ higher = better</td>
+</tr>
+<tr>
+<td><strong>Answer Relevancy</strong></td>
+<td>Does the answer actually address the question?</td>
+<td>Generator</td>
+<td>↑ higher = better</td>
+</tr>
+<tr>
+<td><strong>Context Precision</strong></td>
+<td>Are the <em>relevant</em> chunks ranked high?</td>
+<td>Retriever</td>
+<td>↑ higher = better</td>
+</tr>
+<tr>
+<td><strong>Context Recall</strong></td>
+<td>Did retrieval find <em>all</em> needed info?</td>
+<td>Retriever</td>
+<td>↑ higher = better</td>
+</tr>
+</tbody>
+</table></div>
+<pre><code class="language-python">from ragas.metrics import faithfulness, answer_relevancy, context_precision, context_recall
+from ragas import evaluate
+from datasets import Dataset
+
+data = {
+    &quot;question&quot;: [&quot;What is the refund policy?&quot;],
+    &quot;answer&quot;:   [answer(&quot;What is the refund policy?&quot;)],
+    &quot;contexts&quot;: [retrieve(&quot;What is the refund policy?&quot;)],
+    &quot;ground_truth&quot;: [&quot;Customers can request a refund within 30 days of purchase.&quot;],
+}
+result = evaluate(
+    Dataset.from_dict(data),
+    metrics=[faithfulness, answer_relevancy, context_precision, context_recall],
+)
+print(result)
+</code></pre>
+<p><strong>Diagnosis guide:</strong>
+- Low <strong>faithfulness</strong> → strengthen prompt ("answer only from context"), add reranking, cut noisy chunks.
+- Low <strong>context recall</strong> → smaller chunks, better chunking strategy, hybrid search.
+- Low <strong>answer relevancy</strong> → better prompt + query rewriting.</p>
+<blockquote>
+<p>📘 For the full evaluation methodology — test-set generation, LLM-as-a-judge, and CI quality gates — see <a href="#note-09_rag_evaluation">Module 9</a>.</p>
+</blockquote>
+<hr />
+<h2 id="note-08_building_your_first_rag_app--production-checklist-2026-best-practices">🏆 Production Checklist (2026 best practices)</h2>
+<ul>
+<li>[ ] <strong>Hybrid search</strong> (BM25 + vector) with Reciprocal Rank Fusion</li>
+<li>[ ] <strong>Reranker</strong> (cross-encoder) between retrieval and prompt</li>
+<li>[ ] <strong>Query rewriting / HyDE</strong> for complex questions</li>
+<li>[ ] <strong>Contextual chunk prefixes</strong> (doc title + heading)</li>
+<li>[ ] <strong>Metadata</strong> on every chunk (source, date, section) for filtering</li>
+<li>[ ] <strong>Guardrails</strong> — "answer only from context", citation strings</li>
+<li>[ ] <strong>Semantic cache</strong> for repeated queries (cost/latency win)</li>
+<li>[ ] <strong>Observability</strong> — log query → chunks → scores → answer</li>
+<li>[ ] <strong>Automated evals</strong> (RAGAS) on every change</li>
+<li>[ ] <strong>Domain-adapted embedding model</strong> if your corpus has heavy jargon</li>
+</ul>
+<hr />
+<h2 id="note-08_building_your_first_rag_app--your-full-learning-journey">🗺️ Your Full Learning Journey</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Topic</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>RAG Overview</td>
+<td><code>00_introduction_to_rag.md</code></td>
+</tr>
+<tr>
+<td>1</td>
+<td>Transformers &amp; Tokens</td>
+<td><code>01_foundations_transformers.md</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Embeddings</td>
+<td><code>02_embeddings_and_vectors.md</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Prompting</td>
+<td><code>03_prompting_techniques.md</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Chunking</td>
+<td><code>04_chunking_strategies.md</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Vector DBs</td>
+<td><code>05_vector_databases.md</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td>Retrieval</td>
+<td><code>06_retrieval_mechanics.md</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td>Agentic RAG &amp; Tools</td>
+<td><code>07_agentic_rag_and_tools.md</code></td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>Build the App</strong></td>
+<td><code>08_building_your_first_rag_app.md</code> ← you are here</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Evaluation (Deep Dive)</td>
+<td><code>09_rag_evaluation.md</code></td>
+</tr>
+<tr>
+<td>10</td>
+<td>Document Ingestion &amp; Parsing</td>
+<td><code>10_document_ingestion_and_parsing.md</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Original docs:</strong> <code>AI/day1</code> … <code>AI/day11</code> · <strong>Code:</strong> <code>embedding.py</code>, <code>chunking.py</code>, <code>pine_cone.py</code>, <code>toolcalling.py</code></p>
+<p>🎉 You now have a complete mental model — from tokens to a production-grade RAG system. Build the capstone, break it, measure it with RAGAS, and iterate!</p></div><p class="back"><a href="#top">↑ Back to top</a></p></section>
+<section class="note" id="note-09_rag_evaluation"><div class="note-body"><h1 id="note-09_rag_evaluation--module-9-evaluating-your-rag-application-deep-dive">📏 Module 9: Evaluating Your RAG Application (Deep Dive)</h1>
+<blockquote>
+<p><em>Expands the evaluation section in Module 8 · Sources: Ragas docs, RAGAS paper (arXiv:2309.15217), promptfoo, NVIDIA/IBM RAG eval guides</em></p>
+<p>💡 <em>"You can't improve what you don't measure."</em> — most beginners test RAG by vibes. Production teams <strong>score every stage</strong> and gate releases on those scores.</p>
+</blockquote>
+<hr />
+<h2 id="note-09_rag_evaluation--why-evaluation-is-hard-and-important">🎯 Why evaluation is hard (and important)</h2>
+<p>A RAG app has <strong>two moving parts</strong>, and either can fail silently:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Fails when...</th>
+<th>Symptom</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Retriever</strong></td>
+<td>Wrong chunks retrieved</td>
+<td>Answer is missing facts ("I don't know" too often)</td>
+</tr>
+<tr>
+<td><strong>Generator</strong></td>
+<td>Chunks are right but answer is wrong/unfaithful</td>
+<td>Hallucinations despite good context</td>
+</tr>
+</tbody>
+</table></div>
+<p>If you only measure "does the answer look right?", you can't tell <em>which</em> part to fix. So we score them <strong>separately</strong>.</p>
+<hr />
+<h2 id="note-09_rag_evaluation--the-core-metrics-ragas">📐 The Core Metrics (RAGAS)</h2>
+<h3 id="note-09_rag_evaluation--generator-side">Generator-side</h3>
+<p><strong>1. Faithfulness</strong> — <em>anti-hallucination score</em></p>
+<pre><code>Faithfulness = (claims in answer inferable from context) / (total claims in answer)
+</code></pre>
+<p>Example: answer has 2 claims; only 1 is supported by context → <strong>faithfulness = 0.5</strong>.</p>
+<p><strong>2. Answer Relevancy</strong> — does the answer address the <em>question</em>?</p>
+<pre><code>Answer Relevancy = mean( similarity(question, generated_questions) )
+</code></pre>
+<p>Ragas reverse-engineers questions from the answer and compares them to the original.</p>
+<p><strong>3. Answer Correctness / Similarity</strong> — vs. a known ground-truth answer (factuality + semantic similarity).</p>
+<h3 id="note-09_rag_evaluation--retriever-side">Retriever-side</h3>
+<p><strong>4. Context Precision</strong> — are the <em>relevant</em> chunks ranked <strong>high</strong>?</p>
+<blockquote>
+<p>Uses Average Precision: relevant chunks at the top score higher than relevant chunks buried at position 10.</p>
+</blockquote>
+<p><strong>5. Context Recall</strong> — did retrieval find <strong>all</strong> the info needed?</p>
+<pre><code>Context Recall ≈ TP / (TP + FN)   (estimated against the ground truth)
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Component</th>
+<th>You want...</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Faithfulness</td>
+<td>Generator</td>
+<td>↑ high (≥ 0.9)</td>
+</tr>
+<tr>
+<td>Answer Relevancy</td>
+<td>Generator</td>
+<td>↑ high</td>
+</tr>
+<tr>
+<td>Context Precision</td>
+<td>Retriever</td>
+<td>↑ high</td>
+</tr>
+<tr>
+<td>Context Recall</td>
+<td>Retriever</td>
+<td>↑ high</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="note-09_rag_evaluation--step-1-build-a-test-set">🧪 Step 1: Build a test set</h2>
+<p>You need triplets of <strong><code>question</code> + <code>context</code> + <code>ground_truth</code></strong>. Generate them from your own documents:</p>
+<pre><code class="language-python">from ragas.testset.generator import TestsetGenerator
+from ragas.testset.evolutions import simple, reasoning, multi_context
+
+generator = TestsetGenerator.from_langchain(llm, embeddings)
+testset = generator.generate_with_langchain_docs(
+    docs,
+    test_size=50,
+    distributions={simple: 0.5, reasoning: 0.25, multi_context: 0.25},
+)
+testset.to_pandas()  # question, ground_truth, contexts...
+</code></pre>
+<p><strong>Rule of thumb:</strong> mirror your real traffic — include short factoid questions <em>and</em> multi-hop reasoning questions.</p>
+<h2 id="note-09_rag_evaluation--step-2-run-the-evaluation">🧪 Step 2: Run the evaluation</h2>
+<pre><code class="language-python">from datasets import Dataset
+from ragas import evaluate
+from ragas.metrics import (
+    faithfulness, answer_relevancy, context_precision, context_recall,
+)
+
+data = {
+    &quot;question&quot;: questions,          # list[str]
+    &quot;answer&quot;:   answers,            # what your pipeline produced
+    &quot;contexts&quot;: contexts,           # list[list[str]] actually fed to the LLM
+    &quot;ground_truth&quot;: truths,         # reference answers
+}
+result = evaluate(
+    Dataset.from_dict(data),
+    metrics=[faithfulness, answer_relevancy, context_precision, context_recall],
+)
+print(result)   # per-metric score 0..1
+</code></pre>
+<h2 id="note-09_rag_evaluation--step-3-llm-as-a-judge">🧪 Step 3: LLM-as-a-Judge</h2>
+<p>For open-ended answers, have a strong LLM score responses against a rubric (0–5) with the ground truth visible. Cheap, scalable, and correlates well with human review — but log a sample for human spot-checks.</p>
+<h2 id="note-09_rag_evaluation--step-4-ci-quality-gates-block-bad-releases">🧪 Step 4: CI quality gates (block bad releases)</h2>
+<p>Use <strong>promptfoo</strong> to fail a build when a prompt/model change regresses quality:</p>
+<pre><code class="language-yaml"># promptfooconfig.yaml
+prompts:
+  - &quot;Answer using ONLY the context: {{context}}\nQuestion: {{question}}&quot;
+providers: [gemini-3.5-flash]
+tests:
+  - vars: {context: &quot;Refunds within 30 days&quot;, question: &quot;refund policy?&quot;}
+    assert:
+      - type: llm-rubric
+        value: &quot;must state 30 days&quot;
+      - type: faithfulness
+        threshold: 0.85
+</code></pre>
+<p><strong>Golden rule of release engineering:</strong> a regression in faithfulness or retrieval hit-rate should <strong>block deployment</strong>, not just appear in a dashboard.</p>
+<hr />
+<h2 id="note-09_rag_evaluation--offline-vs-online-evaluation">🌐 Offline vs Online evaluation</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Offline (pre-release)</th>
+<th>Online (production)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>When</td>
+<td>Before shipping</td>
+<td>On live traffic</td>
+</tr>
+<tr>
+<td>Data</td>
+<td>Curated test set</td>
+<td>Real user queries</td>
+</tr>
+<tr>
+<td>Tools</td>
+<td>Ragas, promptfoo</td>
+<td>LangSmith, Langfuse, OpenTelemetry</td>
+</tr>
+<tr>
+<td>Catch</td>
+<td>Regressions</td>
+<td>Drift, staleness, bad edge cases</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Operational metrics to track live:</strong> retrieval hit-rate, chunk relevance, TTFT (time-to-first-token, target p90 &lt; 2s), cost-per-request, and thumbs-up/down feedback.</p>
+<hr />
+<h2 id="note-09_rag_evaluation--diagnosis-matrix-low-score-what-to-fix">🩺 Diagnosis matrix — low score → what to fix</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Low metric</th>
+<th>Likely cause</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Faithfulness</strong></td>
+<td>Noisy/irrelevant chunks in prompt</td>
+<td>Add reranking, lower top-k, strengthen prompt ("only from context")</td>
+</tr>
+<tr>
+<td><strong>Answer Relevancy</strong></td>
+<td>Answer drifts off-topic</td>
+<td>Better prompt, query rewriting</td>
+</tr>
+<tr>
+<td><strong>Context Precision</strong></td>
+<td>Relevant chunks ranked low</td>
+<td>Reranker, hybrid search, better chunking</td>
+</tr>
+<tr>
+<td><strong>Context Recall</strong></td>
+<td>Missing information</td>
+<td>Smaller chunks, metadata filters, more retrieval rounds</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>📊 <strong>Production insight:</strong> most RAG failures concentrate in <strong>retrieval and chunking</strong> (Splunk/Red Hat, 2026) — diagnose those <em>before</em> touching the prompt.</p>
+</blockquote>
+<hr />
+<h2 id="note-09_rag_evaluation--key-takeaways">✅ Key Takeaways</h2>
+<ul>
+<li>Score <strong>retriever and generator separately</strong> — that's the only way to debug.</li>
+<li>RAGAS: faithfulness + answer relevancy (generator), context precision + recall (retriever).</li>
+<li>Generate a test set from your own docs; don't hand-write 50 questions.</li>
+<li>Gate releases on metrics (promptfoo), monitor live traffic (LangSmith).</li>
+<li>Retrieval problems are the most common root cause — check there first.</li>
+</ul>
+<p>⬅️ Back to <a href="#note-08_building_your_first_rag_app">Building Your First RAG App</a> · ➡️ Next: <a href="#note-10_document_ingestion_and_parsing">Document Ingestion &amp; Parsing</a></p></div><p class="back"><a href="#top">↑ Back to top</a></p></section>
+<section class="note" id="note-10_document_ingestion_and_parsing"><div class="note-body"><h1 id="note-10_document_ingestion_and_parsing--module-10-document-ingestion-parsing-the-forgotten-half">📥 Module 10: Document Ingestion &amp; Parsing — The Forgotten Half</h1>
+<blockquote>
+<p><em>Source: Red Hat "Engineering RAG for the enterprise", Omdena "Document Parsing for RAG" (2026)</em></p>
+<p>💡 <em>"Poor parsing leads to weak chunking, low-quality embeddings, and inaccurate retrieval. Fixing parsing often delivers faster gains than changing models."</em></p>
+</blockquote>
+<p>Most RAG tutorials skip this stage and hand you a <code>.txt</code> file. Real applications start with <strong>messy enterprise documents</strong> — and that's where RAG pipelines actually fail.</p>
+<hr />
+<h2 id="note-10_document_ingestion_and_parsing--where-ingestion-fits">🔄 Where ingestion fits</h2>
+<pre><code>Raw documents → PARSE → clean/normalize → extract metadata → chunk → embed → store
+                ↑
+        (Module 4 starts here)
+</code></pre>
+<p>Chunking (Module 4) can only work with what parsing gives it. <strong>Garbage in = garbage out.</strong></p>
+<hr />
+<h2 id="note-10_document_ingestion_and_parsing--document-types-their-quirks">📄 Document types &amp; their quirks</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Challenge</th>
+<th>Approach</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Text-based PDF</strong></td>
+<td>Multi-column layouts, headers/footers, page numbers</td>
+<td>Layout-aware parser (preserve reading order)</td>
+</tr>
+<tr>
+<td><strong>Scanned PDF</strong></td>
+<td>No text layer — just pixels</td>
+<td><strong>OCR</strong> (Tesseract) or vision model</td>
+</tr>
+<tr>
+<td><strong>DOCX/PPTX</strong></td>
+<td>Styles, bullets, speaker notes</td>
+<td>Structure-aware parser (headings → hierarchy)</td>
+</tr>
+<tr>
+<td><strong>XLSX/CSV</strong></td>
+<td>Tables</td>
+<td>Extract tables separately (rows → markdown table)</td>
+</tr>
+<tr>
+<td><strong>HTML</strong></td>
+<td>Nav menus, ads, scripts</td>
+<td>HTML-to-markdown (drop boilerplate)</td>
+</tr>
+<tr>
+<td><strong>Images/figures</strong></td>
+<td>Charts with embedded data</td>
+<td>Caption with a vision model (multimodal)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Common parsing traps:</strong>
+- Reading order destroyed in multi-column PDFs (left column mixed with right)
+- Tables flattened into one long run-on sentence
+- Headers/footers repeated into every chunk
+- Scanned docs silently returning <em>empty</em> text — always verify extraction yield!</p>
+<hr />
+<h2 id="note-10_document_ingestion_and_parsing--tooling-2026-defaults">🛠️ Tooling (2026 defaults)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Best for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Docling</strong> (IBM, open-source; recommended by Red Hat)</td>
+<td>PDF/DOCX/PPTX/XLSX/HTML with layout + table structure</td>
+</tr>
+<tr>
+<td><strong>Unstructured</strong></td>
+<td>Enterprise pipelines, partition-by-element</td>
+</tr>
+<tr>
+<td><strong>LlamaParse</strong></td>
+<td>Hard PDFs, tables, fast managed API</td>
+</tr>
+<tr>
+<td><strong>PyPDF / pypdfium2</strong></td>
+<td>Simple text-based PDFs (cheap, no structure)</td>
+</tr>
+<tr>
+<td><strong>Tesseract</strong></td>
+<td>OCR for scans</td>
+</tr>
+<tr>
+<td><strong>Vision LLM</strong></td>
+<td>Figures, charts, handwritten docs</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>Rule:</strong> <em>one parser does not fit all.</em> A multi-column PDF, a scanned invoice, and a slide deck each need different treatment.</p>
+</blockquote>
+<hr />
+<h2 id="note-10_document_ingestion_and_parsing--metadata-extraction-do-this-before-chunking">🏷️ Metadata extraction (do this before chunking)</h2>
+<p>Every chunk should carry metadata for <strong>filtering, citation, and audit</strong>:</p>
+<pre><code class="language-json">{
+  &quot;source&quot;: &quot;policies/refund-policy.pdf&quot;,
+  &quot;page&quot;: 12,
+  &quot;section&quot;: &quot;3.2 Refund Window&quot;,
+  &quot;doc_date&quot;: &quot;2026-01-15&quot;,
+  &quot;category&quot;: &quot;refund&quot;
+}
+</code></pre>
+<p>Why it matters:
+- <strong>Filtering</strong> — "only answer from docs dated after 2025"
+- <strong>Citations</strong> — "…refund policy (p.12)" in the final answer
+- <strong>Deletion/access control</strong> — find and purge a user's data (see OWASP, Module 11 territory)</p>
+<hr />
+<h2 id="note-10_document_ingestion_and_parsing--code-parse-chunk-store-a-complete-ingestion-snippet">💻 Code: Parse → Chunk → Store (a complete ingestion snippet)</h2>
+<pre><code class="language-python"># pip install docling langchain-text-splitters
+from docling.document_converter import DocumentConverter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+converter = DocumentConverter()
+splitter = RecursiveCharacterTextSplitter(chunk_size=400, chunk_overlap=40)
+
+def ingest(pdf_path: str):
+    # 1. PARSE — layout-aware, preserves headings and tables
+    result = converter.convert(pdf_path)
+    text = result.document.export_to_markdown()
+
+    # sanity check: empty extraction = scanned PDF → fall back to OCR
+    assert len(text.strip()) &gt; 100, f&quot;Parsing extracted nothing from {pdf_path}&quot;
+
+    # 2. CHUNK
+    chunks = splitter.split_text(text)
+
+    # 3. ATTACH METADATA (source, page, section)
+    return [
+        {&quot;text&quot;: c, &quot;metadata&quot;: {&quot;source&quot;: pdf_path, &quot;doc_date&quot;: &quot;2026-01-15&quot;}}
+        for c in chunks
+    ]
+
+documents = ingest(&quot;policies/refund-policy.pdf&quot;)
+print(f&quot;Parsed {len(documents)} chunks&quot;)
+
+# 4. EMBED + STORE  →  see Module 5 (Vector Databases)
+</code></pre>
+<hr />
+<h2 id="note-10_document_ingestion_and_parsing--storage-layout-production-pattern">🗃️ Storage layout (production pattern)</h2>
+<p>Keep three things <strong>separate</strong> (Splunk/Red Hat advice) so a re-index never forces a re-encode:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Data</th>
+<th>Store</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Raw documents</td>
+<td>Object storage (S3 / Blob)</td>
+</tr>
+<tr>
+<td>Chunks + embeddings</td>
+<td>Vector DB (Module 5)</td>
+</tr>
+<tr>
+<td>Metadata / chat history</td>
+<td>Postgres (or other relational)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="note-10_document_ingestion_and_parsing--incremental-indexing">♻️ Incremental indexing</h3>
+<p>Re-embedding your whole corpus on every change is slow and wasteful. Production systems:
+1. <strong>Hash</strong> each document's content.
+2. Only process documents whose hash <strong>changed</strong>.
+3. <strong>Propagate deletions</strong> — removing a file from the source must remove its chunks from the index (a classic OWASP compliance failure).</p>
+<hr />
+<h2 id="note-10_document_ingestion_and_parsing--key-takeaways">✅ Key Takeaways</h2>
+<ul>
+<li>Parsing quality &gt; model choice; fix it first.</li>
+<li>Layout-aware parsing for PDFs; OCR for scans; vision models for figures.</li>
+<li>Attach metadata (source/page/section/date) <strong>before</strong> chunking.</li>
+<li>Separate raw docs, vectors, and metadata — enables incremental updates.</li>
+<li>Always verify extraction yield (empty text = silent failure).</li>
+</ul>
+<p>⬅️ Back to <a href="#note-09_rag_evaluation">RAG Evaluation</a> · 🏠 <a href="#notes-guide">Notes Index</a></p></div><p class="back"><a href="#top">↑ Back to top</a></p></section>
+
+    <footer>Generated from <code>notes/</code> and <code>src/pipeline/</code> by <code>scripts/build_site.py</code>.</footer>
+  </main>
+</div>
+<script>
+(function () {
+  var root = document.documentElement;
+  try { var saved = localStorage.getItem("theme"); if (saved) root.setAttribute("data-theme", saved); } catch (e) {}
+  document.getElementById("theme-toggle").addEventListener("click", function () {
+    var current = root.getAttribute("data-theme") ||
+      (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    var next = current === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("theme", next); } catch (e) {}
+  });
+
+  var sidebar = document.getElementById("sidebar"), btn = document.getElementById("menu-btn");
+  btn.addEventListener("click", function () {
+    var open = sidebar.classList.toggle("open");
+    btn.setAttribute("aria-expanded", open);
+  });
+  sidebar.addEventListener("click", function (e) {
+    if (e.target.closest("nav a")) { sidebar.classList.remove("open"); btn.setAttribute("aria-expanded", false); }
+  });
+
+  // Highlight the sidebar link for the section currently in view.
+  var links = Array.prototype.slice.call(document.querySelectorAll(".sidebar nav a"));
+  var targets = links.map(function (a) { return document.querySelector(a.getAttribute("href")); });
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      var i = targets.indexOf(entry.target);
+      links.forEach(function (l, j) { l.classList.toggle("active", j === i); });
+    });
+  }, { rootMargin: "0px 0px -70% 0px" });
+  targets.forEach(function (t) { if (t) observer.observe(t); });
+})();
+</script>
+</body>
+</html>

@@ -63,6 +63,11 @@ rag-pipeline/
 ├── .gitignore
 ├── requirements.txt
 ├── README.md
+├── docs/
+│   └── index.html            # generated repo guide + rendered notes
+├── notes/                    # study notes 00–10 (Markdown)
+├── scripts/
+│   └── build_site.py         # builds docs/index.html from notes/ + src/
 ├── data/
 │   └── raw/                  # 10-lesson RAG corpus (committed)
 └── src/
@@ -78,6 +83,16 @@ rag-pipeline/
 ```
 
 Generated artifacts (`.venv/`, `chroma_gemini_db/`, `__pycache__/`) are gitignored and not part of the source tree.
+
+## Browsable docs
+
+`docs/index.html` is a single self-contained page that explains this repo and renders every study note in `notes/`. Open it directly in a browser (no server needed), or serve `docs/` with GitHub Pages.
+
+Regenerate it after editing `notes/` or `src/pipeline/`:
+
+```bash
+python scripts/build_site.py
+```
 
 ## Configuration
 

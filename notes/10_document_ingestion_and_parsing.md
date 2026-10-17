@@ -71,7 +71,7 @@ Every chunk should carry metadata for **filtering, citation, and audit**:
 Why it matters:
 - **Filtering** — "only answer from docs dated after 2025"
 - **Citations** — "…refund policy (p.12)" in the final answer
-- **Deletion/access control** — find and purge a user's data (see OWASP, Module 11 territory)
+- **Deletion/access control** — find and purge a user's data (see [Module 11](./11_production_rag.md))
 
 ---
 
@@ -126,6 +126,45 @@ Re-embedding your whole corpus on every change is slow and wasteful. Production 
 2. Only process documents whose hash **changed**.
 3. **Propagate deletions** — removing a file from the source must remove its chunks from the index (a classic OWASP compliance failure).
 
+### 💻 Code: incremental indexing with content hashes (Chroma)
+
+```python
+import hashlib
+from pathlib import Path
+
+def file_hash(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+def sync_file(store, path: Path, splitter):
+    """Re-index a file only if its content changed; replace its old chunks."""
+    text = path.read_text(encoding="utf-8")
+    new_hash = file_hash(text)
+
+    existing = store.get(where={"source": str(path)})          # chunks already indexed for this file
+    if existing["ids"] and existing["metadatas"][0].get("doc_hash") == new_hash:
+        return "unchanged"                                       # skip: no embedding cost
+
+    if existing["ids"]:
+        store.delete(ids=existing["ids"])                        # drop stale chunks first
+
+    chunks = splitter.split_text(text)
+    store.add_texts(
+        texts=chunks,
+        metadatas=[{"source": str(path), "doc_hash": new_hash, "chunk": i} for i in range(len(chunks))],
+        ids=[f"{path.name}::{i}" for i in range(len(chunks))],  # deterministic IDs
+    )
+    return f"indexed {len(chunks)} chunks"
+
+def remove_deleted(store, live_paths: set[str]):
+    """Delete chunks whose source file no longer exists."""
+    indexed = store.get(include=["metadatas"])
+    stale = [i for i, m in zip(indexed["ids"], indexed["metadatas"]) if m["source"] not in live_paths]
+    if stale:
+        store.delete(ids=stale)
+```
+
+Run `sync_file` for every file, then `remove_deleted` with the current file list. Unchanged documents cost nothing; edited ones are replaced cleanly; deleted ones disappear from search.
+
 ---
 
 ## ✅ Key Takeaways
@@ -135,5 +174,39 @@ Re-embedding your whole corpus on every change is slow and wasteful. Production 
 - Attach metadata (source/page/section/date) **before** chunking.
 - Separate raw docs, vectors, and metadata — enables incremental updates.
 - Always verify extraction yield (empty text = silent failure).
+- Hash content and use deterministic chunk IDs so re-indexing is incremental and never duplicates.
 
-⬅️ Back to [RAG Evaluation](./09_rag_evaluation.md) · 🏠 [Notes Index](./README.md)
+---
+
+## 🔗 In this repo
+
+- [`ingest.py`](https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/ingest.py) handles the simplest case: clean `.txt` lessons read with `Path.read_text()`, each tagged with `source` and `filename` metadata.
+- ⚠️ It has no IDs or hashes, so re-running it duplicates every chunk (README known issue #2). 🧪 **Exercise:** replace `Chroma.from_documents(...)` with the `sync_file()` / `remove_deleted()` pattern above, then run ingestion twice and confirm the chunk count stays the same.
+- Read the matching lesson: [`data/raw/02_data_ingestion.txt`](https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/data/raw/02_data_ingestion.txt).
+
+---
+
+## 🧠 Self-check
+
+<details markdown="1">
+<summary>1. A scanned PDF ingests without errors but is never retrieved. What probably happened?</summary>
+
+It has no text layer, so the parser extracted empty or near-empty text and nothing meaningful was embedded. Check extraction yield and route scans through OCR or a vision model.
+
+</details>
+
+<details markdown="1">
+<summary>2. Why attach metadata before chunking rather than after?</summary>
+
+Information like page number and section heading is known during parsing and lost once text is split. Attaching it first means every chunk inherits accurate metadata for filtering and citations.
+
+</details>
+
+<details markdown="1">
+<summary>3. A user asks you to delete their uploaded file. What must happen in the vector store?</summary>
+
+Every chunk derived from that file must be deleted too, found by its `source` metadata. Otherwise the content can still be retrieved and quoted, which is both a privacy and a compliance failure.
+
+</details>
+
+⬅️ Back to [RAG Evaluation](./09_rag_evaluation.md) · ➡️ Next: [Production RAG](./11_production_rag.md) · 🏠 [Notes Index](./README.md)

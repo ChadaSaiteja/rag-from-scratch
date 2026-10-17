@@ -6,6 +6,7 @@ structured data, which is what search engines rank:
   /                     landing page + learning path
   /learn/               how to use the notes (notes/README.md)
   /learn/<module>/      one page per study note
+  /learn/glossary/, /learn/faq/  reference pages (FAQ gets FAQPage structured data)
   /implementation/      how this repo implements the pipeline, with source
   /lessons/             the plain-text corpus the pipeline retrieves from
   /lessons/<lesson>/
@@ -157,16 +158,20 @@ def load_notes():
         return {"path": path, "stem": path.stem, "text": text, "h1": h1, "title": clean_title(h1),
                 "url": url_path, "description": truncate(first_paragraph(text))}
 
-    modules = []
+    modules, extras = [], []
     for p in sorted(NOTES_DIR.glob("*.md")):
         if p.stem.upper() == "README":
             continue
         n = load(p, f"learn/{slug_for(p.stem)}/")
-        n["num"] = p.stem[:2]
-        modules.append(n)
+        if p.stem[:2].isdigit():
+            n["num"] = p.stem[:2]
+            modules.append(n)
+        else:
+            n["num"] = {"glossary": "📖", "faq": "❓"}.get(p.stem, "•")
+            extras.append(n)
     readme = NOTES_DIR / "README.md"
     guide = load(readme, "learn/") if readme.exists() else None
-    return guide, modules
+    return guide, modules, extras
 
 
 def load_lessons():
@@ -182,19 +187,45 @@ def load_lessons():
     return lessons
 
 
+LIST_ITEM = re.compile(r"^\s*(?:[-*+]|\d+\.)\s")
+
+
+def space_lists(text):
+    """Insert a blank line before a list that directly follows a paragraph line.
+
+    GitHub renders such lists, but Python-Markdown needs the blank line, so the notes
+    would otherwise show "- item" as plain text on the site.
+    """
+    out, in_fence = [], False
+    for line in text.splitlines():
+        if line.lstrip().startswith("```"):
+            in_fence = not in_fence
+        elif not in_fence and LIST_ITEM.match(line) and out:
+            prev = out[-1]
+            is_paragraph = (prev.strip() and not LIST_ITEM.match(prev)
+                            and not prev.lstrip().startswith(("|", ">", "<"))
+                            and not prev.startswith((" ", "\t")))
+            if is_paragraph:
+                out.append("")
+        out.append(line)
+    return "\n".join(out) + "\n"
+
+
 def render_markdown(note, url_for_stem, rel):
     def slugify(value, separator):
         slug = re.sub(r"[^\w\s-]", "", value, flags=re.UNICODE).strip().lower()
         return re.sub(r"[\s_-]+", separator, slug)
 
-    md = markdown.Markdown(extensions=["tables", "fenced_code", "sane_lists", "toc"],
+    md = markdown.Markdown(extensions=["tables", "fenced_code", "sane_lists", "toc", "md_in_html"],
                            extension_configs={"toc": {"slugify": slugify}})
-    body = md.convert(note["text"])
+    body = md.convert(space_lists(note["text"]))
 
     def repl(m):
         target = url_for_stem.get(m.group(1))
         return f'href="{rel}{target}{m.group(2) or ""}"' if target is not None else m.group(0)
     body = re.sub(r'href="(?:\./)?([\w-]+)\.md(#[^"]*)?"', repl, body)
+    # Links that leave notes/ (../README.md, ../src/...) point at the repository on GitHub.
+    body = re.sub(r'href="\.\./([^"]+)"', lambda m: f'href="{REPO_URL}/blob/master/{m.group(1)}"', body)
     body = body.replace("<table>", '<div class="table-wrap"><table>').replace("</table>", "</table></div>")
     return body
 
@@ -234,7 +265,8 @@ def page(*, path, title, description, body, rel, og_type="website", ld=(), activ
     canonical = SITE_URL + path
     verify = (f'<meta name="google-site-verification" content="{html.escape(GOOGLE_SITE_VERIFICATION)}">\n'
               if GOOGLE_SITE_VERIFICATION else "")
-    nav = [("", "Home"), ("learn/", "Learn"), ("implementation/", "Implementation"), ("lessons/", "Lessons")]
+    nav = [("", "Home"), ("learn/", "Learn"), ("implementation/", "Implementation"), ("lessons/", "Lessons"),
+           ("learn/faq/", "FAQ")]
     current = ' aria-current="page"'
     nav_html = "".join(
         f'<a href="{rel}{href}"{current if active == href else ""}>{label}</a>' for href, label in nav
@@ -285,16 +317,19 @@ def page(*, path, title, description, body, rel, og_type="website", ld=(), activ
 """
 
 
-def learn_sidebar(guide, modules, rel, current_url):
+def learn_sidebar(guide, modules, extras, rel, current_url):
     def item(url, num, label):
         cur = ' aria-current="page"' if url == current_url else ""
         return f'<li><a href="{rel}{url}"{cur}><span class="num">{num}</span>{html.escape(label)}</a></li>'
     items = [item(guide["url"], "★", "How to use these notes")] if guide else []
     items += [item(m["url"], m["num"], m["title"]) for m in modules]
+    refs = "".join(item(x["url"], x["num"], x["title"]) for x in extras)
+    ref_block = f'<p class="sidebar-label">Reference</p><ul>{refs}</ul>' if refs else ""
     return f"""<aside class="sidebar" aria-label="Course modules">
   <details class="sidebar-box" open>
     <summary>Course modules</summary>
     <ul>{"".join(items)}</ul>
+    {ref_block}
   </details>
 </aside>"""
 
@@ -317,6 +352,29 @@ def pager(prev, nxt, rel):
     return f'<nav class="pager" aria-label="Module navigation">{left}{right}</nav>'
 
 
+def faq_ld(note):
+    """FAQPage data from '### Question' headings and the text under each."""
+    entries = []
+    for block in re.split(r"^###\s+", note["text"], flags=re.MULTILINE)[1:]:
+        question, _, answer = block.partition("\n")
+        answer = strip_markdown(answer.split("\n#", 1)[0])
+        if question.strip() and answer:
+            entries.append({"@type": "Question", "name": question.strip(),
+                            "acceptedAnswer": {"@type": "Answer", "text": answer}})
+    return {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": entries}
+
+
+def glossary_ld(note):
+    terms = []
+    for block in re.split(r"^###\s+", note["text"], flags=re.MULTILINE)[1:]:
+        term, _, definition = block.partition("\n")
+        definition = strip_markdown(definition.split("→")[0])
+        terms.append({"@type": "DefinedTerm", "name": term.strip(), "description": definition,
+                      "inDefinedTermSet": SITE_URL + note["url"]})
+    return {"@context": "https://schema.org", "@type": "DefinedTermSet", "name": "RAG Glossary",
+            "url": SITE_URL + note["url"], "hasDefinedTerm": terms}
+
+
 def course_ld(modules):
     return {
         "@context": "https://schema.org", "@type": "Course",
@@ -335,12 +393,17 @@ def course_ld(modules):
 
 # ---------------------------------------------------------------- pages
 
-def build_home(guide, modules, lessons):
+def build_home(guide, modules, extras, lessons):
     rel = ""
     cards = "".join(
         f'<a class="module-card" href="{m["url"]}"><span class="num">{m["num"]}</span>'
         f'<h3>{html.escape(m["title"])}</h3><p>{html.escape(m["description"])}</p></a>'
         for m in modules
+    )
+    ref_cards = "".join(
+        f'<a class="module-card" href="{x["url"]}"><span class="num">{x["num"]}</span>'
+        f'<h3>{html.escape(x["title"])}</h3><p>{html.escape(x["description"])}</p></a>'
+        for x in extras
     )
     body = f"""
 <section class="hero">
@@ -378,6 +441,11 @@ def build_home(guide, modules, lessons):
   <div class="module-grid">{cards}</div>
 </section>
 
+<section>
+  <h2>Quick reference</h2>
+  <div class="module-grid">{ref_cards}</div>
+</section>
+
 <section class="split">
   <div>
     <h2>Then see it implemented</h2>
@@ -400,7 +468,7 @@ def build_home(guide, modules, lessons):
     return page(path="", title=HOME_TITLE, description=HOME_DESCRIPTION, body=body, rel=rel, ld=ld)
 
 
-def build_note_page(note, guide, modules, url_for_stem, prev, nxt, is_guide=False):
+def build_note_page(note, guide, modules, extras, url_for_stem, prev, nxt, is_guide=False):
     depth = note["url"].count("/")
     rel = "../" * depth
     crumbs = [("Home", ""), ("Learn", "learn/")]
@@ -419,6 +487,10 @@ def build_note_page(note, guide, modules, url_for_stem, prev, nxt, is_guide=Fals
     description = (truncate("How to work through the RAG from Scratch course: reading order, study loop, "
                             "paths for beginners and practitioners, and the full module index.")
                    if is_guide else note["description"])
+    if note["stem"] == "faq":
+        title = f"RAG FAQ: Common Questions Answered | {SITE_NAME}"
+    elif note["stem"] == "glossary":
+        title = f"RAG Glossary: Key Terms Explained Simply | {SITE_NAME}"
     article_ld = {
         "@context": "https://schema.org", "@type": "LearningResource" if is_guide else "TechArticle",
         "headline": title.split(" | ")[0], "name": title.split(" | ")[0], "description": description,
@@ -426,9 +498,14 @@ def build_note_page(note, guide, modules, url_for_stem, prev, nxt, is_guide=Fals
         "dateModified": git_lastmod(note["path"]), "educationalLevel": "Beginner",
         "isPartOf": {"@type": "Course", "name": SITE_NAME, "url": SITE_URL},
     }
+    lds = [article_ld, breadcrumb_ld(crumbs)]
+    if note["stem"] == "faq":
+        lds.append(faq_ld(note))
+    elif note["stem"] == "glossary":
+        lds.append(glossary_ld(note))
     return page(path=note["url"], title=title, description=description, body=body, rel=rel,
-                og_type="article", ld=[article_ld, breadcrumb_ld(crumbs)], active="learn/",
-                sidebar=learn_sidebar(guide, modules, rel, note["url"]))
+                og_type="article", ld=lds, active="learn/faq/" if note["stem"] == "faq" else "learn/",
+                sidebar=learn_sidebar(guide, modules, extras, rel, note["url"]))
 
 
 def build_implementation():
@@ -688,6 +765,13 @@ main > section > h2 { font-size: 1.5rem; }
 details summary { cursor: pointer; color: var(--accent); font-size: 0.9rem; }
 details pre { max-height: 520px; }
 
+.prose details { background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  padding: 10px 14px; margin: 10px 0; }
+.prose details summary { color: var(--text); font-weight: 600; font-size: 0.97rem; }
+.prose details[open] summary { margin-bottom: 6px; }
+.prose details > p:last-child { margin-bottom: 0; }
+.sidebar-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted);
+  font-weight: 600; margin: 18px 8px 0; }
 .pager { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; max-width: var(--content-w); margin-top: 48px; }
 .pager-link { display: block; border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px;
   background: var(--surface); text-decoration: none; color: var(--text); font-weight: 600; }
@@ -742,25 +826,28 @@ def write(rel_path, content):
 def build():
     if OUT_DIR.exists():
         shutil.rmtree(OUT_DIR)
-    guide, modules = load_notes()
+    guide, modules, extras = load_notes()
     lessons = load_lessons()
 
-    url_for_stem = {m["stem"]: m["url"] for m in modules}
+    url_for_stem = {m["stem"]: m["url"] for m in modules + extras}
     if guide:
         url_for_stem["README"] = guide["url"]
 
     sitemap = [("", date.today().isoformat(), "1.0")]
-    write("index.html", build_home(guide, modules, lessons))
+    write("index.html", build_home(guide, modules, extras, lessons))
 
     if guide:
-        write("learn/index.html", build_note_page(guide, guide, modules, url_for_stem, None,
+        write("learn/index.html", build_note_page(guide, guide, modules, extras, url_for_stem, None,
                                                   modules[0] if modules else None, is_guide=True))
         sitemap.append((guide["url"], git_lastmod(guide["path"]), "0.9"))
     for i, m in enumerate(modules):
         prev = modules[i - 1] if i > 0 else guide
         nxt = modules[i + 1] if i + 1 < len(modules) else None
-        write(m["url"] + "index.html", build_note_page(m, guide, modules, url_for_stem, prev, nxt))
+        write(m["url"] + "index.html", build_note_page(m, guide, modules, extras, url_for_stem, prev, nxt))
         sitemap.append((m["url"], git_lastmod(m["path"]), "0.8"))
+    for x in extras:
+        write(x["url"] + "index.html", build_note_page(x, guide, modules, extras, url_for_stem, None, None))
+        sitemap.append((x["url"], git_lastmod(x["path"]), "0.8"))
 
     write("implementation/index.html", build_implementation())
     sitemap.append(("implementation/", max(git_lastmod(PIPELINE_DIR / f) for f, _, _ in PIPELINE_FILES), "0.8"))
@@ -786,7 +873,7 @@ def build():
     write("sitemap.xml", f'<?xml version="1.0" encoding="UTF-8"?>\n'
                          f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}\n</urlset>\n')
     print(f"Built {len(sitemap)} pages into {OUT_DIR.relative_to(ROOT)}/ "
-          f"({len(modules)} modules, {len(lessons)} lessons)")
+          f"({len(modules)} modules, {len(extras)} reference pages, {len(lessons)} lessons)")
 
 
 if __name__ == "__main__":

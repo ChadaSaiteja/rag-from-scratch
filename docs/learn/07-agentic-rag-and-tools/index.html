@@ -25,23 +25,21 @@
 <a class="skip" href="#content">Skip to content</a>
 <header class="topbar">
   <a class="brand" href="../../">RAG <span>from Scratch</span></a>
-  <nav class="topnav" aria-label="Main"><a href="../../">Home</a><a href="../../learn/" aria-current="page">Learn</a><a href="../../implementation/">Implementation</a><a href="../../lessons/">Lessons</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <nav class="topnav" aria-label="Main"><a href="../../">Home</a><a href="../../learn/" aria-current="page">Learn</a><a href="../../implementation/">Implementation</a><a href="../../lessons/">Lessons</a><a href="../../learn/faq/">FAQ</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
   <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
 </header>
 <div class="layout with-sidebar">
 <aside class="sidebar" aria-label="Course modules">
   <details class="sidebar-box" open>
     <summary>Course modules</summary>
-    <ul><li><a href="../../learn/"><span class="num">★</span>How to use these notes</a></li><li><a href="../../learn/00-introduction-to-rag/"><span class="num">00</span>Introduction to RAG</a></li><li><a href="../../learn/01-foundations-transformers/"><span class="num">01</span>Foundations — Transformers, Tokens &amp; LLM Settings</a></li><li><a href="../../learn/02-embeddings-and-vectors/"><span class="num">02</span>Embeddings — Turning Words into Numbers</a></li><li><a href="../../learn/03-prompting-techniques/"><span class="num">03</span>Prompting Techniques — Talking to the LLM</a></li><li><a href="../../learn/04-chunking-strategies/"><span class="num">04</span>Chunking Strategies — Breaking Documents into Bites</a></li><li><a href="../../learn/05-vector-databases/"><span class="num">05</span>Vector Databases — Your AI&#x27;s Memory</a></li><li><a href="../../learn/06-retrieval-mechanics/"><span class="num">06</span>Retrieval Mechanics — Finding the Needle</a></li><li><a href="../../learn/07-agentic-rag-and-tools/" aria-current="page"><span class="num">07</span>Agentic RAG &amp; Tool Calling</a></li><li><a href="../../learn/08-building-your-first-rag-app/"><span class="num">08</span>Build Your First RAG Application</a></li><li><a href="../../learn/09-rag-evaluation/"><span class="num">09</span>Evaluating Your RAG Application</a></li><li><a href="../../learn/10-document-ingestion-and-parsing/"><span class="num">10</span>Document Ingestion &amp; Parsing — The Forgotten Half</a></li></ul>
+    <ul><li><a href="../../learn/"><span class="num">★</span>How to use these notes</a></li><li><a href="../../learn/00-introduction-to-rag/"><span class="num">00</span>Introduction to RAG</a></li><li><a href="../../learn/01-foundations-transformers/"><span class="num">01</span>Foundations — Transformers, Tokens &amp; LLM Settings</a></li><li><a href="../../learn/02-embeddings-and-vectors/"><span class="num">02</span>Embeddings — Turning Words into Numbers</a></li><li><a href="../../learn/03-prompting-techniques/"><span class="num">03</span>Prompting Techniques — Talking to the LLM</a></li><li><a href="../../learn/04-chunking-strategies/"><span class="num">04</span>Chunking Strategies — Breaking Documents into Bites</a></li><li><a href="../../learn/05-vector-databases/"><span class="num">05</span>Vector Databases — Your AI&#x27;s Memory</a></li><li><a href="../../learn/06-retrieval-mechanics/"><span class="num">06</span>Retrieval Mechanics — Finding the Needle</a></li><li><a href="../../learn/07-agentic-rag-and-tools/" aria-current="page"><span class="num">07</span>Agentic RAG &amp; Tool Calling</a></li><li><a href="../../learn/08-building-your-first-rag-app/"><span class="num">08</span>Build Your First RAG Application</a></li><li><a href="../../learn/09-rag-evaluation/"><span class="num">09</span>Evaluating Your RAG Application</a></li><li><a href="../../learn/10-document-ingestion-and-parsing/"><span class="num">10</span>Document Ingestion &amp; Parsing — The Forgotten Half</a></li><li><a href="../../learn/11-production-rag/"><span class="num">11</span>Production RAG — Security, Cost, Latency &amp; Monitoring</a></li></ul>
+    <p class="sidebar-label">Reference</p><ul><li><a href="../../learn/faq/"><span class="num">❓</span>RAG FAQ: Answers to Common Questions</a></li><li><a href="../../learn/glossary/"><span class="num">📖</span>RAG Glossary</a></li></ul>
   </details>
 </aside>
 <main id="content">
 <nav class="crumbs" aria-label="Breadcrumb"><a href="../../">Home</a> / <a href="../../learn/">Learn</a> / <span aria-current="page">Agentic RAG &amp; Tool Calling</span></nav>
 <article class="prose">
 <h1 id="module-7-agentic-rag-tool-calling">🤖 Module 7: Agentic RAG &amp; Tool Calling</h1>
-<blockquote>
-<p><em>Source: <code>AI/day4/toolcalling.md</code> + <code>AI/day4/toolcalling.py</code></em></p>
-</blockquote>
 <p><strong>Tool calling</strong> lets an LLM interact with external tools and functions in a controlled, predictable way. Combined with <strong>structured output</strong>, it turns a chatbot into an <strong>agent</strong> — the foundation of <em>Agentic RAG</em>.</p>
 <hr />
 <h2 id="what-is-structured-output">📦 What is Structured Output?</h2>
@@ -74,7 +72,7 @@ Final Response to User
 <li><strong>RAG-specific:</strong> query a vector store, fetch a document by ID, run a SQL report, call a calculator, hit a live API</li>
 </ul>
 <hr />
-<h2 id="code-tool-calling-with-gemini-from-day4toolcallingpy">💻 Code: Tool Calling with Gemini (from <code>day4/toolcalling.py</code>)</h2>
+<h2 id="code-tool-calling-with-gemini">💻 Code: Tool Calling with Gemini</h2>
 <pre><code class="language-python">import os, json
 from dotenv import load_dotenv
 load_dotenv()
@@ -154,6 +152,52 @@ print(final_result.output_text)
 </tbody>
 </table></div>
 <p><strong>When to use agentic RAG:</strong> multi-hop questions ("compare policy X and Y"), mixed data sources (DB + docs + API), and tasks needing computation or live data.</p>
+<h3 id="the-agentic-rag-loop-retrieval-as-a-tool">🔁 The agentic RAG loop (retrieval as a tool)</h3>
+<p>The core idea fits in a few lines. Retrieval becomes one tool the model can call, possibly several times, and your code enforces the limits:</p>
+<pre><code class="language-python"># Pseudocode: works the same with any tool-calling LLM API
+tools = [search_docs, get_order_status]          # search_docs wraps your retriever
+messages = [system_prompt, user_question]
+
+for step in range(MAX_STEPS):                    # hard cap: agents can loop forever
+    reply = llm(messages, tools=tools)
+    if reply.is_final_answer:
+        return reply.text
+    for call in reply.tool_calls:
+        if call.name not in ALLOWED_TOOLS:       # never execute what you didn't declare
+            result = &quot;error: unknown tool&quot;
+        else:
+            result = run_tool(call.name, call.arguments)
+        messages.append(tool_result(call, result))
+
+return &quot;I couldn't finish this request. Please rephrase or contact support.&quot;
+</code></pre>
+<p><strong>Guardrails every agent needs:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Guardrail</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Maximum steps / time budget</td>
+<td>Stops infinite tool loops and runaway costs</td>
+</tr>
+<tr>
+<td>Allow-list of tools + argument validation</td>
+<td>The model proposes; your code decides what actually runs</td>
+</tr>
+<tr>
+<td>Read-only tools by default; confirmation for actions</td>
+<td>A prompt-injected document must not be able to send emails or delete data</td>
+</tr>
+<tr>
+<td>Log every tool call and result</td>
+<td>Agents are hard to debug without a trace</td>
+</tr>
+</tbody>
+</table></div>
 <blockquote>
 <p>⚠️ <strong>Beginner trap:</strong> agentic ≠ better. It adds latency, cost, and failure modes. Start with classic RAG; add agents only when you <em>need</em> decisions, not just retrieval.</p>
 </blockquote>
@@ -164,8 +208,26 @@ print(final_result.output_text)
 <li>Declare tools with clear names, descriptions, and JSON schemas.</li>
 <li>Agentic RAG = LLM controls the retrieve/reason loop.</li>
 <li>Use ReAct-style reasoning for multi-step tasks.</li>
+<li>Cap steps, allow-list tools, and keep side-effecting tools behind confirmation.</li>
 </ul>
-<p>➡️ Next: <a href="../../learn/08-building-your-first-rag-app/">Build Your First RAG App — the full project</a></p>
+<hr />
+<h2 id="in-this-repo">🔗 In this repo</h2>
+<p>The pipeline here is <strong>classic RAG</strong>: every question goes through <code>hybrid_search()</code> then <code>call_google_api()</code>, always exactly once. That's the right starting point. 🧪 <strong>Exercise:</strong> wrap <code>hybrid_search()</code> as a <code>search_docs(query)</code> tool, let Gemini decide when to call it (using the tool-calling code above), cap it at 3 steps, and compare answers on multi-part questions such as <em>"How do chunking and retrieval affect each other?"</em></p>
+<hr />
+<h2 id="self-check">🧠 Self-check</h2>
+<details>
+<summary>1. In tool calling, who actually executes the function?</summary>
+<p>Your application code. The LLM only returns a structured request (tool name + arguments); you validate it, run it, and send the result back.</p>
+</details>
+<details>
+<summary>2. Give a question where agentic RAG clearly beats a single retrieval pass.</summary>
+<p>Multi-hop questions such as "Which of our plans includes the feature that the March release notes say was deprecated?" One search finds the deprecated feature, a second finds which plans include it.</p>
+</details>
+<details>
+<summary>3. Why should an agent's tools be read-only by default?</summary>
+<p>Retrieved content can contain prompt injections. If the model can be tricked, read-only tools limit the damage to a wrong answer instead of an unwanted action like sending a message or deleting a record.</p>
+</details>
+<p>➡️ Next: <a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/../learn/08-building-your-first-rag-app/">Build Your First RAG App — the full project</a></p>
 </article>
 <nav class="pager" aria-label="Module navigation"><a class="pager-link" href="../../learn/06-retrieval-mechanics/" rel="prev"><small>Previous</small>Retrieval Mechanics — Finding the Needle</a><a class="pager-link next" href="../../learn/08-building-your-first-rag-app/" rel="next"><small>Next</small>Build Your First RAG Application</a></nav>
 <p class="edit"><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/notes/07_agentic_rag_and_tools.md" rel="noopener">View this page’s source on GitHub</a></p>

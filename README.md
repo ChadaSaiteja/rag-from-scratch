@@ -65,7 +65,7 @@ rag-pipeline/
 ├── README.md
 ├── docs/
 │   └── ...                   # generated GitHub Pages site (do not edit by hand)
-├── notes/                    # study notes 00–10 (Markdown)
+├── notes/                    # study notes 00–11 + glossary + FAQ (Markdown)
 ├── scripts/
 │   └── build_site.py         # builds docs/ from notes/, data/raw/ and src/
 ├── data/

@@ -25,23 +25,21 @@
 <a class="skip" href="#content">Skip to content</a>
 <header class="topbar">
   <a class="brand" href="../../">RAG <span>from Scratch</span></a>
-  <nav class="topnav" aria-label="Main"><a href="../../">Home</a><a href="../../learn/" aria-current="page">Learn</a><a href="../../implementation/">Implementation</a><a href="../../lessons/">Lessons</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <nav class="topnav" aria-label="Main"><a href="../../">Home</a><a href="../../learn/" aria-current="page">Learn</a><a href="../../implementation/">Implementation</a><a href="../../lessons/">Lessons</a><a href="../../learn/faq/">FAQ</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
   <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
 </header>
 <div class="layout with-sidebar">
 <aside class="sidebar" aria-label="Course modules">
   <details class="sidebar-box" open>
     <summary>Course modules</summary>
-    <ul><li><a href="../../learn/"><span class="num">★</span>How to use these notes</a></li><li><a href="../../learn/00-introduction-to-rag/"><span class="num">00</span>Introduction to RAG</a></li><li><a href="../../learn/01-foundations-transformers/" aria-current="page"><span class="num">01</span>Foundations — Transformers, Tokens &amp; LLM Settings</a></li><li><a href="../../learn/02-embeddings-and-vectors/"><span class="num">02</span>Embeddings — Turning Words into Numbers</a></li><li><a href="../../learn/03-prompting-techniques/"><span class="num">03</span>Prompting Techniques — Talking to the LLM</a></li><li><a href="../../learn/04-chunking-strategies/"><span class="num">04</span>Chunking Strategies — Breaking Documents into Bites</a></li><li><a href="../../learn/05-vector-databases/"><span class="num">05</span>Vector Databases — Your AI&#x27;s Memory</a></li><li><a href="../../learn/06-retrieval-mechanics/"><span class="num">06</span>Retrieval Mechanics — Finding the Needle</a></li><li><a href="../../learn/07-agentic-rag-and-tools/"><span class="num">07</span>Agentic RAG &amp; Tool Calling</a></li><li><a href="../../learn/08-building-your-first-rag-app/"><span class="num">08</span>Build Your First RAG Application</a></li><li><a href="../../learn/09-rag-evaluation/"><span class="num">09</span>Evaluating Your RAG Application</a></li><li><a href="../../learn/10-document-ingestion-and-parsing/"><span class="num">10</span>Document Ingestion &amp; Parsing — The Forgotten Half</a></li></ul>
+    <ul><li><a href="../../learn/"><span class="num">★</span>How to use these notes</a></li><li><a href="../../learn/00-introduction-to-rag/"><span class="num">00</span>Introduction to RAG</a></li><li><a href="../../learn/01-foundations-transformers/" aria-current="page"><span class="num">01</span>Foundations — Transformers, Tokens &amp; LLM Settings</a></li><li><a href="../../learn/02-embeddings-and-vectors/"><span class="num">02</span>Embeddings — Turning Words into Numbers</a></li><li><a href="../../learn/03-prompting-techniques/"><span class="num">03</span>Prompting Techniques — Talking to the LLM</a></li><li><a href="../../learn/04-chunking-strategies/"><span class="num">04</span>Chunking Strategies — Breaking Documents into Bites</a></li><li><a href="../../learn/05-vector-databases/"><span class="num">05</span>Vector Databases — Your AI&#x27;s Memory</a></li><li><a href="../../learn/06-retrieval-mechanics/"><span class="num">06</span>Retrieval Mechanics — Finding the Needle</a></li><li><a href="../../learn/07-agentic-rag-and-tools/"><span class="num">07</span>Agentic RAG &amp; Tool Calling</a></li><li><a href="../../learn/08-building-your-first-rag-app/"><span class="num">08</span>Build Your First RAG Application</a></li><li><a href="../../learn/09-rag-evaluation/"><span class="num">09</span>Evaluating Your RAG Application</a></li><li><a href="../../learn/10-document-ingestion-and-parsing/"><span class="num">10</span>Document Ingestion &amp; Parsing — The Forgotten Half</a></li><li><a href="../../learn/11-production-rag/"><span class="num">11</span>Production RAG — Security, Cost, Latency &amp; Monitoring</a></li></ul>
+    <p class="sidebar-label">Reference</p><ul><li><a href="../../learn/faq/"><span class="num">❓</span>RAG FAQ: Answers to Common Questions</a></li><li><a href="../../learn/glossary/"><span class="num">📖</span>RAG Glossary</a></li></ul>
   </details>
 </aside>
 <main id="content">
 <nav class="crumbs" aria-label="Breadcrumb"><a href="../../">Home</a> / <a href="../../learn/">Learn</a> / <span aria-current="page">Foundations — Transformers, Tokens &amp; LLM Settings</span></nav>
 <article class="prose">
 <h1 id="module-1-foundations-transformers-tokens-llm-settings">🧱 Module 1: Foundations — Transformers, Tokens &amp; LLM Settings</h1>
-<blockquote>
-<p><em>Source: <code>AI/day1/Transformer.md</code> + <code>AI/day7/contextwindow.md</code></em></p>
-</blockquote>
 <p>Before you build a RAG app, you need to understand the engine inside every LLM: the <strong>Transformer</strong>.</p>
 <hr />
 <h2 id="tokens-the-atoms-of-language">🔤 Tokens — the "atoms" of language</h2>
@@ -142,6 +140,47 @@
 <li><strong>KV cache compression</strong> — evict/quantize/merge less important K/V pairs → O(n²) → O(n).</li>
 <li><strong>Summary-based memory</strong> — keep a rolling summary of intent/constraints/decisions instead of the full transcript (LangChain's <code>ConversationSummaryMemory</code>).</li>
 </ul>
+<h3 id="lost-in-the-middle-and-context-rot">🕳️ "Lost in the middle" and context rot</h3>
+<p>Even when everything fits in the window, models don't use it evenly. Research on long-context models (Liu et al., 2023, <em>"Lost in the Middle"</em>) found that facts placed at the <strong>beginning or end</strong> of a long prompt are used far more reliably than facts buried in the <strong>middle</strong>. As prompts get longer, accuracy tends to degrade gradually, an effect often called <strong>context rot</strong>.</p>
+<p>What this means for RAG:</p>
+<ul>
+<li><strong>Fewer, better chunks beat many mediocre ones.</strong> Five relevant chunks outperform twenty loosely related ones.</li>
+<li><strong>Order matters.</strong> Put the most relevant chunk first (a reranker does this for you, Module 6).</li>
+<li><strong>A bigger context window is not a substitute for retrieval.</strong> It raises the ceiling on what fits, not on what the model actually pays attention to.</li>
+</ul>
+<h3 id="worked-example-a-rag-token-budget">🧮 Worked example: a RAG token budget</h3>
+<p>Say your model costs are measured per token and you want answers to stay fast. A typical RAG prompt for one question:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Tokens (approx.)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>System instructions</td>
+<td>150</td>
+</tr>
+<tr>
+<td>5 retrieved chunks × ~250 tokens</td>
+<td>1,250</td>
+</tr>
+<tr>
+<td>User question</td>
+<td>30</td>
+</tr>
+<tr>
+<td><strong>Input total</strong></td>
+<td><strong>~1,430</strong></td>
+</tr>
+<tr>
+<td>Model's answer</td>
+<td>~200</td>
+</tr>
+</tbody>
+</table></div>
+<p>Rough conversions for English text: <strong>1 token ≈ 4 characters ≈ ¾ of a word</strong>. So a 1,000-<em>character</em> chunk (the default in this repo's <code>config.py</code>) is roughly <strong>250 tokens</strong>. Doubling <code>top_k</code> from 5 to 10 nearly doubles input cost and latency, which is why retrieval quality matters more than quantity.</p>
 <blockquote>
 <p>🔗 <strong>Connect to RAG:</strong> chunking exists <em>because</em> of the context window. A good chunking strategy (Module 4) keeps the most relevant facts inside the window while they're still cheap to process.</p>
 </blockquote>
@@ -152,8 +191,29 @@
 <li>Temperature/Top-K/Top-P control <em>how</em> the model guesses.</li>
 <li>Hallucinations are inevitable in pure LLMs → <strong>that's why RAG exists</strong>.</li>
 <li>Context windows are finite → chunking + retrieval are mandatory.</li>
+<li>Models attend best to the start and end of a prompt → send fewer, well-ordered chunks.</li>
 </ul>
-<p>➡️ Next: <a href="../../learn/02-embeddings-and-vectors/">Embeddings — turning words into numbers</a></p>
+<hr />
+<h2 id="in-this-repo">🔗 In this repo</h2>
+<ul>
+<li>The generation model is set by <code>GENERATION_MODEL</code> in <a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/config.py"><code>config.py</code></a>, and <code>hybrid_search.py</code> uses it with <code>temperature=0</code> for query rewriting, so results are repeatable.</li>
+<li><code>CHUNK_SIZE=1000</code> characters ≈ 250 tokens, and <code>RETRIEVAL_K=3</code> per retriever keeps the prompt small.</li>
+</ul>
+<hr />
+<h2 id="self-check">🧠 Self-check</h2>
+<details>
+<summary>1. Why is low temperature (0–0.3) recommended for RAG answers?</summary>
+<p>RAG answers should restate facts from the context, not invent variations. Low temperature makes the model pick the most likely tokens, so answers are more consistent and less likely to drift from the source.</p>
+</details>
+<details>
+<summary>2. A model has a 1M-token context window. Why not skip retrieval and send all documents every time?</summary>
+<p>Cost and latency scale with input tokens on every request, and models use information in the middle of very long prompts less reliably ("lost in the middle"). Retrieval sends only what's relevant: cheaper, faster, and usually more accurate.</p>
+</details>
+<details>
+<summary>3. Roughly how many tokens is a 2,000-character chunk?</summary>
+<p>About 500 tokens, using the rule of thumb 1 token ≈ 4 characters of English text.</p>
+</details>
+<p>➡️ Next: <a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/../learn/02-embeddings-and-vectors/">Embeddings — turning words into numbers</a></p>
 </article>
 <nav class="pager" aria-label="Module navigation"><a class="pager-link" href="../../learn/00-introduction-to-rag/" rel="prev"><small>Previous</small>Introduction to RAG</a><a class="pager-link next" href="../../learn/02-embeddings-and-vectors/" rel="next"><small>Next</small>Embeddings — Turning Words into Numbers</a></nav>
 <p class="edit"><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/notes/01_foundations_transformers.md" rel="noopener">View this page’s source on GitHub</a></p>

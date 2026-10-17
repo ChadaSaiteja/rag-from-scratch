@@ -25,14 +25,15 @@
 <a class="skip" href="#content">Skip to content</a>
 <header class="topbar">
   <a class="brand" href="../">RAG <span>from Scratch</span></a>
-  <nav class="topnav" aria-label="Main"><a href="../">Home</a><a href="../learn/" aria-current="page">Learn</a><a href="../implementation/">Implementation</a><a href="../lessons/">Lessons</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <nav class="topnav" aria-label="Main"><a href="../">Home</a><a href="../learn/" aria-current="page">Learn</a><a href="../implementation/">Implementation</a><a href="../lessons/">Lessons</a><a href="../learn/faq/">FAQ</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
   <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
 </header>
 <div class="layout with-sidebar">
 <aside class="sidebar" aria-label="Course modules">
   <details class="sidebar-box" open>
     <summary>Course modules</summary>
-    <ul><li><a href="../learn/" aria-current="page"><span class="num">★</span>How to use these notes</a></li><li><a href="../learn/00-introduction-to-rag/"><span class="num">00</span>Introduction to RAG</a></li><li><a href="../learn/01-foundations-transformers/"><span class="num">01</span>Foundations — Transformers, Tokens &amp; LLM Settings</a></li><li><a href="../learn/02-embeddings-and-vectors/"><span class="num">02</span>Embeddings — Turning Words into Numbers</a></li><li><a href="../learn/03-prompting-techniques/"><span class="num">03</span>Prompting Techniques — Talking to the LLM</a></li><li><a href="../learn/04-chunking-strategies/"><span class="num">04</span>Chunking Strategies — Breaking Documents into Bites</a></li><li><a href="../learn/05-vector-databases/"><span class="num">05</span>Vector Databases — Your AI&#x27;s Memory</a></li><li><a href="../learn/06-retrieval-mechanics/"><span class="num">06</span>Retrieval Mechanics — Finding the Needle</a></li><li><a href="../learn/07-agentic-rag-and-tools/"><span class="num">07</span>Agentic RAG &amp; Tool Calling</a></li><li><a href="../learn/08-building-your-first-rag-app/"><span class="num">08</span>Build Your First RAG Application</a></li><li><a href="../learn/09-rag-evaluation/"><span class="num">09</span>Evaluating Your RAG Application</a></li><li><a href="../learn/10-document-ingestion-and-parsing/"><span class="num">10</span>Document Ingestion &amp; Parsing — The Forgotten Half</a></li></ul>
+    <ul><li><a href="../learn/" aria-current="page"><span class="num">★</span>How to use these notes</a></li><li><a href="../learn/00-introduction-to-rag/"><span class="num">00</span>Introduction to RAG</a></li><li><a href="../learn/01-foundations-transformers/"><span class="num">01</span>Foundations — Transformers, Tokens &amp; LLM Settings</a></li><li><a href="../learn/02-embeddings-and-vectors/"><span class="num">02</span>Embeddings — Turning Words into Numbers</a></li><li><a href="../learn/03-prompting-techniques/"><span class="num">03</span>Prompting Techniques — Talking to the LLM</a></li><li><a href="../learn/04-chunking-strategies/"><span class="num">04</span>Chunking Strategies — Breaking Documents into Bites</a></li><li><a href="../learn/05-vector-databases/"><span class="num">05</span>Vector Databases — Your AI&#x27;s Memory</a></li><li><a href="../learn/06-retrieval-mechanics/"><span class="num">06</span>Retrieval Mechanics — Finding the Needle</a></li><li><a href="../learn/07-agentic-rag-and-tools/"><span class="num">07</span>Agentic RAG &amp; Tool Calling</a></li><li><a href="../learn/08-building-your-first-rag-app/"><span class="num">08</span>Build Your First RAG Application</a></li><li><a href="../learn/09-rag-evaluation/"><span class="num">09</span>Evaluating Your RAG Application</a></li><li><a href="../learn/10-document-ingestion-and-parsing/"><span class="num">10</span>Document Ingestion &amp; Parsing — The Forgotten Half</a></li><li><a href="../learn/11-production-rag/"><span class="num">11</span>Production RAG — Security, Cost, Latency &amp; Monitoring</a></li></ul>
+    <p class="sidebar-label">Reference</p><ul><li><a href="../learn/faq/"><span class="num">❓</span>RAG FAQ: Answers to Common Questions</a></li><li><a href="../learn/glossary/"><span class="num">📖</span>RAG Glossary</a></li></ul>
   </details>
 </aside>
 <main id="content">
@@ -41,27 +42,32 @@
 <h1 id="notes-building-a-rag-application">📓 Notes — Building a RAG Application</h1>
 <blockquote>
 <p>Beginner-friendly study notes for building a <strong>Retrieval-Augmented Generation (RAG)</strong> application.
-Written from the existing docs in <code>AI/day1</code> … <code>AI/day11</code>, improved with added explanations, analogies, runnable code, and 2026 production best practices.</p>
+A self-paced course with plain-English explanations, analogies, runnable code, self-check quizzes, and 2026 production best practices — each module linked to the working pipeline in this repo.</p>
 </blockquote>
 <hr />
 <h2 id="the-idea-behind-these-notes">💡 The Idea Behind These Notes</h2>
 <p><strong>What this is:</strong> a complete, self-paced path from "what is an LLM?" to "a production-grade RAG system" — one concept at a time, each module building directly on the last.</p>
 <p><strong>Who it's for:</strong> beginners who know basic Python but have never built a RAG app, and practitioners who want the modern (2026) retrieval stack — hybrid search, reranking, evaluation — in one place.</p>
-<p><strong>How it differs from the source docs (<code>AI/day*</code>):</strong>
-- Plain-English analogies &amp; "beginner trap" warnings in every module
-- Runnable code snippets adapted from the <code>day*</code> Python files
-- Modern topics the original docs skip: <strong>reranking</strong> (cross-encoders), <strong>hybrid search</strong> (BM25 + vector + RRF), <strong>query rewriting/HyDE</strong>, <strong>RAG evaluation</strong> (RAGAS), <strong>CI quality gates</strong> (promptfoo), and <strong>document ingestion &amp; parsing</strong> (layout-aware parsing, OCR, metadata, incremental indexing)
-- A <strong>production checklist</strong> and an end-to-end <strong>capstone build</strong> (Module 8)</p>
+<p><strong>What makes it different:</strong></p>
+<ul>
+<li>Plain-English analogies &amp; "beginner trap" warnings in every module</li>
+<li>Runnable code for each stage, aligned with the stack used in this repo (Gemini + Chroma + LangChain)</li>
+<li><strong>🔗 In this repo</strong> sections that connect every concept to the real implementation in <code>src/pipeline/</code></li>
+<li><strong>🧠 Self-check</strong> questions with answers at the end of each module</li>
+<li>Modern topics most tutorials skip: <strong>reranking</strong>, <strong>hybrid search</strong> (BM25 + vector + RRF), <strong>query rewriting/HyDE</strong>, <strong>RAG evaluation</strong> (RAGAS, hit rate, MRR), <strong>CI quality gates</strong>, <strong>document ingestion &amp; incremental indexing</strong>, and <strong>production security, cost and monitoring</strong></li>
+<li>An end-to-end <strong>capstone build</strong> (Module 8), a <a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/learn/glossary/">Glossary</a> and an <a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/learn/faq/">FAQ</a></li>
+</ul>
 <p><strong>The through-line:</strong> RAG = <em>ingest → chunk → embed → store → retrieve → generate</em>. Every module owns exactly one stage of that pipeline, so by Module 8 you can see how all the pieces snap together.</p>
 <hr />
 <h2 id="how-to-go-through-these-notes">🧭 How to Go Through These Notes</h2>
 <h3 id="the-golden-rule">The golden rule</h3>
-<p><strong>Read in order, 00 → 10.</strong> Each module assumes the previous one (e.g., chunking needs context windows from Module 1, embeddings need Module 2, retrieval needs Modules 2 + 4 + 5). Skipping around will leave gaps.</p>
+<p><strong>Read in order, 00 → 11.</strong> Each module assumes the previous one (e.g., chunking needs context windows from Module 1, embeddings need Module 2, retrieval needs Modules 2 + 4 + 5). Skipping around will leave gaps.</p>
 <h3 id="the-study-loop-repeat-per-module">The study loop (repeat per module)</h3>
 <ol>
 <li><strong>Read</strong> the concept + analogy.</li>
 <li><strong>Run</strong> the code snippet — don't just read it.</li>
-<li><strong>Try the 🧪 beginner experiment</strong> at the end of most modules (change a parameter, observe the result).</li>
+<li><strong>Try the 🧪 experiment or exercise</strong>, many of them change the real pipeline in this repo.</li>
+<li><strong>Answer the 🧠 Self-check</strong> questions before opening the answers.</li>
 <li><strong>Review the ✅ Key Takeaways</strong>, then follow the ➡️ Next link.</li>
 </ol>
 <blockquote>
@@ -86,11 +92,15 @@ Written from the existing docs in <code>AI/day1</code> … <code>AI/day11</code>
 </tr>
 <tr>
 <td><strong>Want production RAG now</strong></td>
-<td>00 → 04 → 06 → 08, then backfill 01–03, 05 as needed; finish with 09 (eval) and 10 (ingestion)</td>
+<td>00 → 04 → 06 → 08, then backfill 01–03, 05 as needed; finish with 09 (eval), 10 (ingestion) and 11 (production)</td>
 </tr>
 <tr>
 <td><strong>Debugging a broken RAG app</strong></td>
-<td>Go straight to 06 (retrieval) + 09 (evaluation) to learn what to measure, then 04 (chunking)</td>
+<td>Go straight to 06 (retrieval) + 09 (evaluation) to learn what to measure, then 04 (chunking); check the <a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/learn/faq/">FAQ</a></td>
+</tr>
+<tr>
+<td><strong>Shipping to real users</strong></td>
+<td>08 → 09 → 10 → 11 (security, cost, latency, monitoring)</td>
 </tr>
 </tbody>
 </table></div>
@@ -105,6 +115,7 @@ Written from the existing docs in <code>AI/day1</code> … <code>AI/day11</code>
                                                                  │
                                             09 Evaluation ←──────┘ ← deep dive on RAGAS/CI gates
                                             10 Ingestion &amp; Parsing ← pre-04 stage for real docs
+                                            11 Production RAG ← security, cost, latency, monitoring
 </code></pre>
 <hr />
 <h2 id="index">📚 Index</h2>
@@ -114,75 +125,93 @@ Written from the existing docs in <code>AI/day1</code> … <code>AI/day11</code>
 <th>#</th>
 <th>Note</th>
 <th>Covers</th>
-<th>Source docs</th>
+<th>In this repo</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>0</td>
-<td><a href="../learn/00-introduction-to-rag/">Introduction to RAG</a></td>
-<td>What/Why RAG, workflow, benefits</td>
+<td><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/learn/00-introduction-to-rag/">Introduction to RAG</a></td>
+<td>What/why RAG, workflow, RAG vs fine-tuning vs long context</td>
 <td>—</td>
 </tr>
 <tr>
 <td>1</td>
-<td><a href="../learn/01-foundations-transformers/">Foundations: Transformers &amp; Tokens</a></td>
-<td>Tokens, parameters, settings, context window, hallucinations</td>
-<td><code>day1</code>, <code>day7</code></td>
+<td><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/learn/01-foundations-transformers/">Foundations: Transformers &amp; Tokens</a></td>
+<td>Tokens, settings, context window, lost in the middle, token budgets</td>
+<td><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/config.py"><code>config.py</code></a></td>
 </tr>
 <tr>
 <td>2</td>
-<td><a href="../learn/02-embeddings-and-vectors/">Embeddings &amp; Vectors</a></td>
-<td>Semantic vectors, cosine similarity, embedding code</td>
-<td><code>day2</code></td>
+<td><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/learn/02-embeddings-and-vectors/">Embeddings &amp; Vectors</a></td>
+<td>Semantic vectors, similarity metrics, dimensions, task types, choosing a model</td>
+<td><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/ingest.py"><code>ingest.py</code></a></td>
 </tr>
 <tr>
 <td>3</td>
-<td><a href="../learn/03-prompting-techniques/">Prompting Techniques</a></td>
-<td>Zero/One/Few-shot, CoT, chaining, RAG prompt template</td>
-<td><code>day3</code></td>
+<td><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/learn/03-prompting-techniques/">Prompting Techniques</a></td>
+<td>Zero/few-shot, CoT, chaining, production RAG prompt, injection defence</td>
+<td><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/generation.py"><code>generation.py</code></a></td>
 </tr>
 <tr>
 <td>4</td>
-<td><a href="../learn/04-chunking-strategies/">Chunking Strategies</a></td>
-<td>Fixed, recursive, semantic, contextual chunking + code</td>
-<td><code>day9</code></td>
+<td><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/learn/04-chunking-strategies/">Chunking Strategies</a></td>
+<td>Fixed, recursive, structure-aware, semantic, contextual; characters vs tokens</td>
+<td><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/ingest.py"><code>ingest.py</code></a></td>
 </tr>
 <tr>
 <td>5</td>
-<td><a href="../learn/05-vector-databases/">Vector Databases</a></td>
-<td>Pinecone/Chroma/FAISS/pgvector, upsert + query code</td>
-<td><code>day8</code></td>
+<td><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/learn/05-vector-databases/">Vector Databases</a></td>
+<td>Choosing a DB, ANN indexes (HNSW/IVF/PQ), Chroma + Pinecone code</td>
+<td><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/vector_retrieval.py"><code>vector_retrieval.py</code></a></td>
 </tr>
 <tr>
 <td>6</td>
-<td><a href="../learn/06-retrieval-mechanics/">Retrieval Mechanics</a></td>
-<td>Sparse/dense/hybrid, RRF, reranking, query rewriting</td>
-<td><code>day11</code> + research</td>
+<td><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/learn/06-retrieval-mechanics/">Retrieval Mechanics</a></td>
+<td>BM25, hybrid + RRF (worked example), reranking code, query rewriting, filters</td>
+<td><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/hybrid_search.py"><code>hybrid_search.py</code></a></td>
 </tr>
 <tr>
 <td>7</td>
-<td><a href="../learn/07-agentic-rag-and-tools/">Agentic RAG &amp; Tool Calling</a></td>
-<td>Structured output, tool calls, ReAct, agentic RAG</td>
-<td><code>day4</code></td>
+<td><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/learn/07-agentic-rag-and-tools/">Agentic RAG &amp; Tool Calling</a></td>
+<td>Structured output, tool calls, agent loop, guardrails</td>
+<td>exercise</td>
 </tr>
 <tr>
 <td>8</td>
-<td><a href="../learn/08-building-your-first-rag-app/">Build Your First RAG App</a></td>
-<td>End-to-end capstone, RAGAS evaluation, production checklist</td>
-<td>all</td>
+<td><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/learn/08-building-your-first-rag-app/">Build Your First RAG App</a></td>
+<td>End-to-end capstone (Chroma + Gemini), reranking, RAGAS, production checklist</td>
+<td><a href="https://github.com/ChadaSaiteja/rag-from-scratch/tree/master/src/pipeline"><code>src/pipeline/</code></a></td>
 </tr>
 <tr>
 <td>9</td>
-<td><a href="../learn/09-rag-evaluation/">RAG Evaluation (Deep Dive)</a></td>
-<td>RAGAS metrics math, test-set generation, LLM-as-judge, CI gates</td>
-<td>research</td>
+<td><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/learn/09-rag-evaluation/">RAG Evaluation (Deep Dive)</a></td>
+<td>Hit rate, MRR, nDCG, RAGAS, test sets, LLM-as-judge, CI gates</td>
+<td><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/evaluation.py"><code>evaluation.py</code></a></td>
 </tr>
 <tr>
 <td>10</td>
-<td><a href="../learn/10-document-ingestion-and-parsing/">Document Ingestion &amp; Parsing</a></td>
-<td>PDF/DOCX/scans/OCR/tables, Docling, metadata, incremental indexing</td>
-<td>research</td>
+<td><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/learn/10-document-ingestion-and-parsing/">Document Ingestion &amp; Parsing</a></td>
+<td>PDF/DOCX/scans/OCR/tables, metadata, incremental indexing code</td>
+<td><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/ingest.py"><code>ingest.py</code></a></td>
+</tr>
+<tr>
+<td>11</td>
+<td><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/learn/11-production-rag/">Production RAG</a></td>
+<td>Threat model, access control, cost &amp; latency budgets, caching, monitoring</td>
+<td>exercises</td>
+</tr>
+<tr>
+<td>📖</td>
+<td><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/learn/glossary/">Glossary</a></td>
+<td>Every term in plain English, linked to its module</td>
+<td>—</td>
+</tr>
+<tr>
+<td>❓</td>
+<td><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/learn/faq/">FAQ</a></td>
+<td>Short answers to the most common RAG questions</td>
+<td>—</td>
 </tr>
 </tbody>
 </table></div>
@@ -192,14 +221,15 @@ Written from the existing docs in <code>AI/day1</code> … <code>AI/day11</code>
 <li>⚠️ <strong>Beginner trap</strong> — the mistake everyone makes once</li>
 <li>🧪 <strong>Experiment</strong> — a 5-minute tweak that proves the concept</li>
 <li>✅ <strong>Key takeaways</strong> — the 3–5 lines worth remembering</li>
+<li>🔗 <strong>In this repo</strong> — where the concept lives in the real pipeline</li>
+<li>🧠 <strong>Self-check</strong> — questions with hidden answers</li>
 </ul>
 <hr />
 <h2 id="quick-start">▶️ Quick start</h2>
-<p><strong>Prerequisites:</strong> Python 3.10+, a <code>GOOGLE_API_KEY</code> in a <code>.env</code> file (free Google AI Studio key), and (optionally) a local Pinecone instance for the storage examples.</p>
-<pre><code class="language-bash">pip install google-genai pinecone langchain-text-splitters python-dotenv ragas datasets docling
+<p><strong>Prerequisites:</strong> Python 3.10+ and a <code>GOOGLE_API_KEY</code> in a <code>.env</code> file (free Google AI Studio key).</p>
+<pre><code class="language-bash">pip install google-genai langchain-chroma langchain-google-genai langchain-text-splitters python-dotenv
 </code></pre>
-<p>Then follow <a href="../learn/08-building-your-first-rag-app/">Module 8</a> step by step — it wires Modules 1–7 into one working pipeline, and you can come back to earlier modules whenever a step is unclear.</p>
-<p><strong>Original docs:</strong> <code>AI/day1</code> … <code>AI/day11</code> · <strong>Code samples:</strong> <code>embedding.py</code>, <code>chunking.py</code>, <code>pine_cone.py</code>, <code>toolcalling.py</code></p>
+<p>Then follow <a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/learn/08-building-your-first-rag-app/">Module 8</a> step by step — it wires Modules 1–7 into one working pipeline. To run the full pipeline in this repo instead, see the <a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/README.md#setup">main README</a>; optional extras used in later modules: <code>sentence-transformers</code> (reranking), <code>ragas</code> (evaluation), <code>docling</code> (document parsing).</p>
 </article>
 <nav class="pager" aria-label="Module navigation"><span></span><a class="pager-link next" href="../learn/00-introduction-to-rag/" rel="next"><small>Next</small>Introduction to RAG</a></nav>
 <p class="edit"><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/notes/README.md" rel="noopener">View this page’s source on GitHub</a></p>

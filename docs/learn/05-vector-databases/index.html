@@ -25,23 +25,21 @@
 <a class="skip" href="#content">Skip to content</a>
 <header class="topbar">
   <a class="brand" href="../../">RAG <span>from Scratch</span></a>
-  <nav class="topnav" aria-label="Main"><a href="../../">Home</a><a href="../../learn/" aria-current="page">Learn</a><a href="../../implementation/">Implementation</a><a href="../../lessons/">Lessons</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <nav class="topnav" aria-label="Main"><a href="../../">Home</a><a href="../../learn/" aria-current="page">Learn</a><a href="../../implementation/">Implementation</a><a href="../../lessons/">Lessons</a><a href="../../learn/faq/">FAQ</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
   <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
 </header>
 <div class="layout with-sidebar">
 <aside class="sidebar" aria-label="Course modules">
   <details class="sidebar-box" open>
     <summary>Course modules</summary>
-    <ul><li><a href="../../learn/"><span class="num">★</span>How to use these notes</a></li><li><a href="../../learn/00-introduction-to-rag/"><span class="num">00</span>Introduction to RAG</a></li><li><a href="../../learn/01-foundations-transformers/"><span class="num">01</span>Foundations — Transformers, Tokens &amp; LLM Settings</a></li><li><a href="../../learn/02-embeddings-and-vectors/"><span class="num">02</span>Embeddings — Turning Words into Numbers</a></li><li><a href="../../learn/03-prompting-techniques/"><span class="num">03</span>Prompting Techniques — Talking to the LLM</a></li><li><a href="../../learn/04-chunking-strategies/"><span class="num">04</span>Chunking Strategies — Breaking Documents into Bites</a></li><li><a href="../../learn/05-vector-databases/" aria-current="page"><span class="num">05</span>Vector Databases — Your AI&#x27;s Memory</a></li><li><a href="../../learn/06-retrieval-mechanics/"><span class="num">06</span>Retrieval Mechanics — Finding the Needle</a></li><li><a href="../../learn/07-agentic-rag-and-tools/"><span class="num">07</span>Agentic RAG &amp; Tool Calling</a></li><li><a href="../../learn/08-building-your-first-rag-app/"><span class="num">08</span>Build Your First RAG Application</a></li><li><a href="../../learn/09-rag-evaluation/"><span class="num">09</span>Evaluating Your RAG Application</a></li><li><a href="../../learn/10-document-ingestion-and-parsing/"><span class="num">10</span>Document Ingestion &amp; Parsing — The Forgotten Half</a></li></ul>
+    <ul><li><a href="../../learn/"><span class="num">★</span>How to use these notes</a></li><li><a href="../../learn/00-introduction-to-rag/"><span class="num">00</span>Introduction to RAG</a></li><li><a href="../../learn/01-foundations-transformers/"><span class="num">01</span>Foundations — Transformers, Tokens &amp; LLM Settings</a></li><li><a href="../../learn/02-embeddings-and-vectors/"><span class="num">02</span>Embeddings — Turning Words into Numbers</a></li><li><a href="../../learn/03-prompting-techniques/"><span class="num">03</span>Prompting Techniques — Talking to the LLM</a></li><li><a href="../../learn/04-chunking-strategies/"><span class="num">04</span>Chunking Strategies — Breaking Documents into Bites</a></li><li><a href="../../learn/05-vector-databases/" aria-current="page"><span class="num">05</span>Vector Databases — Your AI&#x27;s Memory</a></li><li><a href="../../learn/06-retrieval-mechanics/"><span class="num">06</span>Retrieval Mechanics — Finding the Needle</a></li><li><a href="../../learn/07-agentic-rag-and-tools/"><span class="num">07</span>Agentic RAG &amp; Tool Calling</a></li><li><a href="../../learn/08-building-your-first-rag-app/"><span class="num">08</span>Build Your First RAG Application</a></li><li><a href="../../learn/09-rag-evaluation/"><span class="num">09</span>Evaluating Your RAG Application</a></li><li><a href="../../learn/10-document-ingestion-and-parsing/"><span class="num">10</span>Document Ingestion &amp; Parsing — The Forgotten Half</a></li><li><a href="../../learn/11-production-rag/"><span class="num">11</span>Production RAG — Security, Cost, Latency &amp; Monitoring</a></li></ul>
+    <p class="sidebar-label">Reference</p><ul><li><a href="../../learn/faq/"><span class="num">❓</span>RAG FAQ: Answers to Common Questions</a></li><li><a href="../../learn/glossary/"><span class="num">📖</span>RAG Glossary</a></li></ul>
   </details>
 </aside>
 <main id="content">
 <nav class="crumbs" aria-label="Breadcrumb"><a href="../../">Home</a> / <a href="../../learn/">Learn</a> / <span aria-current="page">Vector Databases — Your AI&#x27;s Memory</span></nav>
 <article class="prose">
 <h1 id="module-5-vector-databases-your-ais-memory">🗄️ Module 5: Vector Databases — Your AI's Memory</h1>
-<blockquote>
-<p><em>Source: <code>AI/day8/vectordb.md</code> + <code>AI/day8/pine_cone.py</code></em></p>
-</blockquote>
 <p>A <strong>Vector Database</strong> stores data as <strong>embeddings</strong> — numerical representations of <em>meaning</em>, not keywords. It solves the three things a raw LLM can't do:</p>
 <div class="table-wrap"><table>
 <thead>
@@ -116,7 +114,78 @@
 </table></div>
 <p><strong>Consider:</strong> scale (vector count + query volume), hosted vs self-managed, hybrid search support, metadata filtering, and existing infra.</p>
 <hr />
-<h2 id="code-embed-documents-upsert-to-pinecone-from-day8pine-conepy">💻 Code: Embed Documents &amp; Upsert to Pinecone (from <code>day8/pine_cone.py</code>)</h2>
+<h2 id="how-vector-search-stays-fast-ann-indexes">⚡ How vector search stays fast: ANN indexes</h2>
+<p>Comparing a query against <em>every</em> stored vector (exact k-nearest-neighbour search) is perfect but slow: a million 3,072-dimension vectors means billions of multiplications per query. Vector databases use <strong>approximate nearest neighbour (ANN)</strong> indexes that trade a tiny bit of accuracy for huge speed-ups.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Index</th>
+<th>Idea (plain English)</th>
+<th>Trade-off</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Flat / brute force</strong></td>
+<td>Compare against everything</td>
+<td>100% accurate; fine up to tens of thousands of vectors</td>
+</tr>
+<tr>
+<td><strong>HNSW</strong> (Hierarchical Navigable Small World)</td>
+<td>A multi-layer graph: start at a coarse layer, hop toward closer neighbours, zoom in</td>
+<td>Very fast and accurate; uses more memory. The default in Chroma, pgvector (optional), Weaviate and many others</td>
+</tr>
+<tr>
+<td><strong>IVF</strong> (Inverted File)</td>
+<td>Cluster vectors into buckets; search only the few buckets nearest the query</td>
+<td>Less memory than HNSW; accuracy depends on how many buckets you probe</td>
+</tr>
+<tr>
+<td><strong>PQ</strong> (Product Quantization)</td>
+<td>Compress each vector into a short code</td>
+<td>Massive memory savings for billions of vectors; some accuracy loss. Often combined with IVF</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>🧠 <strong>Analogy:</strong> exact search is reading every book in the library. HNSW is asking a librarian who knows which shelf to walk to, then which row, then which book.</p>
+</blockquote>
+<p><strong>Recall</strong> in this context means <em>how often the ANN index returns the same results exact search would</em>. Well-tuned indexes reach 95–99% recall at a fraction of the cost.</p>
+<hr />
+<h2 id="code-chroma-local-no-server-as-used-in-this-repo">💻 Code: Chroma (local, no server), as used in this repo</h2>
+<p>Chroma runs inside your Python process and saves to a folder, which makes it ideal for learning and prototypes:</p>
+<pre><code class="language-python">from langchain_chroma import Chroma
+from langchain_core.documents import Document
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+
+embeddings = GoogleGenerativeAIEmbeddings(model=&quot;models/gemini-embedding-001&quot;)
+
+docs = [
+    Document(page_content=&quot;Customers can request a refund within 30 days of purchase.&quot;,
+             metadata={&quot;category&quot;: &quot;refund&quot;, &quot;filename&quot;: &quot;refund-policy.md&quot;}),
+    Document(page_content=&quot;Installation appointments can be rescheduled up to 24 hours before.&quot;,
+             metadata={&quot;category&quot;: &quot;installation&quot;, &quot;filename&quot;: &quot;installation.md&quot;}),
+]
+
+store = Chroma.from_documents(
+    documents=docs,
+    embedding=embeddings,
+    collection_name=&quot;demo&quot;,
+    persist_directory=&quot;./chroma_demo_db&quot;,
+    ids=[&quot;refund-1&quot;, &quot;install-1&quot;],          # stable IDs → re-running updates instead of duplicating
+)
+
+# Similarity search, optionally restricted by metadata
+results = store.similarity_search_with_score(&quot;Can I get my money back?&quot;, k=2,
+                                             filter={&quot;category&quot;: &quot;refund&quot;})
+for doc, score in results:
+    print(round(score, 3), doc.metadata[&quot;filename&quot;], doc.page_content)
+</code></pre>
+<blockquote>
+<p>⚠️ Chroma's default distance metric is <strong>L2</strong>, so the score printed above is a <em>distance</em>: lower is better. You can choose cosine when creating the collection; see the Chroma docs for the setting in your version.</p>
+</blockquote>
+<hr />
+<h2 id="code-embed-documents-upsert-to-pinecone">💻 Code: Embed Documents &amp; Upsert to Pinecone</h2>
 <pre><code class="language-python">import os
 from dotenv import load_dotenv
 from google import genai
@@ -135,7 +204,7 @@ documents = [
 # 1. Embed every document text
 embedding_list = [
     client.models.embed_content(
-        model=&quot;gemini-embedding-2&quot;, contents=doc[&quot;text&quot;]
+        model=&quot;gemini-embedding-001&quot;, contents=doc[&quot;text&quot;]
     ).embeddings[0].values
     for doc in documents
 ]
@@ -167,7 +236,7 @@ print(index.describe_index_stats())
 </code></pre>
 <h3 id="then-at-query-time">🔍 Then, at query time:</h3>
 <pre><code class="language-python">query_vec = client.models.embed_content(
-    model=&quot;gemini-embedding-2&quot;, contents=&quot;Can I get a refund?&quot;
+    model=&quot;gemini-embedding-001&quot;, contents=&quot;Can I get a refund?&quot;
 ).embeddings[0].values
 
 results = index.query(vector=query_vec, top_k=3, include_metadata=True)
@@ -183,8 +252,31 @@ results = index.query(vector=query_vec, top_k=3, include_metadata=True)
 <li>Match dimension to your embedding model; keep raw text as metadata.</li>
 <li>Prototype with ChromaDB/FAISS; scale with Pinecone/pgvector.</li>
 <li><code>upsert</code> = insert-or-update; <code>top_k</code> controls how much context you fetch.</li>
+<li>ANN indexes (HNSW, IVF, PQ) make search fast by being <em>approximately</em> right.</li>
+<li>Give chunks stable IDs so re-ingestion updates instead of duplicating.</li>
 </ul>
-<p>➡️ Next: <a href="../../learn/06-retrieval-mechanics/">Retrieval Mechanics — finding the needle</a></p>
+<hr />
+<h2 id="in-this-repo">🔗 In this repo</h2>
+<ul>
+<li><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/ingest.py"><code>ingest.py</code></a> creates the store with <code>Chroma.from_documents(..., persist_directory=PERSIST_DIRECTORY)</code>.</li>
+<li><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/vector_retrieval.py"><code>vector_retrieval.py</code></a> reopens it and runs <code>similarity_search(query, k=RETRIEVAL_K)</code>.</li>
+<li>⚠️ <strong>Known issue:</strong> <code>ingest.py</code> doesn't pass <code>ids</code>, so running it twice stores every chunk twice. 🧪 <strong>Exercise:</strong> generate IDs from <code>filename</code> + chunk position (or a content hash, Module 10) and pass <code>ids=</code> so re-runs overwrite instead of duplicating.</li>
+</ul>
+<hr />
+<h2 id="self-check">🧠 Self-check</h2>
+<details>
+<summary>1. Why store the original text in metadata (or alongside the vector)?</summary>
+<p>The vector is only used for matching; you can't turn it back into text. To build the LLM prompt and show citations you need the original chunk text and its source.</p>
+</details>
+<details>
+<summary>2. Your index has 5,000 vectors. Do you need HNSW?</summary>
+<p>Not really. Brute-force search over a few thousand vectors takes milliseconds. ANN indexes matter at hundreds of thousands to billions of vectors. (Many databases use HNSW by default anyway, which is fine.)</p>
+</details>
+<details>
+<summary>3. Chroma returns scores 0.41 and 0.93 for two chunks. Which is the better match?</summary>
+<p>With Chroma's default L2 metric these are distances, so 0.41 is closer and therefore the better match. Always check whether a score is a distance or a similarity.</p>
+</details>
+<p>➡️ Next: <a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/../learn/06-retrieval-mechanics/">Retrieval Mechanics — finding the needle</a></p>
 </article>
 <nav class="pager" aria-label="Module navigation"><a class="pager-link" href="../../learn/04-chunking-strategies/" rel="prev"><small>Previous</small>Chunking Strategies — Breaking Documents into Bites</a><a class="pager-link next" href="../../learn/06-retrieval-mechanics/" rel="next"><small>Next</small>Retrieval Mechanics — Finding the Needle</a></nav>
 <p class="edit"><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/notes/05_vector_databases.md" rel="noopener">View this page’s source on GitHub</a></p>

@@ -110,6 +110,13 @@ main > section > h2 { font-size: 1.5rem; }
 details summary { cursor: pointer; color: var(--accent); font-size: 0.9rem; }
 details pre { max-height: 520px; }
 
+.prose details { background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  padding: 10px 14px; margin: 10px 0; }
+.prose details summary { color: var(--text); font-weight: 600; font-size: 0.97rem; }
+.prose details[open] summary { margin-bottom: 6px; }
+.prose details > p:last-child { margin-bottom: 0; }
+.sidebar-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted);
+  font-weight: 600; margin: 18px 8px 0; }
 .pager { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; max-width: var(--content-w); margin-top: 48px; }
 .pager-link { display: block; border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px;
   background: var(--surface); text-decoration: none; color: var(--text); font-weight: 600; }

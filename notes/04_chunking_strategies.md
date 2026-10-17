@@ -1,7 +1,5 @@
 # ✂️ Module 4: Chunking Strategies — Breaking Documents into Bites
 
-> *Source: `AI/day9/chunkingStrategies.md` + `AI/day9/chunking.py`*
-
 **Chunking** = breaking a large document into smaller segments. The trick: chunks big enough to hold meaning, small enough to stay focused.
 
 ---
@@ -52,7 +50,7 @@ Add a small context prefix to each chunk (e.g., the doc title + section heading)
 
 ---
 
-## 💻 Code: Recursive Splitting in Action (from `day9/chunking.py`)
+## 💻 Code: Recursive Splitting in Action
 
 ```python
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -73,6 +71,39 @@ print(len(texts))     # how many chunks we got
 
 **Why overlap?** A sentence split across two chunks can be found from *either* side. Overlap (typically 10–20% of chunk size) prevents "lost information" at boundaries.
 
+> ⚠️ **Beginner trap: characters, not tokens.** `chunk_size` in `RecursiveCharacterTextSplitter` counts **characters** by default. `chunk_size=500` is about 125 tokens, not 500. If you want to size chunks in tokens (which is what models and costs care about), use a token-aware length function:
+
+```python
+splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
+    chunk_size=400, chunk_overlap=50   # now measured in tokens (needs: pip install tiktoken)
+)
+```
+
+### 🧮 Worked example: how many chunks?
+
+A 40,000-character document with `chunk_size=1000` and `chunk_overlap=200`:
+- Each new chunk advances by roughly `1000 − 200 = 800` characters.
+- `40,000 / 800 ≈ 50` chunks (a few more or less, because the splitter prefers to break at paragraphs and sentences).
+- Without overlap you'd get about 40 chunks. The extra ~10 chunks are the price of not losing facts at boundaries: about 25% more embedding cost and storage.
+
+### 📑 Structure-aware splitting for Markdown
+
+Splitting on headings first keeps each chunk inside one topic and gives you free metadata:
+
+```python
+from langchain_text_splitters import MarkdownHeaderTextSplitter, RecursiveCharacterTextSplitter
+
+header_splitter = MarkdownHeaderTextSplitter(
+    headers_to_split_on=[("#", "title"), ("##", "section")]
+)
+sections = header_splitter.split_text(markdown_text)  # Documents with title/section metadata
+
+# Then cap the size of very long sections
+size_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
+chunks = size_splitter.split_documents(sections)
+print(chunks[0].metadata)  # {'title': 'Order Installation Guide', 'section': '1. Order Lifecycle'}
+```
+
 ### 🧪 Beginner experiment
 Run the same text with `chunk_size=100` vs `chunk_size=500` and compare `len(texts)`. Then embed each chunk (Module 2) and search for *"When is an order created?"* — notice which chunk size retrieves the right answer.
 
@@ -88,7 +119,16 @@ Run the same text with `chunk_size=100` vs `chunk_size=500` and compare `len(tex
 | Metadata | Attach `source`, `page`, `section`, `date` to every chunk |
 | Contextual prefix | Prepend doc title + heading to each chunk before embedding |
 
-> 💡 **Golden rule:** your embedding model's max input length caps your chunk size. Never exceed it.
+> 💡 **Golden rule:** your embedding model's max input length caps your chunk size. Never exceed it; check your model's documented limit (for example, about 2,048 tokens for `gemini-embedding-001`). Text beyond the limit is typically truncated or rejected.
+
+### 🩺 Symptoms of bad chunking
+
+| Symptom | Likely cause | Try |
+|---|---|---|
+| Answers miss a detail that's clearly in the document | Chunks too big; the detail is diluted by unrelated text | Smaller chunks, structure-aware splitting |
+| Answers lack context ("it", "this policy" with no referent) | Chunks too small or cut mid-thought | Larger chunks, more overlap, contextual prefixes |
+| Same passage retrieved several times | Very high overlap or duplicate ingestion | Lower overlap; deduplicate; use deterministic IDs (Module 10) |
+| Tables or code come back mangled | Splitter broke structured content | Split tables and code blocks as whole units |
 
 ---
 
@@ -98,5 +138,40 @@ Run the same text with `chunk_size=100` vs `chunk_size=500` and compare `len(tex
 - Recursive character splitting is the safe default.
 - Semantic + contextual chunking = premium retrieval.
 - Always carry metadata — it powers filtering later.
+- `chunk_size` is measured in characters unless you use a token-based length function.
+
+---
+
+## 🔗 In this repo
+
+- [`ingest.py`](https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/ingest.py) → `chunk()` uses `RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE)` with `CHUNK_SIZE=1000` **characters** (≈250 tokens). Overlap isn't set, so LangChain's default of 200 characters applies.
+- Each chunk copies its parent's metadata (`source` and `filename`), which is what makes citations possible later in `generation.py`.
+- Read the matching lesson: [`data/raw/03_chunking.txt`](https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/data/raw/03_chunking.txt).
+- 🧪 **Exercise:** set `CHUNK_SIZE=400` in `.env`, delete `chroma_gemini_db/`, re-ingest, and compare `evaluation.py` scores before and after.
+
+---
+
+## 🧠 Self-check
+
+<details markdown="1">
+<summary>1. You set chunk_size=500 expecting 500-token chunks. What did you actually get?</summary>
+
+About 500 *characters*, roughly 125 tokens, because `RecursiveCharacterTextSplitter` measures length in characters by default. Use `from_tiktoken_encoder()` to size chunks in tokens.
+
+</details>
+
+<details markdown="1">
+<summary>2. What problem does chunk overlap solve, and what does it cost?</summary>
+
+It keeps a sentence or idea that straddles a boundary fully present in at least one chunk. The cost is more chunks: more embedding calls, more storage, and some duplicate text in retrieval results.
+
+</details>
+
+<details markdown="1">
+<summary>3. Your FAQ document has one question and answer per paragraph. What chunking strategy fits best?</summary>
+
+Split on the natural unit, one Q&A pair per chunk (structure-aware splitting), so each retrieved chunk is a complete answer. Small fixed-size chunks would split answers apart; huge chunks would mix unrelated questions.
+
+</details>
 
 ➡️ Next: [Vector Databases — your AI's memory](./05_vector_databases.md)

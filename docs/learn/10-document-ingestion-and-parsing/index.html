@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Document Ingestion &amp; Parsing — The Forgotten Half | RAG from Scratch</title>
+<meta name="description" content="Most RAG tutorials skip this stage and hand you a .txt file. Real applications start with messy enterprise documents — and that&#x27;s where RAG pipelines…">
+<link rel="canonical" href="https://chadasaiteja.github.io/rag-from-scratch/learn/10-document-ingestion-and-parsing/">
+<meta name="robots" content="index, follow">
+<meta property="og:site_name" content="RAG from Scratch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Document Ingestion &amp; Parsing — The Forgotten Half | RAG from Scratch">
+<meta property="og:description" content="Most RAG tutorials skip this stage and hand you a .txt file. Real applications start with messy enterprise documents — and that&#x27;s where RAG pipelines…">
+<meta property="og:url" content="https://chadasaiteja.github.io/rag-from-scratch/learn/10-document-ingestion-and-parsing/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Document Ingestion &amp; Parsing — The Forgotten Half | RAG from Scratch">
+<meta name="twitter:description" content="Most RAG tutorials skip this stage and hand you a .txt file. Real applications start with messy enterprise documents — and that&#x27;s where RAG pipelines…">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Document Ingestion & Parsing — The Forgotten Half", "name": "Document Ingestion & Parsing — The Forgotten Half", "description": "Most RAG tutorials skip this stage and hand you a .txt file. Real applications start with messy enterprise documents — and that's where RAG pipelines…", "url": "https://chadasaiteja.github.io/rag-from-scratch/learn/10-document-ingestion-and-parsing/", "inLanguage": "en", "author": {"@type": "Person", "name": "ChadaSaiteja", "url": "https://github.com/ChadaSaiteja"}, "dateModified": "2026-10-04", "educationalLevel": "Beginner", "isPartOf": {"@type": "Course", "name": "RAG from Scratch", "url": "https://chadasaiteja.github.io/rag-from-scratch/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "Learn", "item": "https://chadasaiteja.github.io/rag-from-scratch/learn/"}, {"@type": "ListItem", "position": 3, "name": "Document Ingestion & Parsing — The Forgotten Half", "item": "https://chadasaiteja.github.io/rag-from-scratch/learn/10-document-ingestion-and-parsing/"}]}</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../../">RAG <span>from Scratch</span></a>
+  <nav class="topnav" aria-label="Main"><a href="../../">Home</a><a href="../../learn/" aria-current="page">Learn</a><a href="../../implementation/">Implementation</a><a href="../../lessons/">Lessons</a><a href="../../learn/faq/">FAQ</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+</header>
+<div class="layout with-sidebar">
+<aside class="sidebar" aria-label="Course modules">
+  <details class="sidebar-box" open>
+    <summary>Course modules</summary>
+    <ul><li><a href="../../learn/"><span class="num">★</span>How to use these notes</a></li><li><a href="../../learn/00-introduction-to-rag/"><span class="num">00</span>Introduction to RAG</a></li><li><a href="../../learn/01-foundations-transformers/"><span class="num">01</span>Foundations — Transformers, Tokens &amp; LLM Settings</a></li><li><a href="../../learn/02-embeddings-and-vectors/"><span class="num">02</span>Embeddings — Turning Words into Numbers</a></li><li><a href="../../learn/03-prompting-techniques/"><span class="num">03</span>Prompting Techniques — Talking to the LLM</a></li><li><a href="../../learn/04-chunking-strategies/"><span class="num">04</span>Chunking Strategies — Breaking Documents into Bites</a></li><li><a href="../../learn/05-vector-databases/"><span class="num">05</span>Vector Databases — Your AI&#x27;s Memory</a></li><li><a href="../../learn/06-retrieval-mechanics/"><span class="num">06</span>Retrieval Mechanics — Finding the Needle</a></li><li><a href="../../learn/07-agentic-rag-and-tools/"><span class="num">07</span>Agentic RAG &amp; Tool Calling</a></li><li><a href="../../learn/08-building-your-first-rag-app/"><span class="num">08</span>Build Your First RAG Application</a></li><li><a href="../../learn/09-rag-evaluation/"><span class="num">09</span>Evaluating Your RAG Application</a></li><li><a href="../../learn/10-document-ingestion-and-parsing/" aria-current="page"><span class="num">10</span>Document Ingestion &amp; Parsing — The Forgotten Half</a></li><li><a href="../../learn/11-production-rag/"><span class="num">11</span>Production RAG — Security, Cost, Latency &amp; Monitoring</a></li></ul>
+    <p class="sidebar-label">Reference</p><ul><li><a href="../../learn/faq/"><span class="num">❓</span>RAG FAQ: Answers to Common Questions</a></li><li><a href="../../learn/glossary/"><span class="num">📖</span>RAG Glossary</a></li></ul>
+  </details>
+</aside>
+<main id="content">
+<nav class="crumbs" aria-label="Breadcrumb"><a href="../../">Home</a> / <a href="../../learn/">Learn</a> / <span aria-current="page">Document Ingestion &amp; Parsing — The Forgotten Half</span></nav>
+<article class="prose">
+<h1 id="module-10-document-ingestion-parsing-the-forgotten-half">📥 Module 10: Document Ingestion &amp; Parsing — The Forgotten Half</h1>
+<blockquote>
+<p><em>Source: Red Hat "Engineering RAG for the enterprise", Omdena "Document Parsing for RAG" (2026)</em></p>
+<p>💡 <em>"Poor parsing leads to weak chunking, low-quality embeddings, and inaccurate retrieval. Fixing parsing often delivers faster gains than changing models."</em></p>
+</blockquote>
+<p>Most RAG tutorials skip this stage and hand you a <code>.txt</code> file. Real applications start with <strong>messy enterprise documents</strong> — and that's where RAG pipelines actually fail.</p>
+<hr />
+<h2 id="where-ingestion-fits">🔄 Where ingestion fits</h2>
+<pre><code>Raw documents → PARSE → clean/normalize → extract metadata → chunk → embed → store
+                ↑
+        (Module 4 starts here)
+</code></pre>
+<p>Chunking (Module 4) can only work with what parsing gives it. <strong>Garbage in = garbage out.</strong></p>
+<hr />
+<h2 id="document-types-their-quirks">📄 Document types &amp; their quirks</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Challenge</th>
+<th>Approach</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Text-based PDF</strong></td>
+<td>Multi-column layouts, headers/footers, page numbers</td>
+<td>Layout-aware parser (preserve reading order)</td>
+</tr>
+<tr>
+<td><strong>Scanned PDF</strong></td>
+<td>No text layer — just pixels</td>
+<td><strong>OCR</strong> (Tesseract) or vision model</td>
+</tr>
+<tr>
+<td><strong>DOCX/PPTX</strong></td>
+<td>Styles, bullets, speaker notes</td>
+<td>Structure-aware parser (headings → hierarchy)</td>
+</tr>
+<tr>
+<td><strong>XLSX/CSV</strong></td>
+<td>Tables</td>
+<td>Extract tables separately (rows → markdown table)</td>
+</tr>
+<tr>
+<td><strong>HTML</strong></td>
+<td>Nav menus, ads, scripts</td>
+<td>HTML-to-markdown (drop boilerplate)</td>
+</tr>
+<tr>
+<td><strong>Images/figures</strong></td>
+<td>Charts with embedded data</td>
+<td>Caption with a vision model (multimodal)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Common parsing traps:</strong></p>
+<ul>
+<li>Reading order destroyed in multi-column PDFs (left column mixed with right)</li>
+<li>Tables flattened into one long run-on sentence</li>
+<li>Headers/footers repeated into every chunk</li>
+<li>Scanned docs silently returning <em>empty</em> text — always verify extraction yield!</li>
+</ul>
+<hr />
+<h2 id="tooling-2026-defaults">🛠️ Tooling (2026 defaults)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Best for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Docling</strong> (IBM, open-source; recommended by Red Hat)</td>
+<td>PDF/DOCX/PPTX/XLSX/HTML with layout + table structure</td>
+</tr>
+<tr>
+<td><strong>Unstructured</strong></td>
+<td>Enterprise pipelines, partition-by-element</td>
+</tr>
+<tr>
+<td><strong>LlamaParse</strong></td>
+<td>Hard PDFs, tables, fast managed API</td>
+</tr>
+<tr>
+<td><strong>PyPDF / pypdfium2</strong></td>
+<td>Simple text-based PDFs (cheap, no structure)</td>
+</tr>
+<tr>
+<td><strong>Tesseract</strong></td>
+<td>OCR for scans</td>
+</tr>
+<tr>
+<td><strong>Vision LLM</strong></td>
+<td>Figures, charts, handwritten docs</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>Rule:</strong> <em>one parser does not fit all.</em> A multi-column PDF, a scanned invoice, and a slide deck each need different treatment.</p>
+</blockquote>
+<hr />
+<h2 id="metadata-extraction-do-this-before-chunking">🏷️ Metadata extraction (do this before chunking)</h2>
+<p>Every chunk should carry metadata for <strong>filtering, citation, and audit</strong>:</p>
+<pre><code class="language-json">{
+  &quot;source&quot;: &quot;policies/refund-policy.pdf&quot;,
+  &quot;page&quot;: 12,
+  &quot;section&quot;: &quot;3.2 Refund Window&quot;,
+  &quot;doc_date&quot;: &quot;2026-01-15&quot;,
+  &quot;category&quot;: &quot;refund&quot;
+}
+</code></pre>
+<p>Why it matters:</p>
+<ul>
+<li><strong>Filtering</strong> — "only answer from docs dated after 2025"</li>
+<li><strong>Citations</strong> — "…refund policy (p.12)" in the final answer</li>
+<li><strong>Deletion/access control</strong> — find and purge a user's data (see <a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/../learn/11-production-rag/">Module 11</a>)</li>
+</ul>
+<hr />
+<h2 id="code-parse-chunk-store-a-complete-ingestion-snippet">💻 Code: Parse → Chunk → Store (a complete ingestion snippet)</h2>
+<pre><code class="language-python"># pip install docling langchain-text-splitters
+from docling.document_converter import DocumentConverter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+converter = DocumentConverter()
+splitter = RecursiveCharacterTextSplitter(chunk_size=400, chunk_overlap=40)
+
+def ingest(pdf_path: str):
+    # 1. PARSE — layout-aware, preserves headings and tables
+    result = converter.convert(pdf_path)
+    text = result.document.export_to_markdown()
+
+    # sanity check: empty extraction = scanned PDF → fall back to OCR
+    assert len(text.strip()) &gt; 100, f&quot;Parsing extracted nothing from {pdf_path}&quot;
+
+    # 2. CHUNK
+    chunks = splitter.split_text(text)
+
+    # 3. ATTACH METADATA (source, page, section)
+    return [
+        {&quot;text&quot;: c, &quot;metadata&quot;: {&quot;source&quot;: pdf_path, &quot;doc_date&quot;: &quot;2026-01-15&quot;}}
+        for c in chunks
+    ]
+
+documents = ingest(&quot;policies/refund-policy.pdf&quot;)
+print(f&quot;Parsed {len(documents)} chunks&quot;)
+
+# 4. EMBED + STORE  →  see Module 5 (Vector Databases)
+</code></pre>
+<hr />
+<h2 id="storage-layout-production-pattern">🗃️ Storage layout (production pattern)</h2>
+<p>Keep three things <strong>separate</strong> (Splunk/Red Hat advice) so a re-index never forces a re-encode:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Data</th>
+<th>Store</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Raw documents</td>
+<td>Object storage (S3 / Blob)</td>
+</tr>
+<tr>
+<td>Chunks + embeddings</td>
+<td>Vector DB (Module 5)</td>
+</tr>
+<tr>
+<td>Metadata / chat history</td>
+<td>Postgres (or other relational)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="incremental-indexing">♻️ Incremental indexing</h3>
+<p>Re-embedding your whole corpus on every change is slow and wasteful. Production systems:</p>
+<ol>
+<li><strong>Hash</strong> each document's content.</li>
+<li>Only process documents whose hash <strong>changed</strong>.</li>
+<li><strong>Propagate deletions</strong> — removing a file from the source must remove its chunks from the index (a classic OWASP compliance failure).</li>
+</ol>
+<h3 id="code-incremental-indexing-with-content-hashes-chroma">💻 Code: incremental indexing with content hashes (Chroma)</h3>
+<pre><code class="language-python">import hashlib
+from pathlib import Path
+
+def file_hash(text: str) -&gt; str:
+    return hashlib.sha256(text.encode(&quot;utf-8&quot;)).hexdigest()
+
+def sync_file(store, path: Path, splitter):
+    &quot;&quot;&quot;Re-index a file only if its content changed; replace its old chunks.&quot;&quot;&quot;
+    text = path.read_text(encoding=&quot;utf-8&quot;)
+    new_hash = file_hash(text)
+
+    existing = store.get(where={&quot;source&quot;: str(path)})          # chunks already indexed for this file
+    if existing[&quot;ids&quot;] and existing[&quot;metadatas&quot;][0].get(&quot;doc_hash&quot;) == new_hash:
+        return &quot;unchanged&quot;                                       # skip: no embedding cost
+
+    if existing[&quot;ids&quot;]:
+        store.delete(ids=existing[&quot;ids&quot;])                        # drop stale chunks first
+
+    chunks = splitter.split_text(text)
+    store.add_texts(
+        texts=chunks,
+        metadatas=[{&quot;source&quot;: str(path), &quot;doc_hash&quot;: new_hash, &quot;chunk&quot;: i} for i in range(len(chunks))],
+        ids=[f&quot;{path.name}::{i}&quot; for i in range(len(chunks))],  # deterministic IDs
+    )
+    return f&quot;indexed {len(chunks)} chunks&quot;
+
+def remove_deleted(store, live_paths: set[str]):
+    &quot;&quot;&quot;Delete chunks whose source file no longer exists.&quot;&quot;&quot;
+    indexed = store.get(include=[&quot;metadatas&quot;])
+    stale = [i for i, m in zip(indexed[&quot;ids&quot;], indexed[&quot;metadatas&quot;]) if m[&quot;source&quot;] not in live_paths]
+    if stale:
+        store.delete(ids=stale)
+</code></pre>
+<p>Run <code>sync_file</code> for every file, then <code>remove_deleted</code> with the current file list. Unchanged documents cost nothing; edited ones are replaced cleanly; deleted ones disappear from search.</p>
+<hr />
+<h2 id="key-takeaways">✅ Key Takeaways</h2>
+<ul>
+<li>Parsing quality &gt; model choice; fix it first.</li>
+<li>Layout-aware parsing for PDFs; OCR for scans; vision models for figures.</li>
+<li>Attach metadata (source/page/section/date) <strong>before</strong> chunking.</li>
+<li>Separate raw docs, vectors, and metadata — enables incremental updates.</li>
+<li>Always verify extraction yield (empty text = silent failure).</li>
+<li>Hash content and use deterministic chunk IDs so re-indexing is incremental and never duplicates.</li>
+</ul>
+<hr />
+<h2 id="in-this-repo">🔗 In this repo</h2>
+<ul>
+<li><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/ingest.py"><code>ingest.py</code></a> handles the simplest case: clean <code>.txt</code> lessons read with <code>Path.read_text()</code>, each tagged with <code>source</code> and <code>filename</code> metadata.</li>
+<li>⚠️ It has no IDs or hashes, so re-running it duplicates every chunk (README known issue #2). 🧪 <strong>Exercise:</strong> replace <code>Chroma.from_documents(...)</code> with the <code>sync_file()</code> / <code>remove_deleted()</code> pattern above, then run ingestion twice and confirm the chunk count stays the same.</li>
+<li>Read the matching lesson: <a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/data/raw/02_data_ingestion.txt"><code>data/raw/02_data_ingestion.txt</code></a>.</li>
+</ul>
+<hr />
+<h2 id="self-check">🧠 Self-check</h2>
+<details>
+<summary>1. A scanned PDF ingests without errors but is never retrieved. What probably happened?</summary>
+<p>It has no text layer, so the parser extracted empty or near-empty text and nothing meaningful was embedded. Check extraction yield and route scans through OCR or a vision model.</p>
+</details>
+<details>
+<summary>2. Why attach metadata before chunking rather than after?</summary>
+<p>Information like page number and section heading is known during parsing and lost once text is split. Attaching it first means every chunk inherits accurate metadata for filtering and citations.</p>
+</details>
+<details>
+<summary>3. A user asks you to delete their uploaded file. What must happen in the vector store?</summary>
+<p>Every chunk derived from that file must be deleted too, found by its <code>source</code> metadata. Otherwise the content can still be retrieved and quoted, which is both a privacy and a compliance failure.</p>
+</details>
+<p>⬅️ Back to <a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/../learn/09-rag-evaluation/">RAG Evaluation</a> · ➡️ Next: <a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/../learn/11-production-rag/">Production RAG</a> · 🏠 <a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/../learn/">Notes Index</a></p>
+</article>
+<nav class="pager" aria-label="Module navigation"><a class="pager-link" href="../../learn/09-rag-evaluation/" rel="prev"><small>Previous</small>Evaluating Your RAG Application</a><a class="pager-link next" href="../../learn/11-production-rag/" rel="next"><small>Next</small>Production RAG — Security, Cost, Latency &amp; Monitoring</a></nav>
+<p class="edit"><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/notes/10_document_ingestion_and_parsing.md" rel="noopener">View this page’s source on GitHub</a></p>
+
+</main>
+</div>
+<footer class="site-footer">
+  <p>RAG from Scratch · free and open source on <a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a> · built from <code>notes/</code>, <code>data/raw/</code> and <code>src/pipeline/</code></p>
+</footer>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

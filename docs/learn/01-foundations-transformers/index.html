@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Foundations — Transformers, Tokens &amp; LLM Settings | RAG from Scratch</title>
+<meta name="description" content="Before you build a RAG app, you need to understand the engine inside every LLM: the Transformer.">
+<link rel="canonical" href="https://chadasaiteja.github.io/rag-from-scratch/learn/01-foundations-transformers/">
+<meta name="robots" content="index, follow">
+<meta property="og:site_name" content="RAG from Scratch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Foundations — Transformers, Tokens &amp; LLM Settings | RAG from Scratch">
+<meta property="og:description" content="Before you build a RAG app, you need to understand the engine inside every LLM: the Transformer.">
+<meta property="og:url" content="https://chadasaiteja.github.io/rag-from-scratch/learn/01-foundations-transformers/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Foundations — Transformers, Tokens &amp; LLM Settings | RAG from Scratch">
+<meta name="twitter:description" content="Before you build a RAG app, you need to understand the engine inside every LLM: the Transformer.">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Foundations — Transformers, Tokens & LLM Settings", "name": "Foundations — Transformers, Tokens & LLM Settings", "description": "Before you build a RAG app, you need to understand the engine inside every LLM: the Transformer.", "url": "https://chadasaiteja.github.io/rag-from-scratch/learn/01-foundations-transformers/", "inLanguage": "en", "author": {"@type": "Person", "name": "ChadaSaiteja", "url": "https://github.com/ChadaSaiteja"}, "dateModified": "2026-10-04", "educationalLevel": "Beginner", "isPartOf": {"@type": "Course", "name": "RAG from Scratch", "url": "https://chadasaiteja.github.io/rag-from-scratch/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "Learn", "item": "https://chadasaiteja.github.io/rag-from-scratch/learn/"}, {"@type": "ListItem", "position": 3, "name": "Foundations — Transformers, Tokens & LLM Settings", "item": "https://chadasaiteja.github.io/rag-from-scratch/learn/01-foundations-transformers/"}]}</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../../">RAG <span>from Scratch</span></a>
+  <nav class="topnav" aria-label="Main"><a href="../../">Home</a><a href="../../learn/" aria-current="page">Learn</a><a href="../../implementation/">Implementation</a><a href="../../lessons/">Lessons</a><a href="../../learn/faq/">FAQ</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+</header>
+<div class="layout with-sidebar">
+<aside class="sidebar" aria-label="Course modules">
+  <details class="sidebar-box" open>
+    <summary>Course modules</summary>
+    <ul><li><a href="../../learn/"><span class="num">★</span>How to use these notes</a></li><li><a href="../../learn/00-introduction-to-rag/"><span class="num">00</span>Introduction to RAG</a></li><li><a href="../../learn/01-foundations-transformers/" aria-current="page"><span class="num">01</span>Foundations — Transformers, Tokens &amp; LLM Settings</a></li><li><a href="../../learn/02-embeddings-and-vectors/"><span class="num">02</span>Embeddings — Turning Words into Numbers</a></li><li><a href="../../learn/03-prompting-techniques/"><span class="num">03</span>Prompting Techniques — Talking to the LLM</a></li><li><a href="../../learn/04-chunking-strategies/"><span class="num">04</span>Chunking Strategies — Breaking Documents into Bites</a></li><li><a href="../../learn/05-vector-databases/"><span class="num">05</span>Vector Databases — Your AI&#x27;s Memory</a></li><li><a href="../../learn/06-retrieval-mechanics/"><span class="num">06</span>Retrieval Mechanics — Finding the Needle</a></li><li><a href="../../learn/07-agentic-rag-and-tools/"><span class="num">07</span>Agentic RAG &amp; Tool Calling</a></li><li><a href="../../learn/08-building-your-first-rag-app/"><span class="num">08</span>Build Your First RAG Application</a></li><li><a href="../../learn/09-rag-evaluation/"><span class="num">09</span>Evaluating Your RAG Application</a></li><li><a href="../../learn/10-document-ingestion-and-parsing/"><span class="num">10</span>Document Ingestion &amp; Parsing — The Forgotten Half</a></li><li><a href="../../learn/11-production-rag/"><span class="num">11</span>Production RAG — Security, Cost, Latency &amp; Monitoring</a></li></ul>
+    <p class="sidebar-label">Reference</p><ul><li><a href="../../learn/faq/"><span class="num">❓</span>RAG FAQ: Answers to Common Questions</a></li><li><a href="../../learn/glossary/"><span class="num">📖</span>RAG Glossary</a></li></ul>
+  </details>
+</aside>
+<main id="content">
+<nav class="crumbs" aria-label="Breadcrumb"><a href="../../">Home</a> / <a href="../../learn/">Learn</a> / <span aria-current="page">Foundations — Transformers, Tokens &amp; LLM Settings</span></nav>
+<article class="prose">
+<h1 id="module-1-foundations-transformers-tokens-llm-settings">🧱 Module 1: Foundations — Transformers, Tokens &amp; LLM Settings</h1>
+<p>Before you build a RAG app, you need to understand the engine inside every LLM: the <strong>Transformer</strong>.</p>
+<hr />
+<h2 id="tokens-the-atoms-of-language">🔤 Tokens — the "atoms" of language</h2>
+<p>Models don't read words; they read <strong>tokens</strong> (words, sub-words, characters, or byte-pairs).</p>
+<p><strong>Why it matters:</strong> everything is billed, limited, and measured in tokens. Your RAG prompt = user question + retrieved chunks, so chunk size directly controls token cost.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Key Concept</th>
+<th>Plain-English Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Simplification</td>
+<td>Break text into small learnable units</td>
+</tr>
+<tr>
+<td>Standardization</td>
+<td>Same text → same tokens, every time</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="parameters-the-models-knobs">⚙️ Parameters — the model's "knobs"</h2>
+<p>Parameters are the learned variables that decide how the model behaves. They change during training to reduce prediction error.</p>
+<ul>
+<li><strong>Weights (<code>w</code>)</strong> — how <em>important</em> each feature is.</li>
+<li><strong>Biases (<code>b</code>)</strong> — a baseline shift so a neuron can still fire.</li>
+</ul>
+<pre><code>z = wx + b
+</code></pre>
+<ul>
+<li><strong>Learning rate</strong> — how <em>big</em> each adjustment step is (too big = unstable, too small = slow).</li>
+<li><strong>Activation functions</strong> — convert input signal → output signal (e.g., <strong>ReLU</strong>, <strong>sigmoid</strong>).</li>
+</ul>
+<hr />
+<h2 id="inference-settings-every-rag-developer-must-know">🎛️ Inference settings every RAG developer must know</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>What it does</th>
+<th>Beginner tip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Context window</strong></td>
+<td>Max tokens the model can "see" at once</td>
+<td>Keep retrieved chunks small enough to fit</td>
+</tr>
+<tr>
+<td><strong>Temperature (0–2)</strong></td>
+<td>Randomness. 0 = accurate, 2 = creative, 1 = balanced</td>
+<td>Use <strong>low temp (0–0.3)</strong> for factual RAG answers</td>
+</tr>
+<tr>
+<td><strong>Top-K</strong></td>
+<td>Only sample from the K most likely next tokens</td>
+<td>K=40 is common</td>
+</tr>
+<tr>
+<td><strong>Top-P (nucleus)</strong></td>
+<td>Sample until cumulative probability hits a threshold (e.g. 0.9)</td>
+<td>Alternative to Top-K</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="next-token-prediction-how-llms-talk">🔮 Next-Token Prediction — how LLMs "talk"</h2>
+<p>LLMs don't compose sentences; they <strong>predict the next token</strong> from the previous ones, billions of times over.</p>
+<pre><code>Training loop:
+  predict next token → compare with real answer → adjust weights → repeat
+</code></pre>
+<h3 id="why-hallucinations-happen-day-1">🤥 Why hallucinations happen (Day 1)</h3>
+<ul>
+<li><strong>Confidence in patterns</strong> — plausible-sounding ≠ true.</li>
+<li><strong>No ground truth</strong> — training never verifies facts.</li>
+<li><strong>Training data limits</strong> — bad data in, bad data out.</li>
+<li><strong>Probabilistic nature</strong> — it's guessing, not knowing.</li>
+<li><strong>No real understanding</strong> — statistics, not semantics.</li>
+</ul>
+<blockquote>
+<p>💡 <strong>RAG is the antidote:</strong> give the model real documents as context so it <em>grounds</em> its next-token guesses in facts.</p>
+</blockquote>
+<hr />
+<h2 id="why-context-windows-have-limits-day-7">📏 Why Context Windows Have Limits (Day 7)</h2>
+<ol>
+<li><strong>Quadratic self-attention cost</strong> — every token attends to every other token. 10,000 tokens = <strong>100M comparisons</strong> (O(n²)).</li>
+<li><strong>KV cache memory</strong> — Key/Value vectors stored in VRAM for every generated token; long chats need hundreds of GBs.</li>
+<li><strong>Training length limit</strong> — quality degrades beyond the length seen in training.</li>
+</ol>
+<h3 id="solutions-worth-knowing-for-big-document-rag">Solutions (worth knowing for big-document RAG)</h3>
+<ul>
+<li><strong>Sparse attention (BigBird)</strong> — sliding window + global tokens + random links → quadratic → linear.</li>
+<li><strong>Sliding window attention</strong> — attend only to a fixed neighborhood (O(n·w)); used by Longformer, Mistral.</li>
+<li><strong>KV cache compression</strong> — evict/quantize/merge less important K/V pairs → O(n²) → O(n).</li>
+<li><strong>Summary-based memory</strong> — keep a rolling summary of intent/constraints/decisions instead of the full transcript (LangChain's <code>ConversationSummaryMemory</code>).</li>
+</ul>
+<h3 id="lost-in-the-middle-and-context-rot">🕳️ "Lost in the middle" and context rot</h3>
+<p>Even when everything fits in the window, models don't use it evenly. Research on long-context models (Liu et al., 2023, <em>"Lost in the Middle"</em>) found that facts placed at the <strong>beginning or end</strong> of a long prompt are used far more reliably than facts buried in the <strong>middle</strong>. As prompts get longer, accuracy tends to degrade gradually, an effect often called <strong>context rot</strong>.</p>
+<p>What this means for RAG:</p>
+<ul>
+<li><strong>Fewer, better chunks beat many mediocre ones.</strong> Five relevant chunks outperform twenty loosely related ones.</li>
+<li><strong>Order matters.</strong> Put the most relevant chunk first (a reranker does this for you, Module 6).</li>
+<li><strong>A bigger context window is not a substitute for retrieval.</strong> It raises the ceiling on what fits, not on what the model actually pays attention to.</li>
+</ul>
+<h3 id="worked-example-a-rag-token-budget">🧮 Worked example: a RAG token budget</h3>
+<p>Say your model costs are measured per token and you want answers to stay fast. A typical RAG prompt for one question:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Tokens (approx.)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>System instructions</td>
+<td>150</td>
+</tr>
+<tr>
+<td>5 retrieved chunks × ~250 tokens</td>
+<td>1,250</td>
+</tr>
+<tr>
+<td>User question</td>
+<td>30</td>
+</tr>
+<tr>
+<td><strong>Input total</strong></td>
+<td><strong>~1,430</strong></td>
+</tr>
+<tr>
+<td>Model's answer</td>
+<td>~200</td>
+</tr>
+</tbody>
+</table></div>
+<p>Rough conversions for English text: <strong>1 token ≈ 4 characters ≈ ¾ of a word</strong>. So a 1,000-<em>character</em> chunk (the default in this repo's <code>config.py</code>) is roughly <strong>250 tokens</strong>. Doubling <code>top_k</code> from 5 to 10 nearly doubles input cost and latency, which is why retrieval quality matters more than quantity.</p>
+<blockquote>
+<p>🔗 <strong>Connect to RAG:</strong> chunking exists <em>because</em> of the context window. A good chunking strategy (Module 4) keeps the most relevant facts inside the window while they're still cheap to process.</p>
+</blockquote>
+<hr />
+<h2 id="key-takeaways">✅ Key Takeaways</h2>
+<ul>
+<li>Tokens are the unit of cost, limit, and measurement.</li>
+<li>Temperature/Top-K/Top-P control <em>how</em> the model guesses.</li>
+<li>Hallucinations are inevitable in pure LLMs → <strong>that's why RAG exists</strong>.</li>
+<li>Context windows are finite → chunking + retrieval are mandatory.</li>
+<li>Models attend best to the start and end of a prompt → send fewer, well-ordered chunks.</li>
+</ul>
+<hr />
+<h2 id="in-this-repo">🔗 In this repo</h2>
+<ul>
+<li>The generation model is set by <code>GENERATION_MODEL</code> in <a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/config.py"><code>config.py</code></a>, and <code>hybrid_search.py</code> uses it with <code>temperature=0</code> for query rewriting, so results are repeatable.</li>
+<li><code>CHUNK_SIZE=1000</code> characters ≈ 250 tokens, and <code>RETRIEVAL_K=3</code> per retriever keeps the prompt small.</li>
+</ul>
+<hr />
+<h2 id="self-check">🧠 Self-check</h2>
+<details>
+<summary>1. Why is low temperature (0–0.3) recommended for RAG answers?</summary>
+<p>RAG answers should restate facts from the context, not invent variations. Low temperature makes the model pick the most likely tokens, so answers are more consistent and less likely to drift from the source.</p>
+</details>
+<details>
+<summary>2. A model has a 1M-token context window. Why not skip retrieval and send all documents every time?</summary>
+<p>Cost and latency scale with input tokens on every request, and models use information in the middle of very long prompts less reliably ("lost in the middle"). Retrieval sends only what's relevant: cheaper, faster, and usually more accurate.</p>
+</details>
+<details>
+<summary>3. Roughly how many tokens is a 2,000-character chunk?</summary>
+<p>About 500 tokens, using the rule of thumb 1 token ≈ 4 characters of English text.</p>
+</details>
+<p>➡️ Next: <a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/../learn/02-embeddings-and-vectors/">Embeddings — turning words into numbers</a></p>
+</article>
+<nav class="pager" aria-label="Module navigation"><a class="pager-link" href="../../learn/00-introduction-to-rag/" rel="prev"><small>Previous</small>Introduction to RAG</a><a class="pager-link next" href="../../learn/02-embeddings-and-vectors/" rel="next"><small>Next</small>Embeddings — Turning Words into Numbers</a></nav>
+<p class="edit"><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/notes/01_foundations_transformers.md" rel="noopener">View this page’s source on GitHub</a></p>
+
+</main>
+</div>
+<footer class="site-footer">
+  <p>RAG from Scratch · free and open source on <a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a> · built from <code>notes/</code>, <code>data/raw/</code> and <code>src/pipeline/</code></p>
+</footer>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

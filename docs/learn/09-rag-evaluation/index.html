@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evaluating Your RAG Application | RAG from Scratch</title>
+<meta name="description" content="A RAG app has two moving parts, and either can fail silently:">
+<link rel="canonical" href="https://chadasaiteja.github.io/rag-from-scratch/learn/09-rag-evaluation/">
+<meta name="robots" content="index, follow">
+<meta property="og:site_name" content="RAG from Scratch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Evaluating Your RAG Application | RAG from Scratch">
+<meta property="og:description" content="A RAG app has two moving parts, and either can fail silently:">
+<meta property="og:url" content="https://chadasaiteja.github.io/rag-from-scratch/learn/09-rag-evaluation/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Evaluating Your RAG Application | RAG from Scratch">
+<meta name="twitter:description" content="A RAG app has two moving parts, and either can fail silently:">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Evaluating Your RAG Application", "name": "Evaluating Your RAG Application", "description": "A RAG app has two moving parts, and either can fail silently:", "url": "https://chadasaiteja.github.io/rag-from-scratch/learn/09-rag-evaluation/", "inLanguage": "en", "author": {"@type": "Person", "name": "ChadaSaiteja", "url": "https://github.com/ChadaSaiteja"}, "dateModified": "2026-10-04", "educationalLevel": "Beginner", "isPartOf": {"@type": "Course", "name": "RAG from Scratch", "url": "https://chadasaiteja.github.io/rag-from-scratch/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "Learn", "item": "https://chadasaiteja.github.io/rag-from-scratch/learn/"}, {"@type": "ListItem", "position": 3, "name": "Evaluating Your RAG Application", "item": "https://chadasaiteja.github.io/rag-from-scratch/learn/09-rag-evaluation/"}]}</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../../">RAG <span>from Scratch</span></a>
+  <nav class="topnav" aria-label="Main"><a href="../../">Home</a><a href="../../learn/" aria-current="page">Learn</a><a href="../../implementation/">Implementation</a><a href="../../lessons/">Lessons</a><a href="../../learn/faq/">FAQ</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+</header>
+<div class="layout with-sidebar">
+<aside class="sidebar" aria-label="Course modules">
+  <details class="sidebar-box" open>
+    <summary>Course modules</summary>
+    <ul><li><a href="../../learn/"><span class="num">★</span>How to use these notes</a></li><li><a href="../../learn/00-introduction-to-rag/"><span class="num">00</span>Introduction to RAG</a></li><li><a href="../../learn/01-foundations-transformers/"><span class="num">01</span>Foundations — Transformers, Tokens &amp; LLM Settings</a></li><li><a href="../../learn/02-embeddings-and-vectors/"><span class="num">02</span>Embeddings — Turning Words into Numbers</a></li><li><a href="../../learn/03-prompting-techniques/"><span class="num">03</span>Prompting Techniques — Talking to the LLM</a></li><li><a href="../../learn/04-chunking-strategies/"><span class="num">04</span>Chunking Strategies — Breaking Documents into Bites</a></li><li><a href="../../learn/05-vector-databases/"><span class="num">05</span>Vector Databases — Your AI&#x27;s Memory</a></li><li><a href="../../learn/06-retrieval-mechanics/"><span class="num">06</span>Retrieval Mechanics — Finding the Needle</a></li><li><a href="../../learn/07-agentic-rag-and-tools/"><span class="num">07</span>Agentic RAG &amp; Tool Calling</a></li><li><a href="../../learn/08-building-your-first-rag-app/"><span class="num">08</span>Build Your First RAG Application</a></li><li><a href="../../learn/09-rag-evaluation/" aria-current="page"><span class="num">09</span>Evaluating Your RAG Application</a></li><li><a href="../../learn/10-document-ingestion-and-parsing/"><span class="num">10</span>Document Ingestion &amp; Parsing — The Forgotten Half</a></li><li><a href="../../learn/11-production-rag/"><span class="num">11</span>Production RAG — Security, Cost, Latency &amp; Monitoring</a></li></ul>
+    <p class="sidebar-label">Reference</p><ul><li><a href="../../learn/faq/"><span class="num">❓</span>RAG FAQ: Answers to Common Questions</a></li><li><a href="../../learn/glossary/"><span class="num">📖</span>RAG Glossary</a></li></ul>
+  </details>
+</aside>
+<main id="content">
+<nav class="crumbs" aria-label="Breadcrumb"><a href="../../">Home</a> / <a href="../../learn/">Learn</a> / <span aria-current="page">Evaluating Your RAG Application</span></nav>
+<article class="prose">
+<h1 id="module-9-evaluating-your-rag-application-deep-dive">📏 Module 9: Evaluating Your RAG Application (Deep Dive)</h1>
+<blockquote>
+<p><em>Expands the evaluation section in Module 8 · Sources: Ragas docs, RAGAS paper (arXiv:2309.15217), promptfoo, NVIDIA/IBM RAG eval guides</em></p>
+<p>💡 <em>"You can't improve what you don't measure."</em> — most beginners test RAG by vibes. Production teams <strong>score every stage</strong> and gate releases on those scores.</p>
+</blockquote>
+<hr />
+<h2 id="why-evaluation-is-hard-and-important">🎯 Why evaluation is hard (and important)</h2>
+<p>A RAG app has <strong>two moving parts</strong>, and either can fail silently:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Fails when...</th>
+<th>Symptom</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Retriever</strong></td>
+<td>Wrong chunks retrieved</td>
+<td>Answer is missing facts ("I don't know" too often)</td>
+</tr>
+<tr>
+<td><strong>Generator</strong></td>
+<td>Chunks are right but answer is wrong/unfaithful</td>
+<td>Hallucinations despite good context</td>
+</tr>
+</tbody>
+</table></div>
+<p>If you only measure "does the answer look right?", you can't tell <em>which</em> part to fix. So we score them <strong>separately</strong>.</p>
+<hr />
+<h2 id="the-core-metrics-ragas">📐 The Core Metrics (RAGAS)</h2>
+<h3 id="generator-side">Generator-side</h3>
+<p><strong>1. Faithfulness</strong> — <em>anti-hallucination score</em></p>
+<pre><code>Faithfulness = (claims in answer inferable from context) / (total claims in answer)
+</code></pre>
+<p>Example: answer has 2 claims; only 1 is supported by context → <strong>faithfulness = 0.5</strong>.</p>
+<p><strong>2. Answer Relevancy</strong> — does the answer address the <em>question</em>?</p>
+<pre><code>Answer Relevancy = mean( similarity(question, generated_questions) )
+</code></pre>
+<p>Ragas reverse-engineers questions from the answer and compares them to the original.</p>
+<p><strong>3. Answer Correctness / Similarity</strong> — vs. a known ground-truth answer (factuality + semantic similarity).</p>
+<h3 id="retriever-side">Retriever-side</h3>
+<p><strong>4. Context Precision</strong> — are the <em>relevant</em> chunks ranked <strong>high</strong>?</p>
+<blockquote>
+<p>Uses Average Precision: relevant chunks at the top score higher than relevant chunks buried at position 10.</p>
+</blockquote>
+<p><strong>5. Context Recall</strong> — did retrieval find <strong>all</strong> the info needed?</p>
+<pre><code>Context Recall ≈ TP / (TP + FN)   (estimated against the ground truth)
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Component</th>
+<th>You want...</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Faithfulness</td>
+<td>Generator</td>
+<td>↑ high (≥ 0.9)</td>
+</tr>
+<tr>
+<td>Answer Relevancy</td>
+<td>Generator</td>
+<td>↑ high</td>
+</tr>
+<tr>
+<td>Context Precision</td>
+<td>Retriever</td>
+<td>↑ high</td>
+</tr>
+<tr>
+<td>Context Recall</td>
+<td>Retriever</td>
+<td>↑ high</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="retrieval-metrics-you-can-compute-without-an-llm">🔢 Retrieval metrics you can compute without an LLM</h2>
+<p>Before any LLM-judged metric, check retrieval with plain arithmetic. You only need, for each test question, the ID of the chunk or file that <em>should</em> be found.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Question it answers</th>
+<th>How to compute</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Hit rate @k</strong> (recall@k)</td>
+<td>Did the right source appear in the top k at all?</td>
+<td>Fraction of questions where it did</td>
+</tr>
+<tr>
+<td><strong>MRR</strong> (Mean Reciprocal Rank)</td>
+<td>How high did the first right result appear?</td>
+<td>Average of <code>1 / rank</code> of the first correct result (0 if missing)</td>
+</tr>
+<tr>
+<td><strong>nDCG @k</strong></td>
+<td>Are <em>all</em> relevant results near the top, weighted by position?</td>
+<td>Graded relevance discounted by <code>log2(rank + 1)</code>; use when several chunks are relevant</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="worked-example">🧮 Worked example</h3>
+<p>Three test questions, top-5 retrieval:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Rank of first correct chunk</th>
+<th>Hit @5</th>
+<th>Reciprocal rank</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Q1</td>
+<td>1</td>
+<td>✅</td>
+<td>1.00</td>
+</tr>
+<tr>
+<td>Q2</td>
+<td>3</td>
+<td>✅</td>
+<td>0.33</td>
+</tr>
+<tr>
+<td>Q3</td>
+<td>not retrieved</td>
+<td>❌</td>
+<td>0.00</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Hit rate @5 = 2/3 = 0.67</strong>, <strong>MRR = (1 + 0.33 + 0) / 3 = 0.44</strong>. Hit rate tells you whether the answer was available; MRR tells you whether it was near the top, which matters because of "lost in the middle" (Module 1).</p>
+<pre><code class="language-python">def hit_rate_and_mrr(results, k=5):
+    &quot;&quot;&quot;results: list of (expected_id, retrieved_ids_in_rank_order).&quot;&quot;&quot;
+    hits, rr = 0, 0.0
+    for expected, retrieved in results:
+        top = retrieved[:k]
+        if expected in top:
+            hits += 1
+            rr += 1 / (top.index(expected) + 1)
+    n = len(results)
+    return hits / n, rr / n
+</code></pre>
+<p>These are fast, free and deterministic, so run them on <strong>every</strong> change to chunking, embeddings or retrieval settings.</p>
+<hr />
+<h2 id="step-1-build-a-test-set">🧪 Step 1: Build a test set</h2>
+<p>You need triplets of <strong><code>question</code> + <code>context</code> + <code>ground_truth</code></strong>. Generate them from your own documents:</p>
+<pre><code class="language-python"># ragas 0.2+ API (older tutorials import from ragas.testset.evolutions, which no longer exists)
+from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
+from ragas.embeddings import LangchainEmbeddingsWrapper
+from ragas.llms import LangchainLLMWrapper
+from ragas.testset import TestsetGenerator
+
+generator = TestsetGenerator(
+    llm=LangchainLLMWrapper(ChatGoogleGenerativeAI(model=&quot;gemini-3.5-flash&quot;)),
+    embedding_model=LangchainEmbeddingsWrapper(GoogleGenerativeAIEmbeddings(model=&quot;models/gemini-embedding-001&quot;)),
+)
+testset = generator.generate_with_langchain_docs(docs, testset_size=50)  # docs: LangChain Documents
+testset.to_pandas()  # user_input, reference, reference_contexts, ...
+</code></pre>
+<blockquote>
+<p>⚠️ Always <strong>read and fix</strong> generated questions before trusting them. Synthetic test sets contain some vague or wrong items; 30 reviewed questions beat 300 unreviewed ones.</p>
+</blockquote>
+<p><strong>Rule of thumb:</strong> mirror your real traffic — include short factoid questions <em>and</em> multi-hop reasoning questions.</p>
+<h2 id="step-2-run-the-evaluation">🧪 Step 2: Run the evaluation</h2>
+<pre><code class="language-python">from ragas import EvaluationDataset, evaluate
+from ragas.metrics import Faithfulness, LLMContextPrecisionWithReference, LLMContextRecall, ResponseRelevancy
+
+dataset = EvaluationDataset.from_list([
+    {
+        &quot;user_input&quot;: q,                  # the question
+        &quot;retrieved_contexts&quot;: ctx,        # list[str] actually fed to the LLM
+        &quot;response&quot;: ans,                  # what your pipeline produced
+        &quot;reference&quot;: truth,               # reference answer
+    }
+    for q, ctx, ans, truth in zip(questions, contexts, answers, truths)
+])
+result = evaluate(
+    dataset=dataset,
+    metrics=[Faithfulness(), ResponseRelevancy(), LLMContextPrecisionWithReference(), LLMContextRecall()],
+    llm=judge, embeddings=judge_embeddings,   # wrapped LLM + embeddings, as in Step 1
+)
+print(result)               # per-metric averages, 0..1
+result.to_pandas()          # per-question scores: find the worst cases and read them
+</code></pre>
+<h2 id="step-3-llm-as-a-judge">🧪 Step 3: LLM-as-a-Judge</h2>
+<p>For open-ended answers, have a strong LLM score responses against a rubric (0–5) with the ground truth visible. Cheap, scalable, and correlates well with human review — but log a sample for human spot-checks.</p>
+<h2 id="step-4-ci-quality-gates-block-bad-releases">🧪 Step 4: CI quality gates (block bad releases)</h2>
+<p>Use <strong>promptfoo</strong> to fail a build when a prompt/model change regresses quality:</p>
+<pre><code class="language-yaml"># promptfooconfig.yaml
+prompts:
+  - &quot;Answer using ONLY the context: {{context}}\nQuestion: {{question}}&quot;
+providers: [&quot;google:gemini-3.5-flash&quot;]
+tests:
+  - vars: {context: &quot;Refunds within 30 days&quot;, question: &quot;refund policy?&quot;}
+    assert:
+      - type: llm-rubric
+        value: &quot;must state 30 days&quot;
+      - type: context-faithfulness   # uses the `context` var above
+        threshold: 0.85
+</code></pre>
+<p><strong>Golden rule of release engineering:</strong> a regression in faithfulness or retrieval hit-rate should <strong>block deployment</strong>, not just appear in a dashboard.</p>
+<hr />
+<h2 id="offline-vs-online-evaluation">🌐 Offline vs Online evaluation</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Offline (pre-release)</th>
+<th>Online (production)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>When</td>
+<td>Before shipping</td>
+<td>On live traffic</td>
+</tr>
+<tr>
+<td>Data</td>
+<td>Curated test set</td>
+<td>Real user queries</td>
+</tr>
+<tr>
+<td>Tools</td>
+<td>Ragas, promptfoo</td>
+<td>LangSmith, Langfuse, OpenTelemetry</td>
+</tr>
+<tr>
+<td>Catch</td>
+<td>Regressions</td>
+<td>Drift, staleness, bad edge cases</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Operational metrics to track live:</strong> retrieval hit-rate, chunk relevance, TTFT (time-to-first-token, target p90 &lt; 2s), cost-per-request, and thumbs-up/down feedback.</p>
+<hr />
+<h2 id="diagnosis-matrix-low-score-what-to-fix">🩺 Diagnosis matrix — low score → what to fix</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Low metric</th>
+<th>Likely cause</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Faithfulness</strong></td>
+<td>Noisy/irrelevant chunks in prompt</td>
+<td>Add reranking, lower top-k, strengthen prompt ("only from context")</td>
+</tr>
+<tr>
+<td><strong>Answer Relevancy</strong></td>
+<td>Answer drifts off-topic</td>
+<td>Better prompt, query rewriting</td>
+</tr>
+<tr>
+<td><strong>Context Precision</strong></td>
+<td>Relevant chunks ranked low</td>
+<td>Reranker, hybrid search, better chunking</td>
+</tr>
+<tr>
+<td><strong>Context Recall</strong></td>
+<td>Missing information</td>
+<td>Smaller chunks, metadata filters, more retrieval rounds</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>📊 <strong>Production insight:</strong> most RAG failures concentrate in <strong>retrieval and chunking</strong> (Splunk/Red Hat, 2026) — diagnose those <em>before</em> touching the prompt.</p>
+</blockquote>
+<hr />
+<h2 id="key-takeaways">✅ Key Takeaways</h2>
+<ul>
+<li>Score <strong>retriever and generator separately</strong> — that's the only way to debug.</li>
+<li>RAGAS: faithfulness + answer relevancy (generator), context precision + recall (retriever).</li>
+<li>Generate a test set from your own docs; don't hand-write 50 questions.</li>
+<li>Gate releases on metrics (promptfoo), monitor live traffic (LangSmith).</li>
+<li>Retrieval problems are the most common root cause — check there first.</li>
+<li>Hit rate and MRR are free, deterministic retrieval checks; run them on every change.</li>
+</ul>
+<hr />
+<h2 id="in-this-repo">🔗 In this repo</h2>
+<p><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/evaluation.py"><code>evaluation.py</code></a> is a minimal version of this module:</p>
+<ul>
+<li><strong>Retrieval check:</strong> did the expected source file appear in <code>hybrid_search()</code> results? That's a <strong>hit rate @k</strong> over 5 hand-written questions.</li>
+<li><strong>Generation check:</strong> does the answer contain an expected keyword? A cheap, crude stand-in for faithfulness and correctness.</li>
+<li>Known limitations: only 5 cases, a keyword check that passes easily, and an overloaded-API message that still gets scored. 🧪 <strong>Exercises:</strong> (1) add MRR using <code>hit_rate_and_mrr()</code> above; (2) grow the cases to 20+ questions covering every lesson; (3) replace the keyword check with RAGAS <code>Faithfulness</code>.</li>
+</ul>
+<hr />
+<h2 id="self-check">🧠 Self-check</h2>
+<details>
+<summary>1. Hit rate @5 is 0.95 but MRR is 0.35. What does that tell you?</summary>
+<p>The right chunk is almost always retrieved, but usually not near the top. Add a reranker so the best chunk moves to position 1, or reduce top-k noise.</p>
+</details>
+<details>
+<summary>2. Why score retrieval and generation separately instead of just judging the final answer?</summary>
+<p>A bad answer can come from missing context (retrieval) or from misusing good context (generation). Separate scores tell you which component to fix.</p>
+</details>
+<details>
+<summary>3. Why should a faithfulness regression block a release instead of just showing on a dashboard?</summary>
+<p>Dashboards get ignored, and a faithfulness drop means users get more hallucinated answers. Making it a CI gate forces the regression to be fixed or consciously accepted before it reaches users.</p>
+</details>
+<p>⬅️ Back to <a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/../learn/08-building-your-first-rag-app/">Building Your First RAG App</a> · ➡️ Next: <a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/../learn/10-document-ingestion-and-parsing/">Document Ingestion &amp; Parsing</a></p>
+</article>
+<nav class="pager" aria-label="Module navigation"><a class="pager-link" href="../../learn/08-building-your-first-rag-app/" rel="prev"><small>Previous</small>Build Your First RAG Application</a><a class="pager-link next" href="../../learn/10-document-ingestion-and-parsing/" rel="next"><small>Next</small>Document Ingestion &amp; Parsing — The Forgotten Half</a></nav>
+<p class="edit"><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/notes/09_rag_evaluation.md" rel="noopener">View this page’s source on GitHub</a></p>
+
+</main>
+</div>
+<footer class="site-footer">
+  <p>RAG from Scratch · free and open source on <a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a> · built from <code>notes/</code>, <code>data/raw/</code> and <code>src/pipeline/</code></p>
+</footer>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

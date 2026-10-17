@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chunking Strategies — Breaking Documents into Bites | RAG from Scratch</title>
+<meta name="description" content="1. What kind of data? (PDF, HTML, Markdown, code, tables) 2. Which embedding model? (domain-specific models chunk differently) 3. How long/complex are user…">
+<link rel="canonical" href="https://chadasaiteja.github.io/rag-from-scratch/learn/04-chunking-strategies/">
+<meta name="robots" content="index, follow">
+<meta property="og:site_name" content="RAG from Scratch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Chunking Strategies — Breaking Documents into Bites | RAG from Scratch">
+<meta property="og:description" content="1. What kind of data? (PDF, HTML, Markdown, code, tables) 2. Which embedding model? (domain-specific models chunk differently) 3. How long/complex are user…">
+<meta property="og:url" content="https://chadasaiteja.github.io/rag-from-scratch/learn/04-chunking-strategies/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Chunking Strategies — Breaking Documents into Bites | RAG from Scratch">
+<meta name="twitter:description" content="1. What kind of data? (PDF, HTML, Markdown, code, tables) 2. Which embedding model? (domain-specific models chunk differently) 3. How long/complex are user…">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Chunking Strategies — Breaking Documents into Bites", "name": "Chunking Strategies — Breaking Documents into Bites", "description": "1. What kind of data? (PDF, HTML, Markdown, code, tables) 2. Which embedding model? (domain-specific models chunk differently) 3. How long/complex are user…", "url": "https://chadasaiteja.github.io/rag-from-scratch/learn/04-chunking-strategies/", "inLanguage": "en", "author": {"@type": "Person", "name": "ChadaSaiteja", "url": "https://github.com/ChadaSaiteja"}, "dateModified": "2026-10-04", "educationalLevel": "Beginner", "isPartOf": {"@type": "Course", "name": "RAG from Scratch", "url": "https://chadasaiteja.github.io/rag-from-scratch/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "Learn", "item": "https://chadasaiteja.github.io/rag-from-scratch/learn/"}, {"@type": "ListItem", "position": 3, "name": "Chunking Strategies — Breaking Documents into Bites", "item": "https://chadasaiteja.github.io/rag-from-scratch/learn/04-chunking-strategies/"}]}</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../../">RAG <span>from Scratch</span></a>
+  <nav class="topnav" aria-label="Main"><a href="../../">Home</a><a href="../../learn/" aria-current="page">Learn</a><a href="../../implementation/">Implementation</a><a href="../../lessons/">Lessons</a><a href="../../learn/faq/">FAQ</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+</header>
+<div class="layout with-sidebar">
+<aside class="sidebar" aria-label="Course modules">
+  <details class="sidebar-box" open>
+    <summary>Course modules</summary>
+    <ul><li><a href="../../learn/"><span class="num">★</span>How to use these notes</a></li><li><a href="../../learn/00-introduction-to-rag/"><span class="num">00</span>Introduction to RAG</a></li><li><a href="../../learn/01-foundations-transformers/"><span class="num">01</span>Foundations — Transformers, Tokens &amp; LLM Settings</a></li><li><a href="../../learn/02-embeddings-and-vectors/"><span class="num">02</span>Embeddings — Turning Words into Numbers</a></li><li><a href="../../learn/03-prompting-techniques/"><span class="num">03</span>Prompting Techniques — Talking to the LLM</a></li><li><a href="../../learn/04-chunking-strategies/" aria-current="page"><span class="num">04</span>Chunking Strategies — Breaking Documents into Bites</a></li><li><a href="../../learn/05-vector-databases/"><span class="num">05</span>Vector Databases — Your AI&#x27;s Memory</a></li><li><a href="../../learn/06-retrieval-mechanics/"><span class="num">06</span>Retrieval Mechanics — Finding the Needle</a></li><li><a href="../../learn/07-agentic-rag-and-tools/"><span class="num">07</span>Agentic RAG &amp; Tool Calling</a></li><li><a href="../../learn/08-building-your-first-rag-app/"><span class="num">08</span>Build Your First RAG Application</a></li><li><a href="../../learn/09-rag-evaluation/"><span class="num">09</span>Evaluating Your RAG Application</a></li><li><a href="../../learn/10-document-ingestion-and-parsing/"><span class="num">10</span>Document Ingestion &amp; Parsing — The Forgotten Half</a></li><li><a href="../../learn/11-production-rag/"><span class="num">11</span>Production RAG — Security, Cost, Latency &amp; Monitoring</a></li></ul>
+    <p class="sidebar-label">Reference</p><ul><li><a href="../../learn/faq/"><span class="num">❓</span>RAG FAQ: Answers to Common Questions</a></li><li><a href="../../learn/glossary/"><span class="num">📖</span>RAG Glossary</a></li></ul>
+  </details>
+</aside>
+<main id="content">
+<nav class="crumbs" aria-label="Breadcrumb"><a href="../../">Home</a> / <a href="../../learn/">Learn</a> / <span aria-current="page">Chunking Strategies — Breaking Documents into Bites</span></nav>
+<article class="prose">
+<h1 id="module-4-chunking-strategies-breaking-documents-into-bites">✂️ Module 4: Chunking Strategies — Breaking Documents into Bites</h1>
+<p><strong>Chunking</strong> = breaking a large document into smaller segments. The trick: chunks big enough to hold meaning, small enough to stay focused.</p>
+<hr />
+<h2 id="why-do-we-need-chunking">❓ Why do we need chunking?</h2>
+<ul>
+<li>LLMs have a <strong>context limit</strong> (Module 1).</li>
+<li>Loading everything = hallucinations + excessive token usage.</li>
+<li>Retrieval works best when the unit of search matches the unit of answer.</li>
+</ul>
+<h2 id="choosing-a-strategy-ask-yourself">🤔 Choosing a strategy — ask yourself:</h2>
+<ol>
+<li><strong>What kind of data?</strong> (PDF, HTML, Markdown, code, tables)</li>
+<li><strong>Which embedding model?</strong> (domain-specific models chunk differently)</li>
+<li><strong>How long/complex are user queries?</strong> (short queries → smaller, focused chunks)</li>
+<li><strong>How will results be used?</strong> (semantic search vs. RAG vs. agentic workflow)</li>
+</ol>
+<hr />
+<h2 id="chunking-methods">🔨 Chunking Methods</h2>
+<h3 id="1-fixed-size-chunking">1. Fixed-size chunking</h3>
+<p>Pick a size (e.g. 500 tokens) + overlap (e.g. 50) and slice. Fast, but can cut mid-sentence.</p>
+<h3 id="2-content-aware-chunking">2. Content-aware chunking</h3>
+<p>Respects the document's structure:</p>
+<ul>
+<li><strong>Naive splitter</strong> — splits on <code>,</code>, <code>.</code>, newlines, whitespace.</li>
+<li><strong>NLTK</strong> — trained sentence tokenizer → more meaningful chunks.</li>
+<li><strong>spaCy</strong> — powerful NLP library for sentence/entity-aware splitting.</li>
+</ul>
+<h3 id="3-recursive-character-level-chunking">3. Recursive character-level chunking ⭐</h3>
+<p>LangChain's <code>RecursiveCharacterTextSplitter</code> splits on a priority list of separators (e.g. <code>["\n\n", "\n", ".", " "]</code>) until chunks fit the size. <strong>Best default for general text.</strong></p>
+<h3 id="4-document-structure-based">4. Document structure-based</h3>
+<ul>
+<li><strong>PDF</strong> — headings/subheadings first (LangChain has cleanup utilities).</li>
+<li><strong>HTML</strong> — parse tags, or use LangChain splitters.</li>
+<li><strong>Markdown</strong> — chunk by headers/sections.</li>
+<li><strong>LaTeX</strong> — chunk by its own syntax.</li>
+</ul>
+<h3 id="5-semantic-chunking">5. Semantic chunking</h3>
+<ol>
+<li>Break into sentences.</li>
+<li>Group sentences with neighbors.</li>
+<li>Embed each group.</li>
+<li>Split where consecutive embeddings <em>diverge</em> (topic shift).</li>
+</ol>
+<h3 id="6-contextual-chunking">6. Contextual chunking</h3>
+<p>Add a small context prefix to each chunk (e.g., the doc title + section heading) so chunks make sense <em>out of context</em> — a 2024–2026 best practice that boosts retrieval recall.</p>
+<hr />
+<h2 id="code-recursive-splitting-in-action">💻 Code: Recursive Splitting in Action</h2>
+<pre><code class="language-python">from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+text = &quot;&quot;&quot;# Order Installation Guide
+
+## 1. Order Lifecycle
+When a customer places an order, the order is first created in the ordering system...
+...
+&quot;&quot;&quot;
+
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=10)
+texts = text_splitter.split_text(text)
+
+print(texts)          # list of chunks
+print(len(texts))     # how many chunks we got
+</code></pre>
+<p><strong>Why overlap?</strong> A sentence split across two chunks can be found from <em>either</em> side. Overlap (typically 10–20% of chunk size) prevents "lost information" at boundaries.</p>
+<blockquote>
+<p>⚠️ <strong>Beginner trap: characters, not tokens.</strong> <code>chunk_size</code> in <code>RecursiveCharacterTextSplitter</code> counts <strong>characters</strong> by default. <code>chunk_size=500</code> is about 125 tokens, not 500. If you want to size chunks in tokens (which is what models and costs care about), use a token-aware length function:</p>
+</blockquote>
+<pre><code class="language-python">splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
+    chunk_size=400, chunk_overlap=50   # now measured in tokens (needs: pip install tiktoken)
+)
+</code></pre>
+<h3 id="worked-example-how-many-chunks">🧮 Worked example: how many chunks?</h3>
+<p>A 40,000-character document with <code>chunk_size=1000</code> and <code>chunk_overlap=200</code>:</p>
+<ul>
+<li>Each new chunk advances by roughly <code>1000 − 200 = 800</code> characters.</li>
+<li><code>40,000 / 800 ≈ 50</code> chunks (a few more or less, because the splitter prefers to break at paragraphs and sentences).</li>
+<li>Without overlap you'd get about 40 chunks. The extra ~10 chunks are the price of not losing facts at boundaries: about 25% more embedding cost and storage.</li>
+</ul>
+<h3 id="structure-aware-splitting-for-markdown">📑 Structure-aware splitting for Markdown</h3>
+<p>Splitting on headings first keeps each chunk inside one topic and gives you free metadata:</p>
+<pre><code class="language-python">from langchain_text_splitters import MarkdownHeaderTextSplitter, RecursiveCharacterTextSplitter
+
+header_splitter = MarkdownHeaderTextSplitter(
+    headers_to_split_on=[(&quot;#&quot;, &quot;title&quot;), (&quot;##&quot;, &quot;section&quot;)]
+)
+sections = header_splitter.split_text(markdown_text)  # Documents with title/section metadata
+
+# Then cap the size of very long sections
+size_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
+chunks = size_splitter.split_documents(sections)
+print(chunks[0].metadata)  # {'title': 'Order Installation Guide', 'section': '1. Order Lifecycle'}
+</code></pre>
+<h3 id="beginner-experiment">🧪 Beginner experiment</h3>
+<p>Run the same text with <code>chunk_size=100</code> vs <code>chunk_size=500</code> and compare <code>len(texts)</code>. Then embed each chunk (Module 2) and search for <em>"When is an order created?"</em> — notice which chunk size retrieves the right answer.</p>
+<hr />
+<h2 id="2026-best-practice-stack-from-production-research">🏆 2026 Best-Practice Stack (from production research)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Strategy</td>
+<td>Structure-aware first (headers/sections), then recursive fallback</td>
+</tr>
+<tr>
+<td>Size</td>
+<td>300–800 tokens for most docs; smaller for FAQs, larger for narrative</td>
+</tr>
+<tr>
+<td>Overlap</td>
+<td>10–20% of chunk size</td>
+</tr>
+<tr>
+<td>Metadata</td>
+<td>Attach <code>source</code>, <code>page</code>, <code>section</code>, <code>date</code> to every chunk</td>
+</tr>
+<tr>
+<td>Contextual prefix</td>
+<td>Prepend doc title + heading to each chunk before embedding</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>💡 <strong>Golden rule:</strong> your embedding model's max input length caps your chunk size. Never exceed it; check your model's documented limit (for example, about 2,048 tokens for <code>gemini-embedding-001</code>). Text beyond the limit is typically truncated or rejected.</p>
+</blockquote>
+<h3 id="symptoms-of-bad-chunking">🩺 Symptoms of bad chunking</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Likely cause</th>
+<th>Try</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Answers miss a detail that's clearly in the document</td>
+<td>Chunks too big; the detail is diluted by unrelated text</td>
+<td>Smaller chunks, structure-aware splitting</td>
+</tr>
+<tr>
+<td>Answers lack context ("it", "this policy" with no referent)</td>
+<td>Chunks too small or cut mid-thought</td>
+<td>Larger chunks, more overlap, contextual prefixes</td>
+</tr>
+<tr>
+<td>Same passage retrieved several times</td>
+<td>Very high overlap or duplicate ingestion</td>
+<td>Lower overlap; deduplicate; use deterministic IDs (Module 10)</td>
+</tr>
+<tr>
+<td>Tables or code come back mangled</td>
+<td>Splitter broke structured content</td>
+<td>Split tables and code blocks as whole units</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="key-takeaways">✅ Key Takeaways</h2>
+<ul>
+<li>Chunk size is the #1 lever of RAG quality.</li>
+<li>Recursive character splitting is the safe default.</li>
+<li>Semantic + contextual chunking = premium retrieval.</li>
+<li>Always carry metadata — it powers filtering later.</li>
+<li><code>chunk_size</code> is measured in characters unless you use a token-based length function.</li>
+</ul>
+<hr />
+<h2 id="in-this-repo">🔗 In this repo</h2>
+<ul>
+<li><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/ingest.py"><code>ingest.py</code></a> → <code>chunk()</code> uses <code>RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE)</code> with <code>CHUNK_SIZE=1000</code> <strong>characters</strong> (≈250 tokens). Overlap isn't set, so LangChain's default of 200 characters applies.</li>
+<li>Each chunk copies its parent's metadata (<code>source</code> and <code>filename</code>), which is what makes citations possible later in <code>generation.py</code>.</li>
+<li>Read the matching lesson: <a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/data/raw/03_chunking.txt"><code>data/raw/03_chunking.txt</code></a>.</li>
+<li>🧪 <strong>Exercise:</strong> set <code>CHUNK_SIZE=400</code> in <code>.env</code>, delete <code>chroma_gemini_db/</code>, re-ingest, and compare <code>evaluation.py</code> scores before and after.</li>
+</ul>
+<hr />
+<h2 id="self-check">🧠 Self-check</h2>
+<details>
+<summary>1. You set chunk_size=500 expecting 500-token chunks. What did you actually get?</summary>
+<p>About 500 <em>characters</em>, roughly 125 tokens, because <code>RecursiveCharacterTextSplitter</code> measures length in characters by default. Use <code>from_tiktoken_encoder()</code> to size chunks in tokens.</p>
+</details>
+<details>
+<summary>2. What problem does chunk overlap solve, and what does it cost?</summary>
+<p>It keeps a sentence or idea that straddles a boundary fully present in at least one chunk. The cost is more chunks: more embedding calls, more storage, and some duplicate text in retrieval results.</p>
+</details>
+<details>
+<summary>3. Your FAQ document has one question and answer per paragraph. What chunking strategy fits best?</summary>
+<p>Split on the natural unit, one Q&amp;A pair per chunk (structure-aware splitting), so each retrieved chunk is a complete answer. Small fixed-size chunks would split answers apart; huge chunks would mix unrelated questions.</p>
+</details>
+<p>➡️ Next: <a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/../learn/05-vector-databases/">Vector Databases — your AI's memory</a></p>
+</article>
+<nav class="pager" aria-label="Module navigation"><a class="pager-link" href="../../learn/03-prompting-techniques/" rel="prev"><small>Previous</small>Prompting Techniques — Talking to the LLM</a><a class="pager-link next" href="../../learn/05-vector-databases/" rel="next"><small>Next</small>Vector Databases — Your AI&#x27;s Memory</a></nav>
+<p class="edit"><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/notes/04_chunking_strategies.md" rel="noopener">View this page’s source on GitHub</a></p>
+
+</main>
+</div>
+<footer class="site-footer">
+  <p>RAG from Scratch · free and open source on <a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a> · built from <code>notes/</code>, <code>data/raw/</code> and <code>src/pipeline/</code></p>
+</footer>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

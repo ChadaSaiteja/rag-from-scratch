@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vector Databases for RAG — RAG Lesson 05 | RAG from Scratch</title>
+<meta name="description" content="A vector database stores embeddings and supports similarity search. Conceptual record: ID TEXT VECTOR METADATA Example: ID: chunk-123 TEXT: &quot;The installation…">
+<link rel="canonical" href="https://chadasaiteja.github.io/rag-from-scratch/lessons/05-vector-database/">
+<meta name="robots" content="index, follow">
+<meta property="og:site_name" content="RAG from Scratch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Vector Databases for RAG — RAG Lesson 05 | RAG from Scratch">
+<meta property="og:description" content="A vector database stores embeddings and supports similarity search. Conceptual record: ID TEXT VECTOR METADATA Example: ID: chunk-123 TEXT: &quot;The installation…">
+<meta property="og:url" content="https://chadasaiteja.github.io/rag-from-scratch/lessons/05-vector-database/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Vector Databases for RAG — RAG Lesson 05 | RAG from Scratch">
+<meta name="twitter:description" content="A vector database stores embeddings and supports similarity search. Conceptual record: ID TEXT VECTOR METADATA Example: ID: chunk-123 TEXT: &quot;The installation…">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "Vector Databases for RAG", "description": "A vector database stores embeddings and supports similarity search. Conceptual record: ID TEXT VECTOR METADATA Example: ID: chunk-123 TEXT: \"The installation…", "url": "https://chadasaiteja.github.io/rag-from-scratch/lessons/05-vector-database/", "inLanguage": "en", "educationalLevel": "Beginner", "dateModified": "2026-09-29", "isPartOf": {"@type": "Course", "name": "RAG from Scratch", "url": "https://chadasaiteja.github.io/rag-from-scratch/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "Lessons", "item": "https://chadasaiteja.github.io/rag-from-scratch/lessons/"}, {"@type": "ListItem", "position": 3, "name": "Vector Databases for RAG", "item": "https://chadasaiteja.github.io/rag-from-scratch/lessons/05-vector-database/"}]}</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../../">RAG <span>from Scratch</span></a>
+  <nav class="topnav" aria-label="Main"><a href="../../">Home</a><a href="../../learn/">Learn</a><a href="../../implementation/">Implementation</a><a href="../../lessons/" aria-current="page">Lessons</a><a href="../../learn/faq/">FAQ</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+</header>
+<div class="layout no-sidebar">
+
+<main id="content">
+<nav class="crumbs" aria-label="Breadcrumb"><a href="../../">Home</a> / <a href="../../lessons/">Lessons</a> / <span aria-current="page">Vector Databases for RAG</span></nav>
+<article class="prose">
+<p class="eyebrow">Lesson 05</p>
+<h1>Vector Databases for RAG</h1>
+<p>A vector database stores embeddings and supports similarity search.</p>
+<p>Conceptual record:</p>
+<h2>ID</h2>
+<p>TEXT<br>VECTOR<br>METADATA</p>
+<p>Example:</p>
+<h3>ID</h3>
+<p>chunk-123</p>
+<h3>TEXT</h3>
+<p>&quot;The installation appointment is scheduled after all dependencies are resolved.&quot;</p>
+<h3>VECTOR</h3>
+<p>[0.14, -0.28, 0.91, ...]</p>
+<h3>METADATA</h3>
+<p>source = installation.md<br>section = scheduling<br>page = 7</p>
+<h3>When a user asks a question</h3>
+<p>1. Convert the question into an embedding.<br>2. Search the vector database.<br>3. Find nearby vectors.<br>4. Return their associated text and metadata.</p>
+<p>Top-k means how many results are returned.</p>
+<h3>For example</h3>
+<p>top_k = 5</p>
+<p>The system retrieves the five highest-ranked candidates.</p>
+<p>More results are not automatically better.</p>
+<p>If top_k is too small, relevant evidence may be missed.<br>If top_k is too large, the context may contain noise.</p>
+<p>Metadata filtering can greatly improve retrieval.</p>
+<h3>Example</h3>
+<p>Retrieve only:<br>document_type = &quot;installation_guide&quot;<br>version = &quot;3.2&quot;</p>
+<p>Vector databases are useful for semantic retrieval, but they do not replace ordinary databases.</p>
+<h3>Use a relational database when you need</h3>
+<ul><li>transactions</li><li>exact records</li><li>joins</li><li>constraints</li><li>reliable updates</li></ul>
+<h3>Use vector search when you need</h3>
+<ul><li>semantic similarity</li><li>natural-language retrieval</li><li>fuzzy conceptual matching</li></ul>
+<p>Many real applications use both.</p>
+</article>
+<nav class="pager" aria-label="Module navigation"><a class="pager-link" href="../../lessons/04-embeddings-and-vectors/" rel="prev"><small>Previous</small>Embeddings and Vector Search</a><a class="pager-link next" href="../../lessons/06-retrieval/" rel="next"><small>Next</small>Retrieval in RAG</a></nav>
+<p class="edit"><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/data/raw/05_vector_database.txt" rel="noopener">View the raw lesson file on GitHub</a></p>
+
+</main>
+</div>
+<footer class="site-footer">
+  <p>RAG from Scratch · free and open source on <a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a> · built from <code>notes/</code>, <code>data/raw/</code> and <code>src/pipeline/</code></p>
+</footer>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAG Hands-on Project — RAG Lesson 10 | RAG from Scratch</title>
+<meta name="description" content="Build a small local RAG system from the supplied learning documents. Goal: Ask questions and retrieve the most relevant chunks. Stage 1: Ingestion Load all…">
+<link rel="canonical" href="https://chadasaiteja.github.io/rag-from-scratch/lessons/10-rag-project-exercise/">
+<meta name="robots" content="index, follow">
+<meta property="og:site_name" content="RAG from Scratch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RAG Hands-on Project — RAG Lesson 10 | RAG from Scratch">
+<meta property="og:description" content="Build a small local RAG system from the supplied learning documents. Goal: Ask questions and retrieve the most relevant chunks. Stage 1: Ingestion Load all…">
+<meta property="og:url" content="https://chadasaiteja.github.io/rag-from-scratch/lessons/10-rag-project-exercise/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="RAG Hands-on Project — RAG Lesson 10 | RAG from Scratch">
+<meta name="twitter:description" content="Build a small local RAG system from the supplied learning documents. Goal: Ask questions and retrieve the most relevant chunks. Stage 1: Ingestion Load all…">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "RAG Hands-on Project", "description": "Build a small local RAG system from the supplied learning documents. Goal: Ask questions and retrieve the most relevant chunks. Stage 1: Ingestion Load all…", "url": "https://chadasaiteja.github.io/rag-from-scratch/lessons/10-rag-project-exercise/", "inLanguage": "en", "educationalLevel": "Beginner", "dateModified": "2026-09-29", "isPartOf": {"@type": "Course", "name": "RAG from Scratch", "url": "https://chadasaiteja.github.io/rag-from-scratch/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "Lessons", "item": "https://chadasaiteja.github.io/rag-from-scratch/lessons/"}, {"@type": "ListItem", "position": 3, "name": "RAG Hands-on Project", "item": "https://chadasaiteja.github.io/rag-from-scratch/lessons/10-rag-project-exercise/"}]}</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../../">RAG <span>from Scratch</span></a>
+  <nav class="topnav" aria-label="Main"><a href="../../">Home</a><a href="../../learn/">Learn</a><a href="../../implementation/">Implementation</a><a href="../../lessons/" aria-current="page">Lessons</a><a href="../../learn/faq/">FAQ</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+</header>
+<div class="layout no-sidebar">
+
+<main id="content">
+<nav class="crumbs" aria-label="Breadcrumb"><a href="../../">Home</a> / <a href="../../lessons/">Lessons</a> / <span aria-current="page">RAG Hands-on Project</span></nav>
+<article class="prose">
+<p class="eyebrow">Lesson 10</p>
+<h1>RAG Hands-on Project</h1>
+<p>Build a small local RAG system from the supplied learning documents.</p>
+<h3>Goal</h3>
+<p>Ask questions and retrieve the most relevant chunks.</p>
+<h2>Stage 1: Ingestion</h2>
+<p>Load all .txt or .md files from a directory.</p>
+<h3>For each document</h3>
+<ul><li>read text</li><li>split into chunks</li><li>attach source filename</li><li>store chunks</li></ul>
+<h2>Stage 2: Chunking experiment</h2>
+<p>Create two versions.</p>
+<h3>Version A</h3>
+<p>chunk_size = 500<br>overlap = 0</p>
+<h3>Version B</h3>
+<p>chunk_size = 500<br>overlap = 100</p>
+<p>Inspect at least 10 chunks from both.</p>
+<h3>Ask</h3>
+<ul><li>Which chunks preserve complete ideas?</li><li>Where are boundaries awkward?</li><li>Which version contains more duplicate text?</li></ul>
+<h2>Stage 3: Embeddings</h2>
+<p>Create embeddings for every chunk.</p>
+<h3>Store</h3>
+<p>chunk_id<br>text<br>source<br>embedding</p>
+<h2>Stage 4: Retrieval</h2>
+<p>For a query:<br>- create query embedding<br>- calculate similarity<br>- return top 3 or top 5 chunks</p>
+<h3>Try</h3>
+<p>&quot;What is the difference between chunk size and overlap?&quot;</p>
+<h3>Then try</h3>
+<p>&quot;Why might exact order IDs require more than semantic vector search?&quot;</p>
+<h2>Stage 5: Generation</h2>
+<p>Send the retrieved chunks to an LLM.</p>
+<h3>Prompt</h3>
+<p>&quot;Answer the question using only the supplied context. If the context does not contain the answer, say that the information is unavailable.&quot;</p>
+<h2>Stage 6: Evaluation</h2>
+<p>Create 10 questions.</p>
+<h3>For each question record</h3>
+<ul><li>expected source</li><li>retrieved top 3</li><li>answer</li><li>whether evidence was sufficient</li></ul>
+<p>Then change chunking and compare results.</p>
+<p>The objective is not to build a sophisticated application.</p>
+<p>The objective is to understand the pipeline:</p>
+<h2>Documents</h2>
+<p> -&gt; ingestion<br> -&gt; chunks<br> -&gt; embeddings<br> -&gt; vector storage<br> -&gt; query embedding<br> -&gt; retrieval<br> -&gt; context<br> -&gt; LLM<br> -&gt; answer</p>
+<p>Once you understand this pipeline, frameworks become much easier to learn because you know what the framework is actually doing.</p>
+</article>
+<nav class="pager" aria-label="Module navigation"><a class="pager-link" href="../../lessons/09-metadata-and-filtering/" rel="prev"><small>Previous</small>Metadata in RAG</a><span></span></nav>
+<p class="edit"><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/data/raw/10_rag_project_exercise.txt" rel="noopener">View the raw lesson file on GitHub</a></p>
+
+</main>
+</div>
+<footer class="site-footer">
+  <p>RAG from Scratch · free and open source on <a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a> · built from <code>notes/</code>, <code>data/raw/</code> and <code>src/pipeline/</code></p>
+</footer>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

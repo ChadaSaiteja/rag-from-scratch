@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Embeddings — Turning Words into Numbers | RAG from Scratch</title>
+<meta name="description" content="Computers don&#x27;t understand language — they understand numbers. An embedding is a numerical representation (a vector) that captures the meaning of a word…">
+<link rel="canonical" href="https://chadasaiteja.github.io/rag-from-scratch/learn/02-embeddings-and-vectors/">
+<meta name="robots" content="index, follow">
+<meta property="og:site_name" content="RAG from Scratch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Embeddings — Turning Words into Numbers | RAG from Scratch">
+<meta property="og:description" content="Computers don&#x27;t understand language — they understand numbers. An embedding is a numerical representation (a vector) that captures the meaning of a word…">
+<meta property="og:url" content="https://chadasaiteja.github.io/rag-from-scratch/learn/02-embeddings-and-vectors/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Embeddings — Turning Words into Numbers | RAG from Scratch">
+<meta name="twitter:description" content="Computers don&#x27;t understand language — they understand numbers. An embedding is a numerical representation (a vector) that captures the meaning of a word…">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Embeddings — Turning Words into Numbers", "name": "Embeddings — Turning Words into Numbers", "description": "Computers don't understand language — they understand numbers. An embedding is a numerical representation (a vector) that captures the meaning of a word…", "url": "https://chadasaiteja.github.io/rag-from-scratch/learn/02-embeddings-and-vectors/", "inLanguage": "en", "author": {"@type": "Person", "name": "ChadaSaiteja", "url": "https://github.com/ChadaSaiteja"}, "dateModified": "2026-10-04", "educationalLevel": "Beginner", "isPartOf": {"@type": "Course", "name": "RAG from Scratch", "url": "https://chadasaiteja.github.io/rag-from-scratch/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "Learn", "item": "https://chadasaiteja.github.io/rag-from-scratch/learn/"}, {"@type": "ListItem", "position": 3, "name": "Embeddings — Turning Words into Numbers", "item": "https://chadasaiteja.github.io/rag-from-scratch/learn/02-embeddings-and-vectors/"}]}</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../../">RAG <span>from Scratch</span></a>
+  <nav class="topnav" aria-label="Main"><a href="../../">Home</a><a href="../../learn/" aria-current="page">Learn</a><a href="../../implementation/">Implementation</a><a href="../../lessons/">Lessons</a><a href="../../learn/faq/">FAQ</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+</header>
+<div class="layout with-sidebar">
+<aside class="sidebar" aria-label="Course modules">
+  <details class="sidebar-box" open>
+    <summary>Course modules</summary>
+    <ul><li><a href="../../learn/"><span class="num">★</span>How to use these notes</a></li><li><a href="../../learn/00-introduction-to-rag/"><span class="num">00</span>Introduction to RAG</a></li><li><a href="../../learn/01-foundations-transformers/"><span class="num">01</span>Foundations — Transformers, Tokens &amp; LLM Settings</a></li><li><a href="../../learn/02-embeddings-and-vectors/" aria-current="page"><span class="num">02</span>Embeddings — Turning Words into Numbers</a></li><li><a href="../../learn/03-prompting-techniques/"><span class="num">03</span>Prompting Techniques — Talking to the LLM</a></li><li><a href="../../learn/04-chunking-strategies/"><span class="num">04</span>Chunking Strategies — Breaking Documents into Bites</a></li><li><a href="../../learn/05-vector-databases/"><span class="num">05</span>Vector Databases — Your AI&#x27;s Memory</a></li><li><a href="../../learn/06-retrieval-mechanics/"><span class="num">06</span>Retrieval Mechanics — Finding the Needle</a></li><li><a href="../../learn/07-agentic-rag-and-tools/"><span class="num">07</span>Agentic RAG &amp; Tool Calling</a></li><li><a href="../../learn/08-building-your-first-rag-app/"><span class="num">08</span>Build Your First RAG Application</a></li><li><a href="../../learn/09-rag-evaluation/"><span class="num">09</span>Evaluating Your RAG Application</a></li><li><a href="../../learn/10-document-ingestion-and-parsing/"><span class="num">10</span>Document Ingestion &amp; Parsing — The Forgotten Half</a></li><li><a href="../../learn/11-production-rag/"><span class="num">11</span>Production RAG — Security, Cost, Latency &amp; Monitoring</a></li></ul>
+    <p class="sidebar-label">Reference</p><ul><li><a href="../../learn/faq/"><span class="num">❓</span>RAG FAQ: Answers to Common Questions</a></li><li><a href="../../learn/glossary/"><span class="num">📖</span>RAG Glossary</a></li></ul>
+  </details>
+</aside>
+<main id="content">
+<nav class="crumbs" aria-label="Breadcrumb"><a href="../../">Home</a> / <a href="../../learn/">Learn</a> / <span aria-current="page">Embeddings — Turning Words into Numbers</span></nav>
+<article class="prose">
+<h1 id="module-2-embeddings-turning-words-into-numbers">🔢 Module 2: Embeddings — Turning Words into Numbers</h1>
+<p>Computers don't understand language — they understand <strong>numbers</strong>. An <strong>embedding</strong> is a numerical representation (a vector) that captures the <em>meaning</em> of a word, sentence, or document.</p>
+<hr />
+<h2 id="the-core-idea-meaning-position-in-space">🧭 The Core Idea: Meaning = Position in Space</h2>
+<p>Every piece of text becomes a point in a multi-dimensional space. <strong>Similar meanings land near each other.</strong></p>
+<pre><code>A = &quot;I love football&quot;
+B = &quot;I love soccer&quot;
+→ A and B point in almost the same direction, even though the words differ.
+</code></pre>
+<p>This is the magic that powers RAG retrieval: your query and the right document can use <em>different words</em> but still be <em>semantically close</em>.</p>
+<hr />
+<h2 id="process-of-creating-vector-embeddings">🏭 Process of Creating Vector Embeddings</h2>
+<ol>
+<li><strong>Get the raw data</strong> — documents, PDFs, web pages.</li>
+<li><strong>Clean the data</strong> — tokenization, noise removal, preprocessing.</li>
+<li><strong>Break into tokens</strong> — small individual pieces.</li>
+<li><strong>Convert tokens → numerical vectors</strong> — via an embedding model (e.g., Google <code>gemini-embedding-001</code>, which this repo uses, OpenAI <code>text-embedding-3</code>, Cohere Embed, or open-source BAAI/bge).</li>
+</ol>
+<hr />
+<h2 id="measuring-similarity-cosine-similarity">📐 Measuring Similarity: Cosine Similarity</h2>
+<p>Instead of distance, we measure the <strong>angle</strong> between two vectors:</p>
+<pre><code>cosine_similarity(A, B) = (A · B) / (||A|| × ||B||)
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Score</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1.0</strong></td>
+<td>Very similar direction</td>
+</tr>
+<tr>
+<td><strong>0.8</strong></td>
+<td>Strongly similar</td>
+</tr>
+<tr>
+<td><strong>0.5</strong></td>
+<td>Somewhat related</td>
+</tr>
+<tr>
+<td><strong>0.0</strong></td>
+<td>Little/no relationship</td>
+</tr>
+<tr>
+<td><strong>-1.0</strong></td>
+<td>Opposite direction</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="semantic-relationships">🧠 Semantic Relationships</h2>
+<p>Embeddings capture <em>meaning</em>, so math works on concepts:</p>
+<pre><code>        KING (●)
+         ↑  gender relationship
+        MAN (●)
+
+  Replace &quot;man&quot; with &quot;woman&quot;  →  KING − MAN + WOMAN ≈ QUEEN
+</code></pre>
+<hr />
+<h2 id="code-generate-compare-embeddings">💻 Code: Generate &amp; Compare Embeddings</h2>
+<pre><code class="language-python">import os
+import numpy as np
+from dotenv import load_dotenv
+load_dotenv()
+from google import genai
+
+client = genai.Client(api_key=os.getenv(&quot;GOOGLE_API_KEY&quot;))
+
+sentences = [
+    &quot;I love playing football.&quot;,
+    &quot;I really enjoy playing soccer.&quot;,
+    &quot;Football is my favorite sport.&quot;,
+    &quot;I like eating pizza.&quot;,
+    &quot;The weather is very cold today.&quot;,
+]
+
+# 1. Convert each sentence into a vector
+embedding_list = [
+    client.models.embed_content(
+        model=&quot;gemini-embedding-001&quot;, contents=sentence
+    ).embeddings[0].values
+    for sentence in sentences
+]
+
+# 2. Compare every pair with cosine similarity
+def cosine_similarity(a, b):
+    return np.dot(a, b) / np.linalg.norm(a) / np.linalg.norm(b)
+
+for i in range(len(embedding_list)):
+    for j in range(i + 1, len(embedding_list)):
+        sim = cosine_similarity(np.array(embedding_list[i]), np.array(embedding_list[j]))
+        print(f&quot;{sentences[i]}  ↔  {sentences[j]}  →  {sim:.4f}&quot;)
+</code></pre>
+<p><strong>Expected insight:</strong> football/soccer sentences will score <strong>high (~0.8+)</strong>; pizza/weather sentences will score <strong>low</strong>. That's semantic similarity in action.</p>
+<h3 id="try-this-beginner-experiment">🧪 Try this beginner experiment</h3>
+<p>Add <code>"I adore kicking a ball around on the pitch"</code> to the list. Its similarity to <code>"I love playing football."</code> will still be high, even though the two sentences share <strong>no content words</strong>. A keyword search would miss it completely. That's why embeddings beat keyword search for paraphrased questions.</p>
+<blockquote>
+<p>⚠️ <strong>Beginner trap:</strong> always embed the <strong>query</strong> and the <strong>chunks</strong> with the <em>same</em> model. Mixing models = apples vs. oranges.</p>
+</blockquote>
+<hr />
+<h2 id="dimensions-normalization-and-distance-metrics">📏 Dimensions, normalization and distance metrics</h2>
+<p>Every embedding model outputs vectors of a fixed length, its <strong>dimension</strong> (for example 768, 1536 or 3072 numbers). More dimensions can capture finer distinctions but cost more storage and slightly slower search.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Formula idea</th>
+<th>Use when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cosine similarity</strong></td>
+<td>Angle between vectors, ignores length</td>
+<td>Default for text embeddings</td>
+</tr>
+<tr>
+<td><strong>Dot product</strong></td>
+<td>Angle <em>and</em> length</td>
+<td>Vectors are already normalized (then it equals cosine and is faster)</td>
+</tr>
+<tr>
+<td><strong>Euclidean (L2) distance</strong></td>
+<td>Straight-line distance; <em>smaller</em> = more similar</td>
+<td>Some vector DBs default to it; on normalized vectors it ranks results the same as cosine</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>⚠️ <strong>Beginner trap:</strong> a vector DB's distance setting must match how the model was meant to be compared. Chroma defaults to <strong>L2</strong>, Pinecone asks you to choose. If scores look "backwards", check whether you're reading a <em>distance</em> (lower is better) or a <em>similarity</em> (higher is better).</p>
+</blockquote>
+<h3 id="shrinking-vectors-matryoshka-embeddings">🎚️ Shrinking vectors (Matryoshka embeddings)</h3>
+<p>Some modern models, including <code>gemini-embedding-001</code>, are trained so the <strong>first N numbers of a vector are still a good embedding on their own</strong>. You can request smaller vectors (for example 768 instead of 3072) to cut storage and speed up search with only a small quality loss:</p>
+<pre><code class="language-python">from google.genai import types
+
+vec = client.models.embed_content(
+    model=&quot;gemini-embedding-001&quot;,
+    contents=&quot;How do refunds work?&quot;,
+    config=types.EmbedContentConfig(output_dimensionality=768),
+).embeddings[0].values
+</code></pre>
+<blockquote>
+<p>If you truncate dimensions, re-normalize the vectors before using dot product, and use the same dimension for documents and queries.</p>
+</blockquote>
+<h3 id="task-types-documents-vs-queries">🎯 Task types: documents vs. queries</h3>
+<p>Retrieval questions are short ("refund window?") while documents are long. Several embedding APIs let you say which one you're embedding so the model can place them better:</p>
+<pre><code class="language-python">doc_vec = client.models.embed_content(
+    model=&quot;gemini-embedding-001&quot;, contents=chunk_text,
+    config=types.EmbedContentConfig(task_type=&quot;RETRIEVAL_DOCUMENT&quot;),
+).embeddings[0].values
+
+query_vec = client.models.embed_content(
+    model=&quot;gemini-embedding-001&quot;, contents=&quot;refund window?&quot;,
+    config=types.EmbedContentConfig(task_type=&quot;RETRIEVAL_QUERY&quot;),
+).embeddings[0].values
+</code></pre>
+<h3 id="choosing-an-embedding-model">🏷️ Choosing an embedding model</h3>
+<ol>
+<li>Start with a strong general model from your LLM provider (simple, one API key).</li>
+<li>Check the public <strong>MTEB leaderboard</strong> (Massive Text Embedding Benchmark) and filter by the <em>Retrieval</em> task and your language.</li>
+<li><strong>Evaluate on your own questions</strong> (Module 9). Leaderboard rank does not guarantee the best results on your documents.</li>
+<li>Remember that <strong>changing the model means re-embedding the whole corpus</strong>, because vectors from different models can't be mixed.</li>
+</ol>
+<hr />
+<h2 id="key-takeaways">✅ Key Takeaways</h2>
+<ul>
+<li>Embeddings = meaning as numbers.</li>
+<li>Cosine similarity measures <em>directional</em> closeness: 1 = same direction, 0 = unrelated, −1 = opposite. Text embeddings usually land between 0 and 1.</li>
+<li>Same embedding model for documents AND queries — non-negotiable.</li>
+<li>This is the "Retrieval" fuel in RAG.</li>
+<li>Know whether your DB reports a <em>distance</em> or a <em>similarity</em>, and which metric it uses.</li>
+</ul>
+<hr />
+<h2 id="in-this-repo">🔗 In this repo</h2>
+<ul>
+<li><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/ingest.py"><code>ingest.py</code></a> and <a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/hybrid_search.py"><code>hybrid_search.py</code></a> both build <code>GoogleGenerativeAIEmbeddings(model=EMBEDDING_MODEL)</code> from the same config value. That one shared setting is what guarantees documents and queries live in the same vector space.</li>
+<li>Want to try another model? Change <code>EMBEDDING_MODEL</code> in <code>.env</code>, <strong>delete <code>chroma_gemini_db/</code></strong>, and re-run <code>ingest.py</code>. Old vectors can't be compared with new ones.</li>
+</ul>
+<hr />
+<h2 id="self-check">🧠 Self-check</h2>
+<details>
+<summary>1. Two chunks score 0.82 and 0.31 cosine similarity to a query. Which is more relevant?</summary>
+<p>The 0.82 chunk. Cosine similarity is higher when vectors point in a more similar direction. (If your database reports a <em>distance</em> instead, smaller would be better.)</p>
+</details>
+<details>
+<summary>2. You switched embedding models but kept the old vector store. Why did retrieval quality collapse?</summary>
+<p>Queries are now embedded by the new model, but the stored chunks were embedded by the old one. The two vector spaces aren't comparable, so the "nearest" chunks are essentially random. Re-embed the whole corpus after changing models.</p>
+</details>
+<details>
+<summary>3. Why might keyword search beat embeddings for the query "ERR_4297"?</summary>
+<p>Error codes, SKUs and IDs carry no semantic meaning an embedding can generalize from, so similar-looking codes may land close together. Exact keyword matching (BM25) finds the precise string. That's the case for hybrid search (Module 6).</p>
+</details>
+<p>➡️ Next: <a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/../learn/03-prompting-techniques/">Prompting Techniques — talking to the LLM</a></p>
+</article>
+<nav class="pager" aria-label="Module navigation"><a class="pager-link" href="../../learn/01-foundations-transformers/" rel="prev"><small>Previous</small>Foundations — Transformers, Tokens &amp; LLM Settings</a><a class="pager-link next" href="../../learn/03-prompting-techniques/" rel="next"><small>Next</small>Prompting Techniques — Talking to the LLM</a></nav>
+<p class="edit"><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/notes/02_embeddings_and_vectors.md" rel="noopener">View this page’s source on GitHub</a></p>
+
+</main>
+</div>
+<footer class="site-footer">
+  <p>RAG from Scratch · free and open source on <a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a> · built from <code>notes/</code>, <code>data/raw/</code> and <code>src/pipeline/</code></p>
+</footer>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

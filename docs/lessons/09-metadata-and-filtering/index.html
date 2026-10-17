@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Metadata in RAG — RAG Lesson 09 | RAG from Scratch</title>
+<meta name="description" content="Metadata describes where and what a chunk came from. Example: { &quot;source&quot;: &quot;network_installation.pdf&quot;, &quot;page&quot;: 42, &quot;section&quot;: &quot;Dependencies&quot;, &quot;document_type&quot;…">
+<link rel="canonical" href="https://chadasaiteja.github.io/rag-from-scratch/lessons/09-metadata-and-filtering/">
+<meta name="robots" content="index, follow">
+<meta property="og:site_name" content="RAG from Scratch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Metadata in RAG — RAG Lesson 09 | RAG from Scratch">
+<meta property="og:description" content="Metadata describes where and what a chunk came from. Example: { &quot;source&quot;: &quot;network_installation.pdf&quot;, &quot;page&quot;: 42, &quot;section&quot;: &quot;Dependencies&quot;, &quot;document_type&quot;…">
+<meta property="og:url" content="https://chadasaiteja.github.io/rag-from-scratch/lessons/09-metadata-and-filtering/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Metadata in RAG — RAG Lesson 09 | RAG from Scratch">
+<meta name="twitter:description" content="Metadata describes where and what a chunk came from. Example: { &quot;source&quot;: &quot;network_installation.pdf&quot;, &quot;page&quot;: 42, &quot;section&quot;: &quot;Dependencies&quot;, &quot;document_type&quot;…">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "Metadata in RAG", "description": "Metadata describes where and what a chunk came from. Example: { \"source\": \"network_installation.pdf\", \"page\": 42, \"section\": \"Dependencies\", \"document_type\"…", "url": "https://chadasaiteja.github.io/rag-from-scratch/lessons/09-metadata-and-filtering/", "inLanguage": "en", "educationalLevel": "Beginner", "dateModified": "2026-09-29", "isPartOf": {"@type": "Course", "name": "RAG from Scratch", "url": "https://chadasaiteja.github.io/rag-from-scratch/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "Lessons", "item": "https://chadasaiteja.github.io/rag-from-scratch/lessons/"}, {"@type": "ListItem", "position": 3, "name": "Metadata in RAG", "item": "https://chadasaiteja.github.io/rag-from-scratch/lessons/09-metadata-and-filtering/"}]}</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../../">RAG <span>from Scratch</span></a>
+  <nav class="topnav" aria-label="Main"><a href="../../">Home</a><a href="../../learn/">Learn</a><a href="../../implementation/">Implementation</a><a href="../../lessons/" aria-current="page">Lessons</a><a href="../../learn/faq/">FAQ</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+</header>
+<div class="layout no-sidebar">
+
+<main id="content">
+<nav class="crumbs" aria-label="Breadcrumb"><a href="../../">Home</a> / <a href="../../lessons/">Lessons</a> / <span aria-current="page">Metadata in RAG</span></nav>
+<article class="prose">
+<p class="eyebrow">Lesson 09</p>
+<h1>Metadata in RAG</h1>
+<p>Metadata describes where and what a chunk came from.</p>
+<p>Example:</p>
+<h2>{</h2>
+<p>  &quot;source&quot;: &quot;network_installation.pdf&quot;,<br>  &quot;page&quot;: 42,<br>  &quot;section&quot;: &quot;Dependencies&quot;,<br>  &quot;document_type&quot;: &quot;installation_guide&quot;,<br>  &quot;version&quot;: &quot;5.1&quot;,<br>  &quot;product&quot;: &quot;Fiber&quot;<br>}</p>
+<h3>Metadata can be used for</h3>
+<ul><li>filtering</li><li>citations</li><li>debugging</li><li>access control</li><li>versioning</li><li>source display</li></ul>
+<p>Suppose the user asks about Fiber service.</p>
+<h3>Instead of searching every document, filter</h3>
+<p>product = &quot;Fiber&quot;</p>
+<p>Suppose the company has versions 4.0 and 5.1.</p>
+<p>A query about current behavior should usually retrieve the correct current version.</p>
+<p>Metadata also helps debug RAG.</p>
+<h3>If an answer is wrong, inspect</h3>
+<ul><li>which chunks were retrieved</li><li>from which document</li><li>from which page</li><li>which version</li><li>their similarity scores</li></ul>
+<p>Without metadata, debugging becomes much harder.</p>
+<p>Access control is particularly important.</p>
+<p>If users have different permissions, do not rely on the LLM to hide restricted information. Apply authorization and metadata filters before giving content to the model.</p>
+<h3>A useful principle</h3>
+<p>Security filtering belongs in the application/retrieval layer, not in the model&#x27;s goodwill.</p>
+</article>
+<nav class="pager" aria-label="Module navigation"><a class="pager-link" href="../../lessons/08-rag-evaluation/" rel="prev"><small>Previous</small>Evaluating a RAG System</a><a class="pager-link next" href="../../lessons/10-rag-project-exercise/" rel="next"><small>Next</small>RAG Hands-on Project</a></nav>
+<p class="edit"><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/data/raw/09_metadata_and_filtering.txt" rel="noopener">View the raw lesson file on GitHub</a></p>
+
+</main>
+</div>
+<footer class="site-footer">
+  <p>RAG from Scratch · free and open source on <a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a> · built from <code>notes/</code>, <code>data/raw/</code> and <code>src/pipeline/</code></p>
+</footer>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

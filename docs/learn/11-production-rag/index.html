@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Production RAG — Security, Cost, Latency &amp; Monitoring | RAG from Scratch</title>
+<meta name="description" content="A demo RAG app answers questions. A production RAG app answers them safely, quickly, affordably and observably for many users at once. This module covers…">
+<link rel="canonical" href="https://chadasaiteja.github.io/rag-from-scratch/learn/11-production-rag/">
+<meta name="robots" content="index, follow">
+<meta property="og:site_name" content="RAG from Scratch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Production RAG — Security, Cost, Latency &amp; Monitoring | RAG from Scratch">
+<meta property="og:description" content="A demo RAG app answers questions. A production RAG app answers them safely, quickly, affordably and observably for many users at once. This module covers…">
+<meta property="og:url" content="https://chadasaiteja.github.io/rag-from-scratch/learn/11-production-rag/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Production RAG — Security, Cost, Latency &amp; Monitoring | RAG from Scratch">
+<meta name="twitter:description" content="A demo RAG app answers questions. A production RAG app answers them safely, quickly, affordably and observably for many users at once. This module covers…">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Production RAG — Security, Cost, Latency & Monitoring", "name": "Production RAG — Security, Cost, Latency & Monitoring", "description": "A demo RAG app answers questions. A production RAG app answers them safely, quickly, affordably and observably for many users at once. This module covers…", "url": "https://chadasaiteja.github.io/rag-from-scratch/learn/11-production-rag/", "inLanguage": "en", "author": {"@type": "Person", "name": "ChadaSaiteja", "url": "https://github.com/ChadaSaiteja"}, "dateModified": "2026-10-17", "educationalLevel": "Beginner", "isPartOf": {"@type": "Course", "name": "RAG from Scratch", "url": "https://chadasaiteja.github.io/rag-from-scratch/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "Learn", "item": "https://chadasaiteja.github.io/rag-from-scratch/learn/"}, {"@type": "ListItem", "position": 3, "name": "Production RAG — Security, Cost, Latency & Monitoring", "item": "https://chadasaiteja.github.io/rag-from-scratch/learn/11-production-rag/"}]}</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../../">RAG <span>from Scratch</span></a>
+  <nav class="topnav" aria-label="Main"><a href="../../">Home</a><a href="../../learn/" aria-current="page">Learn</a><a href="../../implementation/">Implementation</a><a href="../../lessons/">Lessons</a><a href="../../learn/faq/">FAQ</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+</header>
+<div class="layout with-sidebar">
+<aside class="sidebar" aria-label="Course modules">
+  <details class="sidebar-box" open>
+    <summary>Course modules</summary>
+    <ul><li><a href="../../learn/"><span class="num">★</span>How to use these notes</a></li><li><a href="../../learn/00-introduction-to-rag/"><span class="num">00</span>Introduction to RAG</a></li><li><a href="../../learn/01-foundations-transformers/"><span class="num">01</span>Foundations — Transformers, Tokens &amp; LLM Settings</a></li><li><a href="../../learn/02-embeddings-and-vectors/"><span class="num">02</span>Embeddings — Turning Words into Numbers</a></li><li><a href="../../learn/03-prompting-techniques/"><span class="num">03</span>Prompting Techniques — Talking to the LLM</a></li><li><a href="../../learn/04-chunking-strategies/"><span class="num">04</span>Chunking Strategies — Breaking Documents into Bites</a></li><li><a href="../../learn/05-vector-databases/"><span class="num">05</span>Vector Databases — Your AI&#x27;s Memory</a></li><li><a href="../../learn/06-retrieval-mechanics/"><span class="num">06</span>Retrieval Mechanics — Finding the Needle</a></li><li><a href="../../learn/07-agentic-rag-and-tools/"><span class="num">07</span>Agentic RAG &amp; Tool Calling</a></li><li><a href="../../learn/08-building-your-first-rag-app/"><span class="num">08</span>Build Your First RAG Application</a></li><li><a href="../../learn/09-rag-evaluation/"><span class="num">09</span>Evaluating Your RAG Application</a></li><li><a href="../../learn/10-document-ingestion-and-parsing/"><span class="num">10</span>Document Ingestion &amp; Parsing — The Forgotten Half</a></li><li><a href="../../learn/11-production-rag/" aria-current="page"><span class="num">11</span>Production RAG — Security, Cost, Latency &amp; Monitoring</a></li></ul>
+    <p class="sidebar-label">Reference</p><ul><li><a href="../../learn/faq/"><span class="num">❓</span>RAG FAQ: Answers to Common Questions</a></li><li><a href="../../learn/glossary/"><span class="num">📖</span>RAG Glossary</a></li></ul>
+  </details>
+</aside>
+<main id="content">
+<nav class="crumbs" aria-label="Breadcrumb"><a href="../../">Home</a> / <a href="../../learn/">Learn</a> / <span aria-current="page">Production RAG — Security, Cost, Latency &amp; Monitoring</span></nav>
+<article class="prose">
+<h1 id="module-11-production-rag-security-cost-latency-monitoring">🏭 Module 11: Production RAG — Security, Cost, Latency &amp; Monitoring</h1>
+<p>A demo RAG app answers questions. A production RAG app answers them <strong>safely, quickly, affordably and observably</strong> for many users at once. This module covers what changes between the two.</p>
+<hr />
+<h2 id="security-the-rag-threat-model">🛡️ Security: the RAG threat model</h2>
+<p>RAG adds a new attack surface: <strong>text you didn't write ends up inside your prompt.</strong> The OWASP Top 10 for LLM Applications lists prompt injection as the top risk and includes weaknesses specific to vector stores and embeddings.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Threat</th>
+<th>What it looks like</th>
+<th>Defences</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Indirect prompt injection</strong></td>
+<td>A document, web page or email in your corpus contains <em>"Ignore previous instructions and…"</em></td>
+<td>Delimit retrieved text and tell the model it's data, not instructions (Module 3); keep tools read-only; never put secrets in prompts</td>
+</tr>
+<tr>
+<td><strong>Cross-user data leakage</strong></td>
+<td>User A's question retrieves chunks from User B's private files</td>
+<td>Store owner/team/permission metadata on every chunk and <strong>filter at query time</strong>; never rely on the prompt to hide data</td>
+</tr>
+<tr>
+<td><strong>Sensitive data in the index</strong></td>
+<td>Passwords, personal data or keys ingested from shared drives</td>
+<td>Scan and redact during ingestion; exclude sensitive folders; support deletion by source (Module 10)</td>
+</tr>
+<tr>
+<td><strong>Corpus poisoning</strong></td>
+<td>Someone adds a document designed to be retrieved for certain questions and mislead the answer</td>
+<td>Control who can add documents; record provenance; prefer trusted sources in ranking</td>
+</tr>
+<tr>
+<td><strong>Over-powered agents</strong></td>
+<td>An injected instruction triggers a tool that sends, deletes or pays</td>
+<td>Allow-list tools, validate arguments, require human confirmation for side effects (Module 7)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="code-permission-aware-retrieval">💻 Code: permission-aware retrieval</h3>
+<p>Access control belongs in the <strong>retrieval filter</strong>, not in the prompt. If a chunk is never retrieved, it can't leak:</p>
+<pre><code class="language-python">def retrieve_for_user(store, question, user, k=5):
+    # Every chunk was ingested with metadata like {&quot;team&quot;: &quot;finance&quot;, &quot;source&quot;: &quot;...&quot;}
+    return store.similarity_search(
+        question, k=k,
+        filter={&quot;team&quot;: {&quot;$in&quot;: user.teams}},   # Chroma metadata filter syntax
+    )
+</code></pre>
+<blockquote>
+<p>⚠️ <strong>Beginner trap:</strong> "The prompt says <em>don't reveal HR documents</em>." Prompts are not access control. A clever question or an injected document can override instructions; a metadata filter can't be talked out of its job.</p>
+</blockquote>
+<hr />
+<h2 id="cost-where-the-money-goes">💸 Cost: where the money goes</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Cost</th>
+<th>When it happens</th>
+<th>How to reduce it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Embedding the corpus</strong></td>
+<td>Once, plus every re-index</td>
+<td>Incremental indexing with content hashes (Module 10); smaller embedding dimensions (Module 2)</td>
+</tr>
+<tr>
+<td><strong>Embedding each question</strong></td>
+<td>Every request</td>
+<td>Cheap per call; cache repeated questions</td>
+</tr>
+<tr>
+<td><strong>LLM input tokens</strong></td>
+<td>Every request: instructions + chunks + question</td>
+<td>Send fewer, better chunks (rerank, then keep 4–6); keep the system prompt short</td>
+</tr>
+<tr>
+<td><strong>LLM output tokens</strong></td>
+<td>Every request</td>
+<td>Ask for concise answers; set a max output length</td>
+</tr>
+<tr>
+<td><strong>Extra LLM calls</strong></td>
+<td>Query rewriting, multi-query, LLM reranking, agent steps</td>
+<td>Use them only where evaluation shows they help; route only hard queries</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="worked-example-cost-per-question">🧮 Worked example: cost per question</h3>
+<p>The prices below are <strong>illustrative</strong>; check your provider's current pricing.</p>
+<pre><code>Input:  1,500 tokens × $0.30 per 1M tokens = $0.00045
+Output:   250 tokens × $2.50 per 1M tokens = $0.000625
+Total per question                          ≈ $0.0011
+× 100,000 questions per month               ≈ $107
+</code></pre>
+<p>Now add multi-query expansion (one extra LLM call of ~300 tokens in and ~100 out) and the bill rises by roughly a third. Every "advanced" technique has a price tag, so measure whether it earns its place (Module 9).</p>
+<hr />
+<h2 id="latency-a-budget-for-every-stage">⚡ Latency: a budget for every stage</h2>
+<p>Users notice delays above a couple of seconds. A typical budget for one question:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Typical time</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Embed the question</td>
+<td>50–200 ms</td>
+<td>One API call; cacheable</td>
+</tr>
+<tr>
+<td>Vector + BM25 search</td>
+<td>10–100 ms</td>
+<td>ANN indexes keep this low (Module 5)</td>
+</tr>
+<tr>
+<td>Rerank ~30 candidates</td>
+<td>100–300 ms</td>
+<td>Cross-encoder; skip for simple queries</td>
+</tr>
+<tr>
+<td>Query rewriting / multi-query</td>
+<td>300–1,000 ms</td>
+<td>An extra LLM round trip before search even starts</td>
+</tr>
+<tr>
+<td>LLM generation</td>
+<td>0.5–5 s</td>
+<td>Dominated by output length; <strong>stream</strong> tokens so users see progress immediately</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Biggest wins:</strong> stream the answer, cache repeated questions, run BM25 and vector search in parallel, and avoid extra LLM calls on the critical path.</p>
+<h3 id="caching">🗄️ Caching</h3>
+<ul>
+<li><strong>Exact cache:</strong> same normalized question → return the stored answer. Simple and safe.</li>
+<li><strong>Semantic cache:</strong> a new question whose embedding is very close to a cached one (similarity above a strict threshold) reuses that answer. Bigger hit rate, but a threshold set too low returns answers to <em>different</em> questions. Tune it on real examples and expire entries when documents change.</li>
+</ul>
+<hr />
+<h2 id="monitoring-what-to-log-for-every-request">📈 Monitoring: what to log for every request</h2>
+<p>You can't fix what you can't see. For each question, record a <strong>trace</strong>:</p>
+<pre><code class="language-json">{
+  &quot;request_id&quot;: &quot;a1b2&quot;,
+  &quot;question&quot;: &quot;Can I return an item after 3 weeks?&quot;,
+  &quot;retrieved&quot;: [{&quot;id&quot;: &quot;refund-policy.md::2&quot;, &quot;score&quot;: 0.81}, {&quot;id&quot;: &quot;shipping.md::0&quot;, &quot;score&quot;: 0.44}],
+  &quot;reranked_top&quot;: [&quot;refund-policy.md::2&quot;],
+  &quot;prompt_tokens&quot;: 1420, &quot;output_tokens&quot;: 96,
+  &quot;latency_ms&quot;: {&quot;retrieve&quot;: 85, &quot;rerank&quot;: 160, &quot;generate&quot;: 1240},
+  &quot;answer_said_dont_know&quot;: false,
+  &quot;user_feedback&quot;: &quot;thumbs_up&quot;
+}
+</code></pre>
+<p>Then watch these over time:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Signal</th>
+<th>Why it matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"I don't know" rate</td>
+<td>Rising → missing documents or broken retrieval</td>
+</tr>
+<tr>
+<td>Top retrieval score distribution</td>
+<td>Falling → questions drifting away from your corpus</td>
+</tr>
+<tr>
+<td>Thumbs-down rate, by topic</td>
+<td>Shows which document areas need work</td>
+</tr>
+<tr>
+<td>p50 / p95 latency per stage</td>
+<td>Finds the slow stage before users complain</td>
+</tr>
+<tr>
+<td>Cost per request</td>
+<td>Catches prompt bloat and runaway agent loops</td>
+</tr>
+</tbody>
+</table></div>
+<p>Tools such as LangSmith, Langfuse or OpenTelemetry-based tracing collect this automatically; a structured log line per request is enough to start.</p>
+<hr />
+<h2 id="common-production-failures">🩺 Common production failures</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Likely cause</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Confident answers to questions the docs don't cover</td>
+<td>No relevance floor: top-k always returns <em>something</em></td>
+<td>Drop chunks below a similarity threshold; if none remain, answer "I don't know"</td>
+</tr>
+<tr>
+<td>Answers cite outdated policies</td>
+<td>Old and new versions both indexed</td>
+<td>Date/version metadata + filters; remove superseded documents</td>
+</tr>
+<tr>
+<td>Good in testing, poor in production</td>
+<td>Test questions don't match real user phrasing</td>
+<td>Build the eval set from real (anonymized) queries</td>
+</tr>
+<tr>
+<td>Slow first answer after deploy</td>
+<td>Models or indexes loading on first request</td>
+<td>Warm up at startup</td>
+</tr>
+<tr>
+<td>Costs creeping up</td>
+<td>Prompt template and top-k grew over time</td>
+<td>Track tokens per request; alert on increases</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="key-takeaways">✅ Key Takeaways</h2>
+<ul>
+<li>Treat retrieved text as untrusted input; enforce access control in retrieval filters, never in prompts.</li>
+<li>Every extra LLM call costs money and latency; keep only what evaluation proves useful.</li>
+<li>Stream answers, cache repeats, and parallelize search to stay within a latency budget.</li>
+<li>Log a full trace per request and watch "I don't know" rate, retrieval scores, feedback, latency and cost.</li>
+</ul>
+<hr />
+<h2 id="in-this-repo">🔗 In this repo</h2>
+<p>The pipeline is a learning project, so several production pieces are deliberately missing. Each one is a good next exercise:</p>
+<ul>
+<li><strong>No relevance floor:</strong> <code>hybrid_search()</code> always returns results. Add a score threshold to the vector leg and a "nothing relevant found" path.</li>
+<li><strong>No access control:</strong> every chunk is visible to every question. Add a <code>team</code> or <code>visibility</code> metadata field in <code>ingest.py</code> and filter on it.</li>
+<li><strong>No API layer or tracing:</strong> wrap <code>generation.py</code> in a small FastAPI <code>/ask</code> endpoint and log one trace line per request.</li>
+<li><strong>Overload handling:</strong> <code>call_google_api()</code> returns a friendly message on HTTP 503; add retry with backoff before giving up.</li>
+</ul>
+<p>See the full list in the repository <a href="https://github.com/ChadaSaiteja/rag-from-scratch#known-issues">README's known issues</a>.</p>
+<hr />
+<h2 id="self-check">🧠 Self-check</h2>
+<details>
+<summary>1. Why is "the system prompt tells the model not to reveal HR documents" not access control?</summary>
+<p>Instructions can be overridden by clever questions or injected document text. Real access control filters chunks during retrieval based on the user's permissions, so restricted content never reaches the model at all.</p>
+</details>
+<details>
+<summary>2. Your answers take 6 seconds. Name three changes that cut perceived latency.</summary>
+<p>Stream the answer so text appears immediately; remove or route around extra LLM calls such as multi-query expansion for simple questions; and cache repeated questions. Running BM25 and vector search in parallel also helps.</p>
+</details>
+<details>
+<summary>3. Why is a semantic cache riskier than an exact-match cache?</summary>
+<p>It reuses answers for questions that are merely <em>similar</em>. If the similarity threshold is too loose, "Can I return a laptop?" might get the cached answer to "Can I return a phone case?" Strict thresholds and expiry when documents change keep it safe.</p>
+</details>
+<p>⬅️ Back to <a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/../learn/10-document-ingestion-and-parsing/">Document Ingestion &amp; Parsing</a> · 📖 <a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/../learn/glossary/">Glossary</a> · ❓ <a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/../learn/faq/">FAQ</a> · 🏠 <a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/../learn/">Notes Index</a></p>
+</article>
+<nav class="pager" aria-label="Module navigation"><a class="pager-link" href="../../learn/10-document-ingestion-and-parsing/" rel="prev"><small>Previous</small>Document Ingestion &amp; Parsing — The Forgotten Half</a><span></span></nav>
+<p class="edit"><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/notes/11_production_rag.md" rel="noopener">View this page’s source on GitHub</a></p>
+
+</main>
+</div>
+<footer class="site-footer">
+  <p>RAG from Scratch · free and open source on <a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a> · built from <code>notes/</code>, <code>data/raw/</code> and <code>src/pipeline/</code></p>
+</footer>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

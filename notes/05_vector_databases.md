@@ -1,7 +1,5 @@
 # 🗄️ Module 5: Vector Databases — Your AI's Memory
 
-> *Source: `AI/day8/vectordb.md` + `AI/day8/pine_cone.py`*
-
 A **Vector Database** stores data as **embeddings** — numerical representations of *meaning*, not keywords. It solves the three things a raw LLM can't do:
 
 | Problem | Why it matters |
@@ -39,7 +37,61 @@ The key trick: a query is compared by **semantic similarity** (e.g., cosine simi
 
 ---
 
-## 💻 Code: Embed Documents & Upsert to Pinecone (from `day8/pine_cone.py`)
+## ⚡ How vector search stays fast: ANN indexes
+
+Comparing a query against *every* stored vector (exact k-nearest-neighbour search) is perfect but slow: a million 3,072-dimension vectors means billions of multiplications per query. Vector databases use **approximate nearest neighbour (ANN)** indexes that trade a tiny bit of accuracy for huge speed-ups.
+
+| Index | Idea (plain English) | Trade-off |
+|---|---|---|
+| **Flat / brute force** | Compare against everything | 100% accurate; fine up to tens of thousands of vectors |
+| **HNSW** (Hierarchical Navigable Small World) | A multi-layer graph: start at a coarse layer, hop toward closer neighbours, zoom in | Very fast and accurate; uses more memory. The default in Chroma, pgvector (optional), Weaviate and many others |
+| **IVF** (Inverted File) | Cluster vectors into buckets; search only the few buckets nearest the query | Less memory than HNSW; accuracy depends on how many buckets you probe |
+| **PQ** (Product Quantization) | Compress each vector into a short code | Massive memory savings for billions of vectors; some accuracy loss. Often combined with IVF |
+
+> 🧠 **Analogy:** exact search is reading every book in the library. HNSW is asking a librarian who knows which shelf to walk to, then which row, then which book.
+
+**Recall** in this context means *how often the ANN index returns the same results exact search would*. Well-tuned indexes reach 95–99% recall at a fraction of the cost.
+
+---
+
+## 💻 Code: Chroma (local, no server), as used in this repo
+
+Chroma runs inside your Python process and saves to a folder, which makes it ideal for learning and prototypes:
+
+```python
+from langchain_chroma import Chroma
+from langchain_core.documents import Document
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+
+embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
+
+docs = [
+    Document(page_content="Customers can request a refund within 30 days of purchase.",
+             metadata={"category": "refund", "filename": "refund-policy.md"}),
+    Document(page_content="Installation appointments can be rescheduled up to 24 hours before.",
+             metadata={"category": "installation", "filename": "installation.md"}),
+]
+
+store = Chroma.from_documents(
+    documents=docs,
+    embedding=embeddings,
+    collection_name="demo",
+    persist_directory="./chroma_demo_db",
+    ids=["refund-1", "install-1"],          # stable IDs → re-running updates instead of duplicating
+)
+
+# Similarity search, optionally restricted by metadata
+results = store.similarity_search_with_score("Can I get my money back?", k=2,
+                                             filter={"category": "refund"})
+for doc, score in results:
+    print(round(score, 3), doc.metadata["filename"], doc.page_content)
+```
+
+> ⚠️ Chroma's default distance metric is **L2**, so the score printed above is a *distance*: lower is better. You can choose cosine when creating the collection; see the Chroma docs for the setting in your version.
+
+---
+
+## 💻 Code: Embed Documents & Upsert to Pinecone
 
 ```python
 import os
@@ -60,7 +112,7 @@ documents = [
 # 1. Embed every document text
 embedding_list = [
     client.models.embed_content(
-        model="gemini-embedding-2", contents=doc["text"]
+        model="gemini-embedding-001", contents=doc["text"]
     ).embeddings[0].values
     for doc in documents
 ]
@@ -94,7 +146,7 @@ print(index.describe_index_stats())
 ### 🔍 Then, at query time:
 ```python
 query_vec = client.models.embed_content(
-    model="gemini-embedding-2", contents="Can I get a refund?"
+    model="gemini-embedding-001", contents="Can I get a refund?"
 ).embeddings[0].values
 
 results = index.query(vector=query_vec, top_k=3, include_metadata=True)
@@ -111,5 +163,40 @@ results = index.query(vector=query_vec, top_k=3, include_metadata=True)
 - Match dimension to your embedding model; keep raw text as metadata.
 - Prototype with ChromaDB/FAISS; scale with Pinecone/pgvector.
 - `upsert` = insert-or-update; `top_k` controls how much context you fetch.
+- ANN indexes (HNSW, IVF, PQ) make search fast by being *approximately* right.
+- Give chunks stable IDs so re-ingestion updates instead of duplicating.
+
+---
+
+## 🔗 In this repo
+
+- [`ingest.py`](https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/ingest.py) creates the store with `Chroma.from_documents(..., persist_directory=PERSIST_DIRECTORY)`.
+- [`vector_retrieval.py`](https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/vector_retrieval.py) reopens it and runs `similarity_search(query, k=RETRIEVAL_K)`.
+- ⚠️ **Known issue:** `ingest.py` doesn't pass `ids`, so running it twice stores every chunk twice. 🧪 **Exercise:** generate IDs from `filename` + chunk position (or a content hash, Module 10) and pass `ids=` so re-runs overwrite instead of duplicating.
+
+---
+
+## 🧠 Self-check
+
+<details markdown="1">
+<summary>1. Why store the original text in metadata (or alongside the vector)?</summary>
+
+The vector is only used for matching; you can't turn it back into text. To build the LLM prompt and show citations you need the original chunk text and its source.
+
+</details>
+
+<details markdown="1">
+<summary>2. Your index has 5,000 vectors. Do you need HNSW?</summary>
+
+Not really. Brute-force search over a few thousand vectors takes milliseconds. ANN indexes matter at hundreds of thousands to billions of vectors. (Many databases use HNSW by default anyway, which is fine.)
+
+</details>
+
+<details markdown="1">
+<summary>3. Chroma returns scores 0.41 and 0.93 for two chunks. Which is the better match?</summary>
+
+With Chroma's default L2 metric these are distances, so 0.41 is closer and therefore the better match. Always check whether a score is a distance or a similarity.
+
+</details>
 
 ➡️ Next: [Retrieval Mechanics — finding the needle](./06_retrieval_mechanics.md)

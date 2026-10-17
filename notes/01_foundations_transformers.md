@@ -1,7 +1,5 @@
 # 🧱 Module 1: Foundations — Transformers, Tokens & LLM Settings
 
-> *Source: `AI/day1/Transformer.md` + `AI/day7/contextwindow.md`*
-
 Before you build a RAG app, you need to understand the engine inside every LLM: the **Transformer**.
 
 ---
@@ -80,6 +78,29 @@ Training loop:
 - **KV cache compression** — evict/quantize/merge less important K/V pairs → O(n²) → O(n).
 - **Summary-based memory** — keep a rolling summary of intent/constraints/decisions instead of the full transcript (LangChain's `ConversationSummaryMemory`).
 
+### 🕳️ "Lost in the middle" and context rot
+
+Even when everything fits in the window, models don't use it evenly. Research on long-context models (Liu et al., 2023, *"Lost in the Middle"*) found that facts placed at the **beginning or end** of a long prompt are used far more reliably than facts buried in the **middle**. As prompts get longer, accuracy tends to degrade gradually, an effect often called **context rot**.
+
+What this means for RAG:
+- **Fewer, better chunks beat many mediocre ones.** Five relevant chunks outperform twenty loosely related ones.
+- **Order matters.** Put the most relevant chunk first (a reranker does this for you, Module 6).
+- **A bigger context window is not a substitute for retrieval.** It raises the ceiling on what fits, not on what the model actually pays attention to.
+
+### 🧮 Worked example: a RAG token budget
+
+Say your model costs are measured per token and you want answers to stay fast. A typical RAG prompt for one question:
+
+| Part | Tokens (approx.) |
+|---|---|
+| System instructions | 150 |
+| 5 retrieved chunks × ~250 tokens | 1,250 |
+| User question | 30 |
+| **Input total** | **~1,430** |
+| Model's answer | ~200 |
+
+Rough conversions for English text: **1 token ≈ 4 characters ≈ ¾ of a word**. So a 1,000-*character* chunk (the default in this repo's `config.py`) is roughly **250 tokens**. Doubling `top_k` from 5 to 10 nearly doubles input cost and latency, which is why retrieval quality matters more than quantity.
+
 > 🔗 **Connect to RAG:** chunking exists *because* of the context window. A good chunking strategy (Module 4) keeps the most relevant facts inside the window while they're still cheap to process.
 
 ---
@@ -90,5 +111,38 @@ Training loop:
 - Temperature/Top-K/Top-P control *how* the model guesses.
 - Hallucinations are inevitable in pure LLMs → **that's why RAG exists**.
 - Context windows are finite → chunking + retrieval are mandatory.
+- Models attend best to the start and end of a prompt → send fewer, well-ordered chunks.
+
+---
+
+## 🔗 In this repo
+
+- The generation model is set by `GENERATION_MODEL` in [`config.py`](https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/config.py), and `hybrid_search.py` uses it with `temperature=0` for query rewriting, so results are repeatable.
+- `CHUNK_SIZE=1000` characters ≈ 250 tokens, and `RETRIEVAL_K=3` per retriever keeps the prompt small.
+
+---
+
+## 🧠 Self-check
+
+<details markdown="1">
+<summary>1. Why is low temperature (0–0.3) recommended for RAG answers?</summary>
+
+RAG answers should restate facts from the context, not invent variations. Low temperature makes the model pick the most likely tokens, so answers are more consistent and less likely to drift from the source.
+
+</details>
+
+<details markdown="1">
+<summary>2. A model has a 1M-token context window. Why not skip retrieval and send all documents every time?</summary>
+
+Cost and latency scale with input tokens on every request, and models use information in the middle of very long prompts less reliably ("lost in the middle"). Retrieval sends only what's relevant: cheaper, faster, and usually more accurate.
+
+</details>
+
+<details markdown="1">
+<summary>3. Roughly how many tokens is a 2,000-character chunk?</summary>
+
+About 500 tokens, using the rule of thumb 1 token ≈ 4 characters of English text.
+
+</details>
 
 ➡️ Next: [Embeddings — turning words into numbers](./02_embeddings_and_vectors.md)

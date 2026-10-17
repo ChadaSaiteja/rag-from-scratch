@@ -20,3 +20,6 @@ langchain-text-splitters==1.1.2
 
 # --- Config ---
 python-dotenv==1.2.3
+
+# --- Docs (only needed to rebuild the docs/ site) ---
+markdown>=3.5

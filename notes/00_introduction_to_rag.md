@@ -50,6 +50,33 @@ Here is how a RAG application actually works under the hood:
 
 ---
 
+## 🤔 RAG vs. fine-tuning vs. long context
+
+RAG is not the only way to give a model new knowledge. Knowing when *not* to use it is part of using it well.
+
+| Approach | What it changes | Best for | Weak at |
+|---|---|---|---|
+| **RAG** | What the model *reads* at question time | Facts that change, private documents, answers that need citations | Tasks that need a new *skill* or style rather than new facts |
+| **Fine-tuning** | The model's *weights* | Teaching a format, tone, or domain-specific behaviour | Fresh or frequently changing facts (you'd retrain every time); citing sources |
+| **Long context** (paste everything) | Nothing; you send all documents every time | A handful of short documents, one-off analysis | Cost and latency grow with every token; quality drops when the answer is buried in the middle |
+
+> 🧠 **Rule of thumb:** *knowledge* problem → RAG. *Behaviour* problem → fine-tuning (or better prompting). Many production systems combine them: a fine-tuned model that is still fed retrieved context.
+
+---
+
+## 🗺️ How this maps to the code in this repo
+
+This repository contains a working implementation of every stage above, so you can read a concept here and then see it in real code:
+
+| Stage | Concept module | Implementation |
+|---|---|---|
+| Load, chunk, embed, store | [04](./04_chunking_strategies.md), [02](./02_embeddings_and_vectors.md), [05](./05_vector_databases.md) | [`src/pipeline/ingest.py`](https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/ingest.py) |
+| Retrieve (vector + hybrid) | [06](./06_retrieval_mechanics.md) | [`hybrid_search.py`](https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/hybrid_search.py) |
+| Prompt + generate with citations | [03](./03_prompting_techniques.md) | [`generation.py`](https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/generation.py) |
+| Evaluate | [09](./09_rag_evaluation.md) | [`evaluation.py`](https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/evaluation.py) |
+
+---
+
 ## 📚 What's Next?
 
 In this series of notes, we will break down every single component of this process. We will go from the mathematical foundations of how AI "reads" (Transformers) to building a full-scale agentic RAG system.
@@ -63,5 +90,35 @@ In this series of notes, we will break down every single component of this proce
 6.  [Retrieval Mechanics: Finding the Needle](./06_retrieval_mechanics.md)
 7.  [Agentic RAG: Tools & Actions](./07_agentic_rag_and_tools.md)
 8.  [Final Project: Building Your App](./08_building_your_first_rag_app.md)
+9.  [Evaluation: Measuring Quality](./09_rag_evaluation.md)
+10. [Document Ingestion & Parsing](./10_document_ingestion_and_parsing.md)
+11. [Production RAG: Security, Cost & Monitoring](./11_production_rag.md)
+
+Keep the [Glossary](./glossary.md) open in another tab, and check the [FAQ](./faq.md) when a question comes up.
+
+---
+
+## 🧠 Self-check
+
+<details markdown="1">
+<summary>1. What are the three words behind "RAG", and what happens in each step?</summary>
+
+**Retrieve** relevant chunks from your documents, **augment** the prompt with them, and **generate** an answer grounded in that context.
+
+</details>
+
+<details markdown="1">
+<summary>2. Why must the question be embedded with the same model as the documents?</summary>
+
+Similarity is only meaningful between vectors from the same embedding space. A different model places text at completely different coordinates, so the nearest neighbours would be noise.
+
+</details>
+
+<details markdown="1">
+<summary>3. Your support bot must answer in your brand's tone and also know this week's price list. RAG, fine-tuning, or both?</summary>
+
+Prices are a *knowledge* problem that changes weekly, so use RAG. Tone is a *behaviour* problem, so a good system prompt (or fine-tuning, if prompting isn't enough). Combining both is common.
+
+</details>
 
 **Happy Learning! 🚀**

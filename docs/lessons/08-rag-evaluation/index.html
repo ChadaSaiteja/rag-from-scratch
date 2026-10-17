@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evaluating a RAG System — RAG Lesson 08 | RAG from Scratch</title>
+<meta name="description" content="Do not evaluate RAG only by asking: &quot;Does the answer sound good?&quot; Separate retrieval quality from generation quality. Retrieval questions: - Did we retrieve…">
+<link rel="canonical" href="https://chadasaiteja.github.io/rag-from-scratch/lessons/08-rag-evaluation/">
+<meta name="robots" content="index, follow">
+<meta property="og:site_name" content="RAG from Scratch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Evaluating a RAG System — RAG Lesson 08 | RAG from Scratch">
+<meta property="og:description" content="Do not evaluate RAG only by asking: &quot;Does the answer sound good?&quot; Separate retrieval quality from generation quality. Retrieval questions: - Did we retrieve…">
+<meta property="og:url" content="https://chadasaiteja.github.io/rag-from-scratch/lessons/08-rag-evaluation/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Evaluating a RAG System — RAG Lesson 08 | RAG from Scratch">
+<meta name="twitter:description" content="Do not evaluate RAG only by asking: &quot;Does the answer sound good?&quot; Separate retrieval quality from generation quality. Retrieval questions: - Did we retrieve…">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "Evaluating a RAG System", "description": "Do not evaluate RAG only by asking: \"Does the answer sound good?\" Separate retrieval quality from generation quality. Retrieval questions: - Did we retrieve…", "url": "https://chadasaiteja.github.io/rag-from-scratch/lessons/08-rag-evaluation/", "inLanguage": "en", "educationalLevel": "Beginner", "dateModified": "2026-09-29", "isPartOf": {"@type": "Course", "name": "RAG from Scratch", "url": "https://chadasaiteja.github.io/rag-from-scratch/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "Lessons", "item": "https://chadasaiteja.github.io/rag-from-scratch/lessons/"}, {"@type": "ListItem", "position": 3, "name": "Evaluating a RAG System", "item": "https://chadasaiteja.github.io/rag-from-scratch/lessons/08-rag-evaluation/"}]}</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../../">RAG <span>from Scratch</span></a>
+  <nav class="topnav" aria-label="Main"><a href="../../">Home</a><a href="../../learn/">Learn</a><a href="../../implementation/">Implementation</a><a href="../../lessons/" aria-current="page">Lessons</a><a href="../../learn/faq/">FAQ</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+</header>
+<div class="layout no-sidebar">
+
+<main id="content">
+<nav class="crumbs" aria-label="Breadcrumb"><a href="../../">Home</a> / <a href="../../lessons/">Lessons</a> / <span aria-current="page">Evaluating a RAG System</span></nav>
+<article class="prose">
+<p class="eyebrow">Lesson 08</p>
+<h1>Evaluating a RAG System</h1>
+<h3>Do not evaluate RAG only by asking</h3>
+<p>&quot;Does the answer sound good?&quot;</p>
+<p>Separate retrieval quality from generation quality.</p>
+<h3>Retrieval questions</h3>
+<ul><li>Did we retrieve the correct chunk?</li><li>Did we retrieve enough supporting evidence?</li><li>Did we retrieve irrelevant chunks?</li><li>Was the correct source ranked highly?</li></ul>
+<h3>Generation questions</h3>
+<ul><li>Did the answer use the retrieved evidence?</li><li>Did it introduce unsupported facts?</li><li>Did it answer the actual question?</li><li>Did it cite the correct source?</li></ul>
+<p>Example test case:</p>
+<h3>Question</h3>
+<p>&quot;What is the latest applicable dependency date for ORD-123?&quot;</p>
+<h3>Expected evidence</h3>
+<p>Service Wire Center = September 10<br>Missing Drop = September 12<br>Damage Drop = September 9</p>
+<h3>Expected answer</h3>
+<p>September 12.</p>
+<p>If the correct chunks were never retrieved, this is a retrieval problem.</p>
+<p>If the correct chunks were retrieved but the model answered September 10, this is primarily a generation/reasoning problem.</p>
+<p>Build a small evaluation dataset:</p>
+<h2>[</h2>
+<p>  {<br>    &quot;question&quot;: &quot;...&quot;,<br>    &quot;expected_answer&quot;: &quot;...&quot;,<br>    &quot;expected_source&quot;: &quot;...&quot;<br>  }<br>]</p>
+<h3>Test changes to</h3>
+<ul><li>chunk size</li><li>overlap</li><li>embedding model</li><li>top_k</li><li>metadata filters</li><li>reranking</li><li>prompt</li></ul>
+<p>Change one important variable at a time.</p>
+<h3>Useful measurements include</h3>
+<ul><li>retrieval recall</li><li>precision</li><li>answer correctness</li><li>groundedness</li><li>citation correctness</li><li>latency</li><li>token usage</li><li>cost</li></ul>
+<p>A simple manual evaluation set of 20-50 questions can already reveal major retrieval problems.</p>
+</article>
+<nav class="pager" aria-label="Module navigation"><a class="pager-link" href="../../lessons/07-rag-prompt-and-generation/" rel="prev"><small>Previous</small>Prompt Construction and Generation</a><a class="pager-link next" href="../../lessons/09-metadata-and-filtering/" rel="next"><small>Next</small>Metadata in RAG</a></nav>
+<p class="edit"><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/data/raw/08_rag_evaluation.txt" rel="noopener">View the raw lesson file on GitHub</a></p>
+
+</main>
+</div>
+<footer class="site-footer">
+  <p>RAG from Scratch · free and open source on <a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a> · built from <code>notes/</code>, <code>data/raw/</code> and <code>src/pipeline/</code></p>
+</footer>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

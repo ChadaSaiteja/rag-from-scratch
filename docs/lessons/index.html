@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAG Lessons — Short Explanations of Every Stage | RAG from Scratch</title>
+<meta name="description" content="Ten short lessons covering RAG fundamentals, data ingestion, chunking, embeddings, vector databases, retrieval, prompting, evaluation and metadata filtering.">
+<link rel="canonical" href="https://chadasaiteja.github.io/rag-from-scratch/lessons/">
+<meta name="robots" content="index, follow">
+<meta property="og:site_name" content="RAG from Scratch">
+<meta property="og:type" content="website">
+<meta property="og:title" content="RAG Lessons — Short Explanations of Every Stage | RAG from Scratch">
+<meta property="og:description" content="Ten short lessons covering RAG fundamentals, data ingestion, chunking, embeddings, vector databases, retrieval, prompting, evaluation and metadata filtering.">
+<meta property="og:url" content="https://chadasaiteja.github.io/rag-from-scratch/lessons/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="RAG Lessons — Short Explanations of Every Stage | RAG from Scratch">
+<meta name="twitter:description" content="Ten short lessons covering RAG fundamentals, data ingestion, chunking, embeddings, vector databases, retrieval, prompting, evaluation and metadata filtering.">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "CollectionPage", "name": "RAG Lessons — Short Explanations of Every Stage", "description": "Ten short lessons covering RAG fundamentals, data ingestion, chunking, embeddings, vector databases, retrieval, prompting, evaluation and metadata filtering.", "url": "https://chadasaiteja.github.io/rag-from-scratch/lessons/"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "Lessons", "item": "https://chadasaiteja.github.io/rag-from-scratch/lessons/"}]}</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../">RAG <span>from Scratch</span></a>
+  <nav class="topnav" aria-label="Main"><a href="../">Home</a><a href="../learn/">Learn</a><a href="../implementation/">Implementation</a><a href="../lessons/" aria-current="page">Lessons</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+</header>
+<div class="layout no-sidebar">
+
+<main id="content">
+<nav class="crumbs" aria-label="Breadcrumb"><a href="../">Home</a> / <span aria-current="page">Lessons</span></nav>
+<article class="prose wide">
+<h1>RAG lessons: the corpus the pipeline searches</h1>
+<p class="lede">10 short plain-text lessons that explain RAG end to end. The pipeline ingests exactly these files, so every
+answer it gives cites one of them. They also make a fast, compact refresher.</p>
+</article>
+<div class="module-grid"><a class="module-card" href="../lessons/01-rag-fundamentals/"><span class="num">01</span><h3>RAG Fundamentals</h3><p>Retrieval-Augmented Generation (RAG) is an architecture where an application retrieves relevant information from an external knowledge source and gives that…</p></a><a class="module-card" href="../lessons/02-data-ingestion/"><span class="num">02</span><h3>Data Ingestion for RAG</h3><p>Ingestion is the process of taking raw source data and preparing it for retrieval. Typical pipeline: Source -&gt; loader -&gt; parser -&gt; cleaner -&gt; chunker -&gt;…</p></a><a class="module-card" href="../lessons/03-chunking/"><span class="num">03</span><h3>Chunking in RAG</h3><p>Chunking divides a large document into smaller retrieval units. Why chunk? Sending an entire 100-page document for every question is expensive and often…</p></a><a class="module-card" href="../lessons/04-embeddings-and-vectors/"><span class="num">04</span><h3>Embeddings and Vector Search</h3><p>An embedding converts text into a numerical vector representing semantic information. Example: &quot;The customer cannot install the service because the network…</p></a><a class="module-card" href="../lessons/05-vector-database/"><span class="num">05</span><h3>Vector Databases for RAG</h3><p>A vector database stores embeddings and supports similarity search. Conceptual record: ID TEXT VECTOR METADATA Example: ID: chunk-123 TEXT: &quot;The installation…</p></a><a class="module-card" href="../lessons/06-retrieval/"><span class="num">06</span><h3>Retrieval in RAG</h3><p>Retrieval is the process of finding the most useful pieces of information for a user query. Basic semantic retrieval: query -&gt; embedding -&gt; vector search -&gt;…</p></a><a class="module-card" href="../lessons/07-rag-prompt-and-generation/"><span class="num">07</span><h3>Prompt Construction and Generation</h3><p>After retrieval, the application needs to provide the retrieved evidence to the LLM. Conceptually: SYSTEM INSTRUCTIONS + USER QUESTION + RETRIEVED CONTEXT =…</p></a><a class="module-card" href="../lessons/08-rag-evaluation/"><span class="num">08</span><h3>Evaluating a RAG System</h3><p>Do not evaluate RAG only by asking: &quot;Does the answer sound good?&quot; Separate retrieval quality from generation quality. Retrieval questions: - Did we retrieve…</p></a><a class="module-card" href="../lessons/09-metadata-and-filtering/"><span class="num">09</span><h3>Metadata in RAG</h3><p>Metadata describes where and what a chunk came from. Example: { &quot;source&quot;: &quot;network_installation.pdf&quot;, &quot;page&quot;: 42, &quot;section&quot;: &quot;Dependencies&quot;, &quot;document_type&quot;…</p></a><a class="module-card" href="../lessons/10-rag-project-exercise/"><span class="num">10</span><h3>RAG Hands-on Project</h3><p>Build a small local RAG system from the supplied learning documents. Goal: Ask questions and retrieve the most relevant chunks. Stage 1: Ingestion Load all…</p></a></div>
+
+</main>
+</div>
+<footer class="site-footer">
+  <p>RAG from Scratch · free and open source on <a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a> · built from <code>notes/</code>, <code>data/raw/</code> and <code>src/pipeline/</code></p>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

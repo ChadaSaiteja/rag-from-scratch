@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Embeddings and Vector Search — RAG Lesson 04 | RAG from Scratch</title>
+<meta name="description" content="An embedding converts text into a numerical vector representing semantic information. Example: &quot;The customer cannot install the service because the network…">
+<link rel="canonical" href="https://chadasaiteja.github.io/rag-from-scratch/lessons/04-embeddings-and-vectors/">
+<meta name="robots" content="index, follow">
+<meta property="og:site_name" content="RAG from Scratch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Embeddings and Vector Search — RAG Lesson 04 | RAG from Scratch">
+<meta property="og:description" content="An embedding converts text into a numerical vector representing semantic information. Example: &quot;The customer cannot install the service because the network…">
+<meta property="og:url" content="https://chadasaiteja.github.io/rag-from-scratch/lessons/04-embeddings-and-vectors/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Embeddings and Vector Search — RAG Lesson 04 | RAG from Scratch">
+<meta name="twitter:description" content="An embedding converts text into a numerical vector representing semantic information. Example: &quot;The customer cannot install the service because the network…">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "Embeddings and Vector Search", "description": "An embedding converts text into a numerical vector representing semantic information. Example: \"The customer cannot install the service because the network…", "url": "https://chadasaiteja.github.io/rag-from-scratch/lessons/04-embeddings-and-vectors/", "inLanguage": "en", "educationalLevel": "Beginner", "dateModified": "2026-09-29", "isPartOf": {"@type": "Course", "name": "RAG from Scratch", "url": "https://chadasaiteja.github.io/rag-from-scratch/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "Lessons", "item": "https://chadasaiteja.github.io/rag-from-scratch/lessons/"}, {"@type": "ListItem", "position": 3, "name": "Embeddings and Vector Search", "item": "https://chadasaiteja.github.io/rag-from-scratch/lessons/04-embeddings-and-vectors/"}]}</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../../">RAG <span>from Scratch</span></a>
+  <nav class="topnav" aria-label="Main"><a href="../../">Home</a><a href="../../learn/">Learn</a><a href="../../implementation/">Implementation</a><a href="../../lessons/" aria-current="page">Lessons</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+</header>
+<div class="layout no-sidebar">
+
+<main id="content">
+<nav class="crumbs" aria-label="Breadcrumb"><a href="../../">Home</a> / <a href="../../lessons/">Lessons</a> / <span aria-current="page">Embeddings and Vector Search</span></nav>
+<article class="prose">
+<p class="eyebrow">Lesson 04</p>
+<h1>Embeddings and Vector Search</h1>
+<p>An embedding converts text into a numerical vector representing semantic information.</p>
+<p>Example:</p>
+<p>&quot;The customer cannot install the service because the network dependency is incomplete.&quot;</p>
+<p>might become a vector such as:</p>
+<h2>[0.12, -0.44, 0.83, ...]</h2>
+<p>The actual vector contains many dimensions.</p>
+<p>Texts with similar meaning tend to have vectors that are closer according to an appropriate similarity metric.</p>
+<h3>Example</h3>
+<p>&quot;Installation is delayed because a network dependency is unresolved.&quot;<br>and<br>&quot;The unresolved network dependency is blocking installation.&quot;<br>should generally be semantically similar.</p>
+<p>This enables semantic retrieval.</p>
+<h3>Important distinction</h3>
+<p>Text -&gt; embedding model -&gt; vector</p>
+<p>The vector is not the original text. A production system normally stores both the vector and the original chunk or a reference to it.</p>
+<p>A record might contain:</p>
+<h2>{</h2>
+<p>  &quot;id&quot;: &quot;chunk-001&quot;,<br>  &quot;text&quot;: &quot;Installation is delayed...&quot;,<br>  &quot;embedding&quot;: [0.12, -0.44, ...],<br>  &quot;metadata&quot;: {<br>      &quot;source&quot;: &quot;guide.pdf&quot;,<br>      &quot;page&quot;: 18<br>  }<br>}</p>
+<h3>Similarity measures</h3>
+<ul><li>cosine similarity</li><li>dot product</li><li>Euclidean distance</li></ul>
+<p>The exact choice depends on the embedding model and vector database.</p>
+<h3>A key concept</h3>
+<p>Embedding quality determines how well semantic relationships can be represented.</p>
+<p>If two chunks are semantically related but their embeddings are not close, retrieval may fail.</p>
+<p>Do not assume vector search is always enough. Exact identifiers, dates, order numbers, product codes, and names can sometimes be better handled using keyword search, metadata filtering, or hybrid retrieval.</p>
+</article>
+<nav class="pager" aria-label="Module navigation"><a class="pager-link" href="../../lessons/03-chunking/" rel="prev"><small>Previous</small>Chunking in RAG</a><a class="pager-link next" href="../../lessons/05-vector-database/" rel="next"><small>Next</small>Vector Databases for RAG</a></nav>
+<p class="edit"><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/data/raw/04_embeddings_and_vectors.txt" rel="noopener">View the raw lesson file on GitHub</a></p>
+
+</main>
+</div>
+<footer class="site-footer">
+  <p>RAG from Scratch · free and open source on <a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a> · built from <code>notes/</code>, <code>data/raw/</code> and <code>src/pipeline/</code></p>
+</footer>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

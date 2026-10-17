@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build a RAG Pipeline in Python: LangChain + Chroma | RAG from Scratch</title>
+<meta name="description" content="Step-by-step walkthrough of a from-scratch RAG pipeline in Python: ingestion, chunking, Chroma vector store, hybrid BM25 + vector retrieval, cited Gemini…">
+<link rel="canonical" href="https://chadasaiteja.github.io/rag-from-scratch/implementation/">
+<meta name="robots" content="index, follow">
+<meta property="og:site_name" content="RAG from Scratch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Build a RAG Pipeline in Python: LangChain + Chroma | RAG from Scratch">
+<meta property="og:description" content="Step-by-step walkthrough of a from-scratch RAG pipeline in Python: ingestion, chunking, Chroma vector store, hybrid BM25 + vector retrieval, cited Gemini…">
+<meta property="og:url" content="https://chadasaiteja.github.io/rag-from-scratch/implementation/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Build a RAG Pipeline in Python: LangChain + Chroma | RAG from Scratch">
+<meta name="twitter:description" content="Step-by-step walkthrough of a from-scratch RAG pipeline in Python: ingestion, chunking, Chroma vector store, hybrid BM25 + vector retrieval, cited Gemini…">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Build a RAG Pipeline in Python: LangChain + Chroma", "description": "Step-by-step walkthrough of a from-scratch RAG pipeline in Python: ingestion, chunking, Chroma vector store, hybrid BM25 + vector retrieval, cited Gemini…", "url": "https://chadasaiteja.github.io/rag-from-scratch/implementation/", "author": {"@type": "Person", "name": "ChadaSaiteja", "url": "https://github.com/ChadaSaiteja"}, "inLanguage": "en", "dateModified": "2026-10-03", "proficiencyLevel": "Beginner", "isPartOf": {"@type": "Course", "name": "RAG from Scratch", "url": "https://chadasaiteja.github.io/rag-from-scratch/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareSourceCode", "name": "RAG from Scratch", "codeRepository": "https://github.com/ChadaSaiteja/rag-from-scratch", "programmingLanguage": "Python", "description": "Step-by-step walkthrough of a from-scratch RAG pipeline in Python: ingestion, chunking, Chroma vector store, hybrid BM25 + vector retrieval, cited Gemini…"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "Implementation", "item": "https://chadasaiteja.github.io/rag-from-scratch/implementation/"}]}</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../">RAG <span>from Scratch</span></a>
+  <nav class="topnav" aria-label="Main"><a href="../">Home</a><a href="../learn/">Learn</a><a href="../implementation/" aria-current="page">Implementation</a><a href="../lessons/">Lessons</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+</header>
+<div class="layout no-sidebar">
+
+<main id="content">
+<nav class="crumbs" aria-label="Breadcrumb"><a href="../">Home</a> / <span aria-current="page">Implementation</span></nav>
+<article class="prose wide">
+<h1>How this RAG pipeline is implemented</h1>
+<p class="lede">A Retrieval-Augmented Generation pipeline built stage by stage with LangChain, ChromaDB and Google Gemini —
+implemented by hand to learn how each part works, not wired together from one high-level helper.</p>
+
+<h2>What it demonstrates</h2>
+<ul>
+  <li><strong>Ingestion with provenance</strong> — every chunk carries its source filename.</li>
+  <li><strong>Two retrievers to compare</strong> — pure vector search vs. hybrid BM25 + vector.</li>
+  <li><strong>Query expansion</strong> — <code>MultiQueryRetriever</code> rephrases the question to close the wording gap.</li>
+  <li><strong>Cited, grounded answers</strong> — the model must cite filenames or say it doesn’t know.</li>
+  <li><strong>Separate evaluation</strong> — retrieval accuracy and generation accuracy scored independently.</li>
+</ul>
+
+<h2>Architecture</h2>
+<p>Ingestion runs once to build the vector store; every question then flows through retrieval and generation.</p>
+<div class="flow" role="img" aria-label="data/raw lessons to ingest.py to Chroma to hybrid_search.py to generation.py to a cited answer">
+  <div class="box">data/raw/*.txt<small>lesson files</small></div><span class="arrow">→</span>
+  <div class="box">ingest.py<small>chunk + tag filename</small></div><span class="arrow">→</span>
+  <div class="box">Chroma<small>vector store</small></div><span class="arrow">→</span>
+  <div class="box">hybrid_search.py<small>BM25 + multi-query vector</small></div><span class="arrow">→</span>
+  <div class="box">generation.py<small>[Source] prompt → Gemini</small></div><span class="arrow">→</span>
+  <div class="box">Cited answer</div>
+</div>
+<p><code>evaluation.py</code> sits beside the flow and scores what hybrid search retrieved and what Gemini answered, separately.</p>
+
+<h2>Pipeline files</h2>
+<p>Read them in order alongside the matching <a href="../lessons/">lesson</a>. Expand a card to read its source.</p>
+
+<article class="file-card" id="config">
+  <div class="file-head"><span class="step">0</span><div><h3><code>src/pipeline/config.py</code></h3><p class="stage">Shared settings</p></div></div>
+  <p>Loads the API key, model names, chunk size and top-k from <code>.env</code>, so every other script is retargeted by editing <code>.env</code> only.</p>
+  <details><summary>View source</summary><pre><code class="language-python">&quot;&quot;&quot;Single source of truth for API keys and tunable constants, loaded from .env.
+
+Every pipeline script imports from here instead of hardcoding values, so the whole
+pipeline can be retargeted (model, collection, store location, chunk/retrieval sizes)
+by editing .env only.
+&quot;&quot;&quot;
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# --- Secrets ---
+GOOGLE_API_KEY = os.getenv(&quot;GOOGLE_API_KEY&quot;)
+
+# --- Models ---
+EMBEDDING_MODEL = os.getenv(&quot;EMBEDDING_MODEL&quot;, &quot;models/gemini-embedding-001&quot;)
+GENERATION_MODEL = os.getenv(&quot;GENERATION_MODEL&quot;, &quot;gemini-3.5-flash&quot;)
+
+# --- Vector store ---
+COLLECTION_NAME = os.getenv(&quot;COLLECTION_NAME&quot;, &quot;gemini_collection&quot;)
+PERSIST_DIRECTORY = os.getenv(&quot;PERSIST_DIRECTORY&quot;, &quot;./chroma_gemini_db&quot;)
+
+# --- Chunking / retrieval tuning ---
+CHUNK_SIZE = int(os.getenv(&quot;CHUNK_SIZE&quot;, &quot;1000&quot;))
+RETRIEVAL_K = int(os.getenv(&quot;RETRIEVAL_K&quot;, &quot;3&quot;))
+</code></pre></details>
+</article>
+<article class="file-card" id="ingest">
+  <div class="file-head"><span class="step">1</span><div><h3><code>src/pipeline/ingest.py</code></h3><p class="stage">Stages 1–4 · Load → chunk → embed → store</p></div></div>
+  <p>Reads every lesson in <code>data/raw/</code>, splits it into ~1000-character chunks, tags each chunk with its source <code>filename</code>, embeds it with Gemini and persists it to Chroma.</p>
+  <details><summary>View source</summary><pre><code class="language-python">&quot;&quot;&quot;Ingestion stage: load the raw corpus, chunk it, embed it, and persist it to Chroma.&quot;&quot;&quot;
+from pathlib import Path
+from langchain_core.documents import Document
+from langchain_chroma import Chroma
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from config import CHUNK_SIZE, COLLECTION_NAME, EMBEDDING_MODEL, GOOGLE_API_KEY, PERSIST_DIRECTORY
+
+
+# Default corpus location: &lt;repo_root&gt;/data/raw
+file_path = str(Path(__file__).resolve().parents[2] / &quot;data&quot; / &quot;raw&quot;)
+
+def ingest(file_path: str, is_directory: bool = True):
+    &quot;&quot;&quot;Load .txt files into Documents, tagging each with its source path as metadata.&quot;&quot;&quot;
+    try:
+        paths = sorted(Path(file_path).glob(&quot;*.txt&quot;)) if is_directory else [Path(file_path)]
+        documents = [
+            Document(page_content=path.read_text(encoding=&quot;utf-8&quot;), metadata={&quot;source&quot;: str(path), &quot;filename&quot;: str(path.name)})
+            for path in paths
+        ]
+
+        print(f&quot;Loaded {len(documents)} documents from {file_path}&quot;)
+        return documents
+    except Exception as e:
+        print(f&quot;[ingest] error: {e}&quot;)
+        raise
+
+def chunk(documents, chunk_size=CHUNK_SIZE):
+    &quot;&quot;&quot;Split each document into smaller chunks, preserving the parent&#x27;s metadata.&quot;&quot;&quot;
+    try:
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size)
+        chunks = []
+        for document in documents:
+            for chunk in text_splitter.split_text(document.page_content):
+                chunks.append(Document(page_content=chunk, metadata=document.metadata))
+        return chunks
+    except Exception as e:
+        print(f&quot;[chunk] error: {e}&quot;)
+        raise
+
+
+def ingest_pipeline(file_path: str = file_path, is_directory: bool = True):
+    &quot;&quot;&quot;Load, chunk, embed, and persist the corpus into the Chroma vector store.&quot;&quot;&quot;
+    try:
+        documents=ingest(file_path, is_directory=is_directory)    
+        chunks=chunk(documents)
+        
+        # This can be in-memory or persisted to a directory
+        embeddings = GoogleGenerativeAIEmbeddings(model=EMBEDDING_MODEL, google_api_key=GOOGLE_API_KEY)
+        vector_store = Chroma.from_documents(
+            documents=chunks,
+            embedding=embeddings,
+            collection_name=COLLECTION_NAME,
+            persist_directory=PERSIST_DIRECTORY  # Optional: omit if you want in-memory only
+        )
+        
+        print(f&quot;Created {len(chunks)} chunks from {len(documents)} documents&quot;)
+        return chunks
+    except Exception as e:
+        print(f&quot;[ingest_pipeline] error: {e}&quot;)
+        raise
+    
+
+if __name__ == &quot;__main__&quot;:
+    ingest_pipeline(file_path)</code></pre></details>
+</article>
+<article class="file-card" id="vector-retrieval">
+  <div class="file-head"><span class="step">2</span><div><h3><code>src/pipeline/vector_retrieval.py</code></h3><p class="stage">Stage 5a · Semantic retrieval</p></div></div>
+  <p>The simplest retriever: top-k nearest neighbours by embedding similarity. A baseline to compare hybrid search against.</p>
+  <details><summary>View source</summary><pre><code class="language-python">&quot;&quot;&quot;Pure semantic (vector) retrieval demo against the persisted Chroma store.&quot;&quot;&quot;
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_chroma import Chroma
+from config import COLLECTION_NAME, EMBEDDING_MODEL, GOOGLE_API_KEY, PERSIST_DIRECTORY, RETRIEVAL_K
+
+embeddings = GoogleGenerativeAIEmbeddings(model=EMBEDDING_MODEL, google_api_key=GOOGLE_API_KEY)
+
+vector_store = Chroma(
+    collection_name=COLLECTION_NAME,
+    embedding_function=embeddings,
+    persist_directory=PERSIST_DIRECTORY
+)
+
+# Top-k nearest neighbours by embedding similarity
+results = vector_store.similarity_search(
+    query=&quot;How to retrieve data using vectors?&quot;,
+    k=RETRIEVAL_K
+)
+
+print(results)</code></pre></details>
+</article>
+<article class="file-card" id="hybrid-search">
+  <div class="file-head"><span class="step">3</span><div><h3><code>src/pipeline/hybrid_search.py</code></h3><p class="stage">Stage 5b · Hybrid retrieval</p></div></div>
+  <p>BM25 (exact keywords) and a multi-query-expanded vector retriever, fused 50/50 by an <code>EnsembleRetriever</code>.</p>
+  <details><summary>View source</summary><pre><code class="language-python">&quot;&quot;&quot;Hybrid retrieval: combines lexical (BM25) and semantic (vector) search via an ensemble.&quot;&quot;&quot;
+from langchain_community.retrievers import BM25Retriever
+from langchain_classic.retrievers import EnsembleRetriever, MultiQueryRetriever
+from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
+from langchain_chroma import Chroma
+from langchain_core.documents import Document
+from config import COLLECTION_NAME, EMBEDDING_MODEL, GENERATION_MODEL, GOOGLE_API_KEY, PERSIST_DIRECTORY, RETRIEVAL_K
+
+embeddings = GoogleGenerativeAIEmbeddings(model=EMBEDDING_MODEL, google_api_key=GOOGLE_API_KEY)
+
+vector_store = Chroma(
+    collection_name=COLLECTION_NAME,
+    embedding_function=embeddings,
+    persist_directory=PERSIST_DIRECTORY
+)
+
+# BM25 needs the raw documents in memory; pull everything back out of Chroma
+info= vector_store.get()
+doc=[]
+
+for text,metadata in zip(info[&#x27;documents&#x27;], info[&#x27;metadatas&#x27;]):
+    doc.append(Document(page_content=text, metadata=metadata))
+    
+bm25retriever = BM25Retriever.from_documents(documents=doc)
+bm25retriever.k = RETRIEVAL_K
+
+base_vector_retriever = vector_store.as_retriever(search_kwargs={&quot;k&quot;: RETRIEVAL_K})
+
+# MultiQueryRetriever asks the LLM to rephrase the question a few ways and unions the
+# results, which helps recall when the user&#x27;s wording doesn&#x27;t match the corpus wording.
+query_expansion_llm = ChatGoogleGenerativeAI(model=GENERATION_MODEL, google_api_key=GOOGLE_API_KEY, temperature=0)
+vector_retriever = MultiQueryRetriever.from_llm(
+    retriever=base_vector_retriever,
+    llm=query_expansion_llm,
+)
+
+# Combine both using the EnsembleRetriever (Hybrid Search)
+# weights=[0.5, 0.5] splits the relevance evenly between BM25 and Vector search
+hybrid_retriever = EnsembleRetriever(
+    retrievers=[bm25retriever, vector_retriever],
+    weights=[0.5, 0.5]
+)
+
+
+def hybrid_search(query):
+    &quot;&quot;&quot;Run hybrid (BM25 + multi-query-expanded vector) search and return matched documents.&quot;&quot;&quot;
+    try:
+        return hybrid_retriever.invoke(query)
+    except Exception as e:
+        print(f&quot;[hybrid_search] error: {e}&quot;)
+        raise
+
+
+if __name__ == &quot;__main__&quot;:
+    query = &quot;How to retrieve data using vectors?&quot;
+    print(hybrid_search(query))</code></pre></details>
+</article>
+<article class="file-card" id="generation">
+  <div class="file-head"><span class="step">4</span><div><h3><code>src/pipeline/generation.py</code></h3><p class="stage">Stages 6–7 · Prompt + generate</p></div></div>
+  <p>Wraps each retrieved chunk in a <code>[Source: …]</code> tag and asks Gemini to answer only from that context, cite filenames, and say “I don’t know” otherwise.</p>
+  <details><summary>View source</summary><pre><code class="language-python">&quot;&quot;&quot;Generation stage: retrieve context via hybrid search, then ask Gemini to answer.&quot;&quot;&quot;
+from pathlib import Path
+from google import genai
+from google.genai import errors, types
+from hybrid_search import hybrid_search
+from config import GENERATION_MODEL, GOOGLE_API_KEY
+
+model = GENERATION_MODEL
+# Client-side timeout so a slow/overloaded API fails fast instead of hanging silently.
+client = genai.Client(api_key=GOOGLE_API_KEY, http_options=types.HttpOptions(timeout=20000))
+
+
+def call_google_api(question, retrievedInfo, prompt=None):
+    &quot;&quot;&quot;Call the Google API with the retrieved context and the user&#x27;s question.&quot;&quot;&quot;
+    if not prompt:
+        prompt = (
+            &quot;You are a helpful assistant. Answer the question using ONLY the context below.\n&quot;
+            &quot;Each context block is tagged with its source filename in [Source: ...] form.\n&quot;
+            &quot;After every sentence or claim you make, cite the filename(s) it came from, &quot;
+            &quot;e.g. &#x27;Chunking improves recall (Source: 03_chunking.txt).&#x27;\n&quot;
+            &quot;If the answer isn&#x27;t in the context, say you don&#x27;t know instead of guessing.\n\n&quot;
+            f&quot;Context:\n{retrievedInfo}\n\n&quot;
+            f&quot;Question: {question}&quot;
+        )
+    try:
+        response = client.models.generate_content(
+            model=model,
+            contents=prompt,
+        )
+    except errors.ServerError:
+        return &quot;The model is temporarily overloaded (HTTP 503). Please try again in a moment.&quot;
+    except Exception as e:
+        print(f&quot;[call_google_api] error: {e}&quot;)
+        raise
+    return response.text or &quot;&quot;
+
+
+def format_context(docs):
+    &quot;&quot;&quot;Join retrieved chunks, tagging each with its source filename for citation.&quot;&quot;&quot;
+    try:
+        tagged = []
+        for doc in docs:
+            # older chunks may predate the dedicated &quot;filename&quot; field, fall back to &quot;source&quot;
+            filename = doc.metadata.get(&quot;filename&quot;) or Path(doc.metadata.get(&quot;source&quot;, &quot;&quot;)).name or &quot;unknown&quot;
+            tagged.append(f&quot;[Source: {filename}]\n{doc.page_content}&quot;)
+        return &quot;\n\n&quot;.join(tagged)
+    except Exception as e:
+        print(f&quot;[format_context] error: {e}&quot;)
+        raise
+
+
+if __name__ == &quot;__main__&quot;:
+    question = input(&quot;Enter your question: &quot;)
+    docs = hybrid_search(question)
+    retrievedInfo = format_context(docs)
+    # print(retrievedInfo)
+    answer = call_google_api(question, retrievedInfo)
+    print(answer)
+</code></pre></details>
+</article>
+<article class="file-card" id="evaluation">
+  <div class="file-head"><span class="step">5</span><div><h3><code>src/pipeline/evaluation.py</code></h3><p class="stage">Stage 8 · Evaluation</p></div></div>
+  <p>Runs fixed question → expected-source cases and scores retrieval (right file found?) and generation (expected concept in answer?) separately.</p>
+  <details><summary>View source</summary><pre><code class="language-python">&quot;&quot;&quot;Lightweight RAG evaluation: scores retrieval and generation separately.
+
+Implements the approach described in data/raw/08_rag_evaluation.txt — don&#x27;t judge a RAG
+system only by &quot;does the answer sound good?&quot;; check whether retrieval actually found the
+right source, independently of how fluent the generated answer reads.
+&quot;&quot;&quot;
+from pathlib import Path
+from hybrid_search import hybrid_search
+from generation import call_google_api, format_context
+
+# Each case: a question, the filename that should be retrieved, and a keyword
+# expected to appear in a grounded answer. Extend this list as the corpus grows.
+EVAL_CASES = [
+    {
+        &quot;question&quot;: &quot;What is the difference between chunk size and overlap?&quot;,
+        &quot;expected_source&quot;: &quot;03_chunking.txt&quot;,
+        &quot;expected_keyword&quot;: &quot;overlap&quot;,
+    },
+    {
+        &quot;question&quot;: &quot;How does a vector database find similar embeddings?&quot;,
+        &quot;expected_source&quot;: &quot;05_vector_database.txt&quot;,
+        &quot;expected_keyword&quot;: &quot;vector&quot;,
+    },
+    {
+        &quot;question&quot;: &quot;What does the retriever stage do in a RAG pipeline?&quot;,
+        &quot;expected_source&quot;: &quot;06_retrieval.txt&quot;,
+        &quot;expected_keyword&quot;: &quot;retriev&quot;,
+    },
+    {
+        &quot;question&quot;: &quot;How should a prompt be constructed for the generation stage?&quot;,
+        &quot;expected_source&quot;: &quot;07_rag_prompt_and_generation.txt&quot;,
+        &quot;expected_keyword&quot;: &quot;prompt&quot;,
+    },
+    {
+        &quot;question&quot;: &quot;Why should retrieval and generation quality be evaluated separately?&quot;,
+        &quot;expected_source&quot;: &quot;08_rag_evaluation.txt&quot;,
+        &quot;expected_keyword&quot;: &quot;evaluat&quot;,
+    },
+]
+
+
+def evaluate_retrieval(case):
+    &quot;&quot;&quot;Check whether the expected source file shows up anywhere in the retrieved chunks.&quot;&quot;&quot;
+    try:
+        docs = hybrid_search(case[&quot;question&quot;])
+        # same fallback as format_context(): older chunks may lack &quot;filename&quot; metadata
+        retrieved_sources = {
+            doc.metadata.get(&quot;filename&quot;) or Path(doc.metadata.get(&quot;source&quot;, &quot;&quot;)).name
+            for doc in docs
+        }
+        hit = case[&quot;expected_source&quot;] in retrieved_sources
+        return hit, docs
+    except Exception as e:
+        print(f&quot;[evaluate_retrieval] error: {e}&quot;)
+        raise
+
+
+def evaluate_generation(case, docs):
+    &quot;&quot;&quot;Check whether the generated answer contains the expected keyword (crude groundedness proxy).&quot;&quot;&quot;
+    try:
+        retrieved_info = format_context(docs)
+        answer = call_google_api(case[&quot;question&quot;], retrieved_info)
+        hit = case[&quot;expected_keyword&quot;].lower() in answer.lower()
+        return hit, answer
+    except Exception as e:
+        print(f&quot;[evaluate_generation] error: {e}&quot;)
+        raise
+
+
+def run_evaluation(cases=EVAL_CASES):
+    &quot;&quot;&quot;Run every eval case and print a retrieval-vs-generation scorecard.&quot;&quot;&quot;
+    results = []
+    for case in cases:
+        retrieval_hit, docs = evaluate_retrieval(case)
+        generation_hit, answer = evaluate_generation(case, docs)
+        results.append({
+            &quot;question&quot;: case[&quot;question&quot;],
+            &quot;expected_source&quot;: case[&quot;expected_source&quot;],
+            &quot;retrieval_hit&quot;: retrieval_hit,
+            &quot;generation_hit&quot;: generation_hit,
+            &quot;answer&quot;: answer,
+        })
+
+    retrieval_score = sum(r[&quot;retrieval_hit&quot;] for r in results)
+    generation_score = sum(r[&quot;generation_hit&quot;] for r in results)
+    total = len(results)
+
+    print(f&quot;\n{&#x27;Question&#x27;:&lt;60} {&#x27;Retrieval&#x27;:&lt;10} {&#x27;Generation&#x27;:&lt;10}&quot;)
+    print(&quot;-&quot; * 82)
+    for r in results:
+        print(f&quot;{r[&#x27;question&#x27;][:58]:&lt;60} {str(r[&#x27;retrieval_hit&#x27;]):&lt;10} {str(r[&#x27;generation_hit&#x27;]):&lt;10}&quot;)
+    print(&quot;-&quot; * 82)
+    print(f&quot;Retrieval accuracy:  {retrieval_score}/{total}&quot;)
+    print(f&quot;Generation accuracy: {generation_score}/{total}&quot;)
+    return results
+
+
+if __name__ == &quot;__main__&quot;:
+    run_evaluation()
+</code></pre></details>
+</article>
+
+<h2 id="setup">Setup and usage</h2>
+<pre><code>git clone https://github.com/ChadaSaiteja/rag-from-scratch.git
+cd rag-from-scratch
+python -m venv .venv
+.venv\Scripts\activate          # Windows (macOS/Linux: source .venv/bin/activate)
+pip install -r requirements.txt
+copy .env.example .env          # then paste your GOOGLE_API_KEY
+
+cd src/pipeline
+python ingest.py                # build the vector store
+python hybrid_search.py         # try retrieval
+python generation.py            # ask a question, get a cited answer
+python evaluation.py            # retrieval vs. generation scorecard</code></pre>
+<p>Settings such as <code>GENERATION_MODEL</code>, <code>CHUNK_SIZE</code> and <code>RETRIEVAL_K</code> live in <code>.env</code>; defaults are in <code>config.py</code>.</p>
+
+<h2 id="known-issues">Known issues</h2>
+<p>Real limitations of the current code, kept visible as next exercises:</p>
+<ul><li><strong>Relative persist directory.</strong> <code>./chroma_gemini_db</code> resolves against the working directory, so ingesting and querying from different folders use different stores.</li><li><strong>Re-ingest duplicates data.</strong> <code>ingest_pipeline</code> appends with no reset or deterministic IDs; running it twice doubles the corpus.</li><li><strong>Import-time side effects.</strong> <code>vector_retrieval.py</code> and <code>hybrid_search.py</code> do real work (API calls, index build) when imported.</li><li><strong>No relevance floor.</strong> Retrieval always returns top-k, so off-topic questions still feed chunks to the LLM.</li><li><strong>Flat imports.</strong> Scripts import each other as <code>from config import …</code>, so they only run from <code>src/pipeline/</code>.</li><li><strong>Weak generation check.</strong> A 503 returns an apology string that evaluation still scores, and the keyword check passes easily.</li><li><strong>No automated tests.</strong> <code>evaluation.py</code> checks behaviour, but there is no pytest suite.</li></ul>
+</article>
+
+</main>
+</div>
+<footer class="site-footer">
+  <p>RAG from Scratch · free and open source on <a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a> · built from <code>notes/</code>, <code>data/raw/</code> and <code>src/pipeline/</code></p>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

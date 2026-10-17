@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agentic RAG &amp; Tool Calling | RAG from Scratch</title>
+<meta name="description" content="Constraining the LLM&#x27;s output to a predictable, type-safe format instead of free-form text.">
+<link rel="canonical" href="https://chadasaiteja.github.io/rag-from-scratch/learn/07-agentic-rag-and-tools/">
+<meta name="robots" content="index, follow">
+<meta property="og:site_name" content="RAG from Scratch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Agentic RAG &amp; Tool Calling | RAG from Scratch">
+<meta property="og:description" content="Constraining the LLM&#x27;s output to a predictable, type-safe format instead of free-form text.">
+<meta property="og:url" content="https://chadasaiteja.github.io/rag-from-scratch/learn/07-agentic-rag-and-tools/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Agentic RAG &amp; Tool Calling | RAG from Scratch">
+<meta name="twitter:description" content="Constraining the LLM&#x27;s output to a predictable, type-safe format instead of free-form text.">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Agentic RAG & Tool Calling", "name": "Agentic RAG & Tool Calling", "description": "Constraining the LLM's output to a predictable, type-safe format instead of free-form text.", "url": "https://chadasaiteja.github.io/rag-from-scratch/learn/07-agentic-rag-and-tools/", "inLanguage": "en", "author": {"@type": "Person", "name": "ChadaSaiteja", "url": "https://github.com/ChadaSaiteja"}, "dateModified": "2026-10-04", "educationalLevel": "Beginner", "isPartOf": {"@type": "Course", "name": "RAG from Scratch", "url": "https://chadasaiteja.github.io/rag-from-scratch/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "Learn", "item": "https://chadasaiteja.github.io/rag-from-scratch/learn/"}, {"@type": "ListItem", "position": 3, "name": "Agentic RAG & Tool Calling", "item": "https://chadasaiteja.github.io/rag-from-scratch/learn/07-agentic-rag-and-tools/"}]}</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../../">RAG <span>from Scratch</span></a>
+  <nav class="topnav" aria-label="Main"><a href="../../">Home</a><a href="../../learn/" aria-current="page">Learn</a><a href="../../implementation/">Implementation</a><a href="../../lessons/">Lessons</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+</header>
+<div class="layout with-sidebar">
+<aside class="sidebar" aria-label="Course modules">
+  <details class="sidebar-box" open>
+    <summary>Course modules</summary>
+    <ul><li><a href="../../learn/"><span class="num">★</span>How to use these notes</a></li><li><a href="../../learn/00-introduction-to-rag/"><span class="num">00</span>Introduction to RAG</a></li><li><a href="../../learn/01-foundations-transformers/"><span class="num">01</span>Foundations — Transformers, Tokens &amp; LLM Settings</a></li><li><a href="../../learn/02-embeddings-and-vectors/"><span class="num">02</span>Embeddings — Turning Words into Numbers</a></li><li><a href="../../learn/03-prompting-techniques/"><span class="num">03</span>Prompting Techniques — Talking to the LLM</a></li><li><a href="../../learn/04-chunking-strategies/"><span class="num">04</span>Chunking Strategies — Breaking Documents into Bites</a></li><li><a href="../../learn/05-vector-databases/"><span class="num">05</span>Vector Databases — Your AI&#x27;s Memory</a></li><li><a href="../../learn/06-retrieval-mechanics/"><span class="num">06</span>Retrieval Mechanics — Finding the Needle</a></li><li><a href="../../learn/07-agentic-rag-and-tools/" aria-current="page"><span class="num">07</span>Agentic RAG &amp; Tool Calling</a></li><li><a href="../../learn/08-building-your-first-rag-app/"><span class="num">08</span>Build Your First RAG Application</a></li><li><a href="../../learn/09-rag-evaluation/"><span class="num">09</span>Evaluating Your RAG Application</a></li><li><a href="../../learn/10-document-ingestion-and-parsing/"><span class="num">10</span>Document Ingestion &amp; Parsing — The Forgotten Half</a></li></ul>
+  </details>
+</aside>
+<main id="content">
+<nav class="crumbs" aria-label="Breadcrumb"><a href="../../">Home</a> / <a href="../../learn/">Learn</a> / <span aria-current="page">Agentic RAG &amp; Tool Calling</span></nav>
+<article class="prose">
+<h1 id="module-7-agentic-rag-tool-calling">🤖 Module 7: Agentic RAG &amp; Tool Calling</h1>
+<blockquote>
+<p><em>Source: <code>AI/day4/toolcalling.md</code> + <code>AI/day4/toolcalling.py</code></em></p>
+</blockquote>
+<p><strong>Tool calling</strong> lets an LLM interact with external tools and functions in a controlled, predictable way. Combined with <strong>structured output</strong>, it turns a chatbot into an <strong>agent</strong> — the foundation of <em>Agentic RAG</em>.</p>
+<hr />
+<h2 id="what-is-structured-output">📦 What is Structured Output?</h2>
+<p>Constraining the LLM's output to a predictable, type-safe format instead of free-form text.</p>
+<p><strong>Benefits:</strong> predictable format • type safety • easy extraction (no regex) • fewer errors • seamless app integration.</p>
+<hr />
+<h2 id="mental-model-the-llm-does-not-execute-anything">🧠 Mental Model: The LLM does NOT execute anything</h2>
+<pre><code>User Input
+    ↓
+LLM (analyzes and suggests an action)
+    ↓
+&quot;Call get_weather(city='Hyderabad')&quot;
+    ↓
+YOUR PYTHON CODE (executes the actual function)
+    ↓
+get_weather(&quot;Hyderabad&quot;)
+    ↓
+Tool Result (weather data)
+    ↓
+LLM (processes result)
+    ↓
+Final Response to User
+</code></pre>
+<p><strong>Key insight:</strong> the LLM <em>proposes</em> actions via structured output; <strong>your application controls execution.</strong></p>
+<hr />
+<h2 id="common-use-cases">🎯 Common Use Cases</h2>
+<ul>
+<li>Weather APIs, database queries, calculations, web search</li>
+<li><strong>Multi-step workflows</strong> — chaining multiple tool calls</li>
+<li><strong>RAG-specific:</strong> query a vector store, fetch a document by ID, run a SQL report, call a calculator, hit a live API</li>
+</ul>
+<hr />
+<h2 id="code-tool-calling-with-gemini-from-day4toolcallingpy">💻 Code: Tool Calling with Gemini (from <code>day4/toolcalling.py</code>)</h2>
+<pre><code class="language-python">import os, json
+from dotenv import load_dotenv
+load_dotenv()
+from google import genai
+
+client = genai.Client(api_key=os.getenv(&quot;GOOGLE_API_KEY&quot;))
+
+def get_weather(city):
+    weather = {
+        &quot;hyderabad&quot;: {&quot;temperature&quot;: &quot;30°C&quot;, &quot;condition&quot;: &quot;Sunny&quot;},
+        &quot;bangalore&quot;: {&quot;temperature&quot;: &quot;28°C&quot;, &quot;condition&quot;: &quot;Cloudy&quot;},
+    }
+    return weather.get(city.lower(), {&quot;temperature&quot;: &quot;N/A&quot;, &quot;condition&quot;: &quot;N/A&quot;})
+
+# 1. Declare the tool (name + description + JSON schema)
+tool = {
+    &quot;type&quot;: &quot;function&quot;,
+    &quot;name&quot;: &quot;get_weather&quot;,
+    &quot;description&quot;: &quot;Get the current weather for a city&quot;,
+    &quot;parameters&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {&quot;city&quot;: {&quot;type&quot;: &quot;string&quot;}},
+        &quot;required&quot;: [&quot;city&quot;],
+    },
+}
+
+# 2. Ask the model — it may decide to call the tool
+result = client.interactions.create(
+    model=&quot;gemini-3.5-flash&quot;,
+    input=&quot;Get the current weather for Hyderabad&quot;,
+    tools=[tool],
+)
+
+# 3. Find the function-call step in the response
+fc_step = next((s for s in result.steps if s.type == &quot;function_call&quot;), None)
+
+# 4. YOUR CODE executes it (never trust the LLM to run it)
+tool_result = get_weather(fc_step.arguments.get(&quot;city&quot;)) if fc_step else None
+
+# 5. Send the tool result back for a grounded final answer
+final_result = client.interactions.create(
+    model=&quot;gemini-3.5-flash&quot;,
+    tools=[tool],
+    previous_interaction_id=result.id,
+    input=[{
+        &quot;type&quot;: &quot;function_result&quot;,
+        &quot;name&quot;: fc_step.name,
+        &quot;call_id&quot;: fc_step.id,
+        &quot;result&quot;: [{&quot;type&quot;: &quot;text&quot;, &quot;text&quot;: json.dumps(tool_result)}],
+    }],
+)
+print(final_result.output_text)
+</code></pre>
+<hr />
+<h2 id="from-tools-agentic-rag">🔀 From Tools → Agentic RAG</h2>
+<p>A RAG app becomes <strong>agentic</strong> when the LLM <em>decides</em> whether/how to retrieve:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Classic RAG</th>
+<th>Agentic RAG</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Always retrieves for every question</td>
+<td>Decides <em>if</em> retrieval is needed</td>
+</tr>
+<tr>
+<td>Single retrieval pass</td>
+<td>Multiple rounds (query → retrieve → check → re-query)</td>
+</tr>
+<tr>
+<td>Fixed pipeline</td>
+<td>LLM plans steps, calls tools, self-reflects</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>When to use agentic RAG:</strong> multi-hop questions ("compare policy X and Y"), mixed data sources (DB + docs + API), and tasks needing computation or live data.</p>
+<blockquote>
+<p>⚠️ <strong>Beginner trap:</strong> agentic ≠ better. It adds latency, cost, and failure modes. Start with classic RAG; add agents only when you <em>need</em> decisions, not just retrieval.</p>
+</blockquote>
+<hr />
+<h2 id="key-takeaways">✅ Key Takeaways</h2>
+<ul>
+<li>LLM proposes → your code executes → result returns.</li>
+<li>Declare tools with clear names, descriptions, and JSON schemas.</li>
+<li>Agentic RAG = LLM controls the retrieve/reason loop.</li>
+<li>Use ReAct-style reasoning for multi-step tasks.</li>
+</ul>
+<p>➡️ Next: <a href="../../learn/08-building-your-first-rag-app/">Build Your First RAG App — the full project</a></p>
+</article>
+<nav class="pager" aria-label="Module navigation"><a class="pager-link" href="../../learn/06-retrieval-mechanics/" rel="prev"><small>Previous</small>Retrieval Mechanics — Finding the Needle</a><a class="pager-link next" href="../../learn/08-building-your-first-rag-app/" rel="next"><small>Next</small>Build Your First RAG Application</a></nav>
+<p class="edit"><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/notes/07_agentic_rag_and_tools.md" rel="noopener">View this page’s source on GitHub</a></p>
+
+</main>
+</div>
+<footer class="site-footer">
+  <p>RAG from Scratch · free and open source on <a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a> · built from <code>notes/</code>, <code>data/raw/</code> and <code>src/pipeline/</code></p>
+</footer>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

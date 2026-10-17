@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prompt Construction and Generation — RAG Lesson 07 | RAG from Scratch</title>
+<meta name="description" content="After retrieval, the application needs to provide the retrieved evidence to the LLM. Conceptually: SYSTEM INSTRUCTIONS + USER QUESTION + RETRIEVED CONTEXT =…">
+<link rel="canonical" href="https://chadasaiteja.github.io/rag-from-scratch/lessons/07-rag-prompt-and-generation/">
+<meta name="robots" content="index, follow">
+<meta property="og:site_name" content="RAG from Scratch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Prompt Construction and Generation — RAG Lesson 07 | RAG from Scratch">
+<meta property="og:description" content="After retrieval, the application needs to provide the retrieved evidence to the LLM. Conceptually: SYSTEM INSTRUCTIONS + USER QUESTION + RETRIEVED CONTEXT =…">
+<meta property="og:url" content="https://chadasaiteja.github.io/rag-from-scratch/lessons/07-rag-prompt-and-generation/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Prompt Construction and Generation — RAG Lesson 07 | RAG from Scratch">
+<meta name="twitter:description" content="After retrieval, the application needs to provide the retrieved evidence to the LLM. Conceptually: SYSTEM INSTRUCTIONS + USER QUESTION + RETRIEVED CONTEXT =…">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "Prompt Construction and Generation", "description": "After retrieval, the application needs to provide the retrieved evidence to the LLM. Conceptually: SYSTEM INSTRUCTIONS + USER QUESTION + RETRIEVED CONTEXT =…", "url": "https://chadasaiteja.github.io/rag-from-scratch/lessons/07-rag-prompt-and-generation/", "inLanguage": "en", "educationalLevel": "Beginner", "dateModified": "2026-09-29", "isPartOf": {"@type": "Course", "name": "RAG from Scratch", "url": "https://chadasaiteja.github.io/rag-from-scratch/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "Lessons", "item": "https://chadasaiteja.github.io/rag-from-scratch/lessons/"}, {"@type": "ListItem", "position": 3, "name": "Prompt Construction and Generation", "item": "https://chadasaiteja.github.io/rag-from-scratch/lessons/07-rag-prompt-and-generation/"}]}</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../../">RAG <span>from Scratch</span></a>
+  <nav class="topnav" aria-label="Main"><a href="../../">Home</a><a href="../../learn/">Learn</a><a href="../../implementation/">Implementation</a><a href="../../lessons/" aria-current="page">Lessons</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+</header>
+<div class="layout no-sidebar">
+
+<main id="content">
+<nav class="crumbs" aria-label="Breadcrumb"><a href="../../">Home</a> / <a href="../../lessons/">Lessons</a> / <span aria-current="page">Prompt Construction and Generation</span></nav>
+<article class="prose">
+<p class="eyebrow">Lesson 07</p>
+<h1>Prompt Construction and Generation</h1>
+<p>After retrieval, the application needs to provide the retrieved evidence to the LLM.</p>
+<p>Conceptually:</p>
+<h2>SYSTEM INSTRUCTIONS</h2>
+<p>+<br>USER QUESTION<br>+<br>RETRIEVED CONTEXT<br>=<br>MODEL INPUT</p>
+<p>Example:</p>
+<h3>System</h3>
+<p>Answer using the supplied context. If the answer is not present, say you do not have enough information.</p>
+<h3>Context</h3>
+<p>[1] Service Wire Center must be resolved before installation.</p>
+<p>[2] The current estimated resolution date is September 15.</p>
+<h3>Question</h3>
+<p>&quot;When can installation proceed?&quot;</p>
+<h3>The model can produce</h3>
+<p>&quot;Installation can proceed after the Service Wire Center dependency is resolved. The estimated resolution date is September 15.&quot;</p>
+<p>The application should clearly separate retrieved context from the user&#x27;s request.</p>
+<h3>A useful rule</h3>
+<p>Do not ask the model to invent information that retrieval did not provide.</p>
+<p>For knowledge-grounded systems, consider requiring the model to cite the source chunk.</p>
+<h3>Example</h3>
+<p>&quot;Installation can proceed after the dependency is resolved. [Source: installation_guide.pdf, page 18]&quot;</p>
+<p>The LLM is the generation layer, not the database.</p>
+<p>The vector database should retrieve evidence.<br>The application should construct the prompt.<br>The LLM should interpret the evidence and produce a useful response.</p>
+<p>RAG does not eliminate hallucination. It reduces the need for the model to rely only on its internal knowledge.</p>
+</article>
+<nav class="pager" aria-label="Module navigation"><a class="pager-link" href="../../lessons/06-retrieval/" rel="prev"><small>Previous</small>Retrieval in RAG</a><a class="pager-link next" href="../../lessons/08-rag-evaluation/" rel="next"><small>Next</small>Evaluating a RAG System</a></nav>
+<p class="edit"><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/data/raw/07_rag_prompt_and_generation.txt" rel="noopener">View the raw lesson file on GitHub</a></p>
+
+</main>
+</div>
+<footer class="site-footer">
+  <p>RAG from Scratch · free and open source on <a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a> · built from <code>notes/</code>, <code>data/raw/</code> and <code>src/pipeline/</code></p>
+</footer>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

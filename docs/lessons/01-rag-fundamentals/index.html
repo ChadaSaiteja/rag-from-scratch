@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAG Fundamentals — RAG Lesson 01 | RAG from Scratch</title>
+<meta name="description" content="Retrieval-Augmented Generation (RAG) is an architecture where an application retrieves relevant information from an external knowledge source and gives that…">
+<link rel="canonical" href="https://chadasaiteja.github.io/rag-from-scratch/lessons/01-rag-fundamentals/">
+<meta name="robots" content="index, follow">
+<meta property="og:site_name" content="RAG from Scratch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RAG Fundamentals — RAG Lesson 01 | RAG from Scratch">
+<meta property="og:description" content="Retrieval-Augmented Generation (RAG) is an architecture where an application retrieves relevant information from an external knowledge source and gives that…">
+<meta property="og:url" content="https://chadasaiteja.github.io/rag-from-scratch/lessons/01-rag-fundamentals/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="RAG Fundamentals — RAG Lesson 01 | RAG from Scratch">
+<meta name="twitter:description" content="Retrieval-Augmented Generation (RAG) is an architecture where an application retrieves relevant information from an external knowledge source and gives that…">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "RAG Fundamentals", "description": "Retrieval-Augmented Generation (RAG) is an architecture where an application retrieves relevant information from an external knowledge source and gives that…", "url": "https://chadasaiteja.github.io/rag-from-scratch/lessons/01-rag-fundamentals/", "inLanguage": "en", "educationalLevel": "Beginner", "dateModified": "2026-09-29", "isPartOf": {"@type": "Course", "name": "RAG from Scratch", "url": "https://chadasaiteja.github.io/rag-from-scratch/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "Lessons", "item": "https://chadasaiteja.github.io/rag-from-scratch/lessons/"}, {"@type": "ListItem", "position": 3, "name": "RAG Fundamentals", "item": "https://chadasaiteja.github.io/rag-from-scratch/lessons/01-rag-fundamentals/"}]}</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../../">RAG <span>from Scratch</span></a>
+  <nav class="topnav" aria-label="Main"><a href="../../">Home</a><a href="../../learn/">Learn</a><a href="../../implementation/">Implementation</a><a href="../../lessons/" aria-current="page">Lessons</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+</header>
+<div class="layout no-sidebar">
+
+<main id="content">
+<nav class="crumbs" aria-label="Breadcrumb"><a href="../../">Home</a> / <a href="../../lessons/">Lessons</a> / <span aria-current="page">RAG Fundamentals</span></nav>
+<article class="prose">
+<p class="eyebrow">Lesson 01</p>
+<h1>RAG Fundamentals</h1>
+<p>Retrieval-Augmented Generation (RAG) is an architecture where an application retrieves relevant information from an external knowledge source and gives that information to a language model before generating an answer.</p>
+<h3>Basic flow</h3>
+<p>User question -&gt; retrieve relevant data -&gt; build context -&gt; LLM -&gt; answer</p>
+<h2>Why RAG?</h2>
+<p>LLMs have limited knowledge of private company data, can have stale knowledge, and may hallucinate. RAG lets an application ground an answer in data stored outside the model.</p>
+<h3>Typical RAG components</h3>
+<p>1. Documents: PDFs, Markdown, HTML, database records, tickets, manuals, etc.<br>2. Ingestion: loading, cleaning, parsing, and splitting documents.<br>3. Embeddings: converting text into numerical vectors.<br>4. Vector database: storing vectors and metadata.<br>5. Retrieval: finding relevant chunks for a query.<br>6. Prompt construction: placing retrieved chunks into model context.<br>7. Generation: asking the LLM to answer using the retrieved context.</p>
+<h3>A useful mental model</h3>
+<p>RAG is not training the model. The model parameters do not change when you ingest documents. You are giving the model relevant external information at inference time.</p>
+<h3>Example</h3>
+<p>A company has an installation guide containing:<br>&quot;Service Wire Center dependencies must be resolved before installation.&quot;</p>
+<h3>A user asks</h3>
+<p>&quot;Why is my installation delayed?&quot;</p>
+<p>A RAG system searches its knowledge base, retrieves the relevant section, and gives it to the LLM. The LLM can then answer using that evidence.</p>
+<h3>RAG is especially useful for</h3>
+<ul><li>Internal documentation</li><li>Product manuals</li><li>Customer support knowledge</li><li>Engineering runbooks</li><li>Policies</li><li>Contracts</li><li>Frequently changing information</li><li>Private company data</li></ul>
+<p>RAG does not automatically guarantee correctness. Bad parsing, poor chunking, weak retrieval, missing metadata, or irrelevant retrieved chunks can still produce bad answers.</p>
+</article>
+<nav class="pager" aria-label="Module navigation"><span></span><a class="pager-link next" href="../../lessons/02-data-ingestion/" rel="next"><small>Next</small>Data Ingestion for RAG</a></nav>
+<p class="edit"><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/data/raw/01_rag_fundamentals.txt" rel="noopener">View the raw lesson file on GitHub</a></p>
+
+</main>
+</div>
+<footer class="site-footer">
+  <p>RAG from Scratch · free and open source on <a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a> · built from <code>notes/</code>, <code>data/raw/</code> and <code>src/pipeline/</code></p>
+</footer>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Ingestion for RAG — RAG Lesson 02 | RAG from Scratch</title>
+<meta name="description" content="Ingestion is the process of taking raw source data and preparing it for retrieval. Typical pipeline: Source -&gt; loader -&gt; parser -&gt; cleaner -&gt; chunker -&gt;…">
+<link rel="canonical" href="https://chadasaiteja.github.io/rag-from-scratch/lessons/02-data-ingestion/">
+<meta name="robots" content="index, follow">
+<meta property="og:site_name" content="RAG from Scratch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Data Ingestion for RAG — RAG Lesson 02 | RAG from Scratch">
+<meta property="og:description" content="Ingestion is the process of taking raw source data and preparing it for retrieval. Typical pipeline: Source -&gt; loader -&gt; parser -&gt; cleaner -&gt; chunker -&gt;…">
+<meta property="og:url" content="https://chadasaiteja.github.io/rag-from-scratch/lessons/02-data-ingestion/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Data Ingestion for RAG — RAG Lesson 02 | RAG from Scratch">
+<meta name="twitter:description" content="Ingestion is the process of taking raw source data and preparing it for retrieval. Typical pipeline: Source -&gt; loader -&gt; parser -&gt; cleaner -&gt; chunker -&gt;…">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "Data Ingestion for RAG", "description": "Ingestion is the process of taking raw source data and preparing it for retrieval. Typical pipeline: Source -> loader -> parser -> cleaner -> chunker ->…", "url": "https://chadasaiteja.github.io/rag-from-scratch/lessons/02-data-ingestion/", "inLanguage": "en", "educationalLevel": "Beginner", "dateModified": "2026-09-29", "isPartOf": {"@type": "Course", "name": "RAG from Scratch", "url": "https://chadasaiteja.github.io/rag-from-scratch/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "Lessons", "item": "https://chadasaiteja.github.io/rag-from-scratch/lessons/"}, {"@type": "ListItem", "position": 3, "name": "Data Ingestion for RAG", "item": "https://chadasaiteja.github.io/rag-from-scratch/lessons/02-data-ingestion/"}]}</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../../">RAG <span>from Scratch</span></a>
+  <nav class="topnav" aria-label="Main"><a href="../../">Home</a><a href="../../learn/">Learn</a><a href="../../implementation/">Implementation</a><a href="../../lessons/" aria-current="page">Lessons</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+</header>
+<div class="layout no-sidebar">
+
+<main id="content">
+<nav class="crumbs" aria-label="Breadcrumb"><a href="../../">Home</a> / <a href="../../lessons/">Lessons</a> / <span aria-current="page">Data Ingestion for RAG</span></nav>
+<article class="prose">
+<p class="eyebrow">Lesson 02</p>
+<h1>Data Ingestion for RAG</h1>
+<p>Ingestion is the process of taking raw source data and preparing it for retrieval.</p>
+<h3>Typical pipeline</h3>
+<p>Source -&gt; loader -&gt; parser -&gt; cleaner -&gt; chunker -&gt; metadata -&gt; embeddings -&gt; vector store</p>
+<h3>Possible sources</h3>
+<ul><li>PDF</li><li>Markdown</li><li>TXT</li><li>HTML</li><li>Word documents</li><li>Web pages</li><li>Database rows</li><li>JSON</li><li>Support tickets</li><li>API responses</li></ul>
+<p>The first goal is to preserve meaning.</p>
+<h3>For a PDF, extraction should ideally preserve</h3>
+<ul><li>headings</li><li>paragraphs</li><li>lists</li><li>tables</li><li>page information</li><li>section relationships</li></ul>
+<p>A scanned PDF may contain images instead of selectable text. Such a document may require OCR.</p>
+<p>Cleaning should remove useless artifacts such as repeated headers, page numbers, navigation text, and broken formatting, but should not remove information that changes meaning.</p>
+<p>Metadata is extremely valuable. Example:</p>
+<h2>{</h2>
+<p>  &quot;source&quot;: &quot;installation_guide.pdf&quot;,<br>  &quot;page&quot;: 18,<br>  &quot;section&quot;: &quot;Installation Dependencies&quot;,<br>  &quot;document_type&quot;: &quot;technical_guide&quot;,<br>  &quot;version&quot;: &quot;3.2&quot;<br>}</p>
+<p>Metadata can later be used for filtering and citations.</p>
+<h3>Good ingestion is not just</h3>
+<p>read file -&gt; split text.</p>
+<h3>It is</h3>
+<p>understand the source -&gt; preserve structure -&gt; clean carefully -&gt; attach metadata -&gt; create meaningful chunks.</p>
+<p>For structured business data, consider whether a database or API should be the source of truth instead of forcing everything into a vector database.</p>
+<h3>Example</h3>
+<p>A policy document is a good RAG candidate.<br>The current status of order ORD-123 may be better retrieved directly from an order API.</p>
+<p>A strong production system often combines RAG with normal APIs.</p>
+</article>
+<nav class="pager" aria-label="Module navigation"><a class="pager-link" href="../../lessons/01-rag-fundamentals/" rel="prev"><small>Previous</small>RAG Fundamentals</a><a class="pager-link next" href="../../lessons/03-chunking/" rel="next"><small>Next</small>Chunking in RAG</a></nav>
+<p class="edit"><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/data/raw/02_data_ingestion.txt" rel="noopener">View the raw lesson file on GitHub</a></p>
+
+</main>
+</div>
+<footer class="site-footer">
+  <p>RAG from Scratch · free and open source on <a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a> · built from <code>notes/</code>, <code>data/raw/</code> and <code>src/pipeline/</code></p>
+</footer>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

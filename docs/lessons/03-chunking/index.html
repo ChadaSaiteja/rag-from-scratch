@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chunking in RAG — RAG Lesson 03 | RAG from Scratch</title>
+<meta name="description" content="Chunking divides a large document into smaller retrieval units. Why chunk? Sending an entire 100-page document for every question is expensive and often…">
+<link rel="canonical" href="https://chadasaiteja.github.io/rag-from-scratch/lessons/03-chunking/">
+<meta name="robots" content="index, follow">
+<meta property="og:site_name" content="RAG from Scratch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Chunking in RAG — RAG Lesson 03 | RAG from Scratch">
+<meta property="og:description" content="Chunking divides a large document into smaller retrieval units. Why chunk? Sending an entire 100-page document for every question is expensive and often…">
+<meta property="og:url" content="https://chadasaiteja.github.io/rag-from-scratch/lessons/03-chunking/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Chunking in RAG — RAG Lesson 03 | RAG from Scratch">
+<meta name="twitter:description" content="Chunking divides a large document into smaller retrieval units. Why chunk? Sending an entire 100-page document for every question is expensive and often…">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "Chunking in RAG", "description": "Chunking divides a large document into smaller retrieval units. Why chunk? Sending an entire 100-page document for every question is expensive and often…", "url": "https://chadasaiteja.github.io/rag-from-scratch/lessons/03-chunking/", "inLanguage": "en", "educationalLevel": "Beginner", "dateModified": "2026-09-29", "isPartOf": {"@type": "Course", "name": "RAG from Scratch", "url": "https://chadasaiteja.github.io/rag-from-scratch/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "Lessons", "item": "https://chadasaiteja.github.io/rag-from-scratch/lessons/"}, {"@type": "ListItem", "position": 3, "name": "Chunking in RAG", "item": "https://chadasaiteja.github.io/rag-from-scratch/lessons/03-chunking/"}]}</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../../">RAG <span>from Scratch</span></a>
+  <nav class="topnav" aria-label="Main"><a href="../../">Home</a><a href="../../learn/">Learn</a><a href="../../implementation/">Implementation</a><a href="../../lessons/" aria-current="page">Lessons</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+</header>
+<div class="layout no-sidebar">
+
+<main id="content">
+<nav class="crumbs" aria-label="Breadcrumb"><a href="../../">Home</a> / <a href="../../lessons/">Lessons</a> / <span aria-current="page">Chunking in RAG</span></nav>
+<article class="prose">
+<p class="eyebrow">Lesson 03</p>
+<h1>Chunking in RAG</h1>
+<p>Chunking divides a large document into smaller retrieval units.</p>
+<h2>Why chunk?</h2>
+<p>Sending an entire 100-page document for every question is expensive and often irrelevant. Retrieval works better when the system can select focused pieces.</p>
+<h3>Two important parameters are</h3>
+<ul><li>chunk size</li><li>chunk overlap</li></ul>
+<p>Chunk size determines approximately how much text is stored in each chunk.</p>
+<h3>Small chunks</h3>
+<p>Pros: precise retrieval, less irrelevant context.<br>Cons: important relationships may be split.</p>
+<h3>Large chunks</h3>
+<p>Pros: more context and complete ideas.<br>Cons: retrieval becomes less focused and uses more context.</p>
+<p>Overlap repeats a portion of the previous chunk in the next chunk.</p>
+<h3>Example</h3>
+<p>Chunk size = 500 tokens<br>Overlap = 100 tokens</p>
+<h2>Chunk 1: tokens 1-500</h2>
+<p>Chunk 2: tokens 401-900<br>Chunk 3: tokens 801-1300</p>
+<p>The 100-token overlap helps preserve context around boundaries.</p>
+<p>Do not choose chunk size only because a tutorial says &quot;500 tokens.&quot;</p>
+<h3>Ask</h3>
+<ul><li>What is the natural unit of meaning?</li><li>Are headings important?</li><li>Are tables important?</li><li>Do paragraphs depend on each other?</li><li>Does the source contain procedures?</li><li>Are there references such as &quot;as described above&quot;?</li></ul>
+<p>Semantic boundaries are often better than arbitrary boundaries.</p>
+<h3>Examples</h3>
+<p>FAQ -&gt; one question/answer can be a chunk.<br>Technical documentation -&gt; heading plus related paragraphs.<br>Code -&gt; function/class/module.<br>Legal document -&gt; clause or logically connected section.</p>
+<p>A good chunk should ideally answer or substantially support a question by itself.</p>
+<h3>Chunk quality can be evaluated by asking</h3>
+<p>1. Is the chunk understandable without its neighbors?<br>2. Does it preserve important entities and relationships?<br>3. Does it contain unnecessary unrelated content?<br>4. Would embedding this chunk represent the intended concept?<br>5. Can the retrieved chunk provide enough evidence for the LLM?</p>
+<p>Chunking is an experiment, not a fixed constant.</p>
+</article>
+<nav class="pager" aria-label="Module navigation"><a class="pager-link" href="../../lessons/02-data-ingestion/" rel="prev"><small>Previous</small>Data Ingestion for RAG</a><a class="pager-link next" href="../../lessons/04-embeddings-and-vectors/" rel="next"><small>Next</small>Embeddings and Vector Search</a></nav>
+<p class="edit"><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/data/raw/03_chunking.txt" rel="noopener">View the raw lesson file on GitHub</a></p>
+
+</main>
+</div>
+<footer class="site-footer">
+  <p>RAG from Scratch · free and open source on <a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a> · built from <code>notes/</code>, <code>data/raw/</code> and <code>src/pipeline/</code></p>
+</footer>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

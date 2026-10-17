@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Retrieval in RAG — RAG Lesson 06 | RAG from Scratch</title>
+<meta name="description" content="Retrieval is the process of finding the most useful pieces of information for a user query. Basic semantic retrieval: query -&gt; embedding -&gt; vector search -&gt;…">
+<link rel="canonical" href="https://chadasaiteja.github.io/rag-from-scratch/lessons/06-retrieval/">
+<meta name="robots" content="index, follow">
+<meta property="og:site_name" content="RAG from Scratch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Retrieval in RAG — RAG Lesson 06 | RAG from Scratch">
+<meta property="og:description" content="Retrieval is the process of finding the most useful pieces of information for a user query. Basic semantic retrieval: query -&gt; embedding -&gt; vector search -&gt;…">
+<meta property="og:url" content="https://chadasaiteja.github.io/rag-from-scratch/lessons/06-retrieval/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Retrieval in RAG — RAG Lesson 06 | RAG from Scratch">
+<meta name="twitter:description" content="Retrieval is the process of finding the most useful pieces of information for a user query. Basic semantic retrieval: query -&gt; embedding -&gt; vector search -&gt;…">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "Retrieval in RAG", "description": "Retrieval is the process of finding the most useful pieces of information for a user query. Basic semantic retrieval: query -> embedding -> vector search ->…", "url": "https://chadasaiteja.github.io/rag-from-scratch/lessons/06-retrieval/", "inLanguage": "en", "educationalLevel": "Beginner", "dateModified": "2026-09-29", "isPartOf": {"@type": "Course", "name": "RAG from Scratch", "url": "https://chadasaiteja.github.io/rag-from-scratch/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "Lessons", "item": "https://chadasaiteja.github.io/rag-from-scratch/lessons/"}, {"@type": "ListItem", "position": 3, "name": "Retrieval in RAG", "item": "https://chadasaiteja.github.io/rag-from-scratch/lessons/06-retrieval/"}]}</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../../">RAG <span>from Scratch</span></a>
+  <nav class="topnav" aria-label="Main"><a href="../../">Home</a><a href="../../learn/">Learn</a><a href="../../implementation/">Implementation</a><a href="../../lessons/" aria-current="page">Lessons</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+</header>
+<div class="layout no-sidebar">
+
+<main id="content">
+<nav class="crumbs" aria-label="Breadcrumb"><a href="../../">Home</a> / <a href="../../lessons/">Lessons</a> / <span aria-current="page">Retrieval in RAG</span></nav>
+<article class="prose">
+<p class="eyebrow">Lesson 06</p>
+<h1>Retrieval in RAG</h1>
+<p>Retrieval is the process of finding the most useful pieces of information for a user query.</p>
+<p>Basic semantic retrieval:</p>
+<h2>query</h2>
+<p> -&gt; embedding<br> -&gt; vector search<br> -&gt; top-k chunks</p>
+<h3>Example query</h3>
+<p>&quot;Why is installation delayed?&quot;</p>
+<h3>Possible retrieved chunks</h3>
+<p>1. &quot;Installation cannot proceed until Service Wire Center is resolved.&quot;<br>2. &quot;The appointment is scheduled for September 18.&quot;<br>3. &quot;Customer billing information is stored in Salesforce.&quot;</p>
+<p>The first chunk is highly relevant.<br>The second may be somewhat relevant.<br>The third is probably irrelevant.</p>
+<p>A good RAG system must rank useful evidence above noise.</p>
+<h3>Retrieval quality can be improved with</h3>
+<ul><li>better chunking</li><li>better embeddings</li><li>metadata filters</li><li>query rewriting</li><li>hybrid search</li><li>reranking</li><li>domain-specific indexing</li></ul>
+<h3>Query rewriting can transform</h3>
+<p>&quot;why delayed?&quot;</p>
+<h3>into something more explicit</h3>
+<p>&quot;What dependency is currently preventing installation from proceeding?&quot;</p>
+<p>Hybrid retrieval combines semantic search with lexical/exact matching.</p>
+<h3>This is useful for identifiers</h3>
+<p>ORD-123<br>WO-987<br>Drop_Commit_Date__c</p>
+<p>A pure semantic search may not reliably prioritize exact identifiers.</p>
+<h3>Reranking is a second-stage process</h3>
+<p>1. Retrieve a larger candidate set.<br>2. Score candidates more carefully.<br>3. Keep the strongest evidence.</p>
+<h3>Example</h3>
+<p>Initial retrieval top_k = 20<br>Reranker keeps top 5.</p>
+<p>Retrieval is one of the most important parts of RAG. A powerful LLM cannot compensate for consistently retrieving the wrong evidence.</p>
+</article>
+<nav class="pager" aria-label="Module navigation"><a class="pager-link" href="../../lessons/05-vector-database/" rel="prev"><small>Previous</small>Vector Databases for RAG</a><a class="pager-link next" href="../../lessons/07-rag-prompt-and-generation/" rel="next"><small>Next</small>Prompt Construction and Generation</a></nav>
+<p class="edit"><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/data/raw/06_retrieval.txt" rel="noopener">View the raw lesson file on GitHub</a></p>
+
+</main>
+</div>
+<footer class="site-footer">
+  <p>RAG from Scratch · free and open source on <a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a> · built from <code>notes/</code>, <code>data/raw/</code> and <code>src/pipeline/</code></p>
+</footer>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

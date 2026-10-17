@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Retrieval Mechanics — Finding the Needle | RAG from Scratch</title>
+<meta name="description" content="The 2026 production standard: run both methods in parallel and merge.">
+<link rel="canonical" href="https://chadasaiteja.github.io/rag-from-scratch/learn/06-retrieval-mechanics/">
+<meta name="robots" content="index, follow">
+<meta property="og:site_name" content="RAG from Scratch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Retrieval Mechanics — Finding the Needle | RAG from Scratch">
+<meta property="og:description" content="The 2026 production standard: run both methods in parallel and merge.">
+<meta property="og:url" content="https://chadasaiteja.github.io/rag-from-scratch/learn/06-retrieval-mechanics/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Retrieval Mechanics — Finding the Needle | RAG from Scratch">
+<meta name="twitter:description" content="The 2026 production standard: run both methods in parallel and merge.">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Retrieval Mechanics — Finding the Needle", "name": "Retrieval Mechanics — Finding the Needle", "description": "The 2026 production standard: run both methods in parallel and merge.", "url": "https://chadasaiteja.github.io/rag-from-scratch/learn/06-retrieval-mechanics/", "inLanguage": "en", "author": {"@type": "Person", "name": "ChadaSaiteja", "url": "https://github.com/ChadaSaiteja"}, "dateModified": "2026-10-04", "educationalLevel": "Beginner", "isPartOf": {"@type": "Course", "name": "RAG from Scratch", "url": "https://chadasaiteja.github.io/rag-from-scratch/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "Learn", "item": "https://chadasaiteja.github.io/rag-from-scratch/learn/"}, {"@type": "ListItem", "position": 3, "name": "Retrieval Mechanics — Finding the Needle", "item": "https://chadasaiteja.github.io/rag-from-scratch/learn/06-retrieval-mechanics/"}]}</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../../">RAG <span>from Scratch</span></a>
+  <nav class="topnav" aria-label="Main"><a href="../../">Home</a><a href="../../learn/" aria-current="page">Learn</a><a href="../../implementation/">Implementation</a><a href="../../lessons/">Lessons</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+</header>
+<div class="layout with-sidebar">
+<aside class="sidebar" aria-label="Course modules">
+  <details class="sidebar-box" open>
+    <summary>Course modules</summary>
+    <ul><li><a href="../../learn/"><span class="num">★</span>How to use these notes</a></li><li><a href="../../learn/00-introduction-to-rag/"><span class="num">00</span>Introduction to RAG</a></li><li><a href="../../learn/01-foundations-transformers/"><span class="num">01</span>Foundations — Transformers, Tokens &amp; LLM Settings</a></li><li><a href="../../learn/02-embeddings-and-vectors/"><span class="num">02</span>Embeddings — Turning Words into Numbers</a></li><li><a href="../../learn/03-prompting-techniques/"><span class="num">03</span>Prompting Techniques — Talking to the LLM</a></li><li><a href="../../learn/04-chunking-strategies/"><span class="num">04</span>Chunking Strategies — Breaking Documents into Bites</a></li><li><a href="../../learn/05-vector-databases/"><span class="num">05</span>Vector Databases — Your AI&#x27;s Memory</a></li><li><a href="../../learn/06-retrieval-mechanics/" aria-current="page"><span class="num">06</span>Retrieval Mechanics — Finding the Needle</a></li><li><a href="../../learn/07-agentic-rag-and-tools/"><span class="num">07</span>Agentic RAG &amp; Tool Calling</a></li><li><a href="../../learn/08-building-your-first-rag-app/"><span class="num">08</span>Build Your First RAG Application</a></li><li><a href="../../learn/09-rag-evaluation/"><span class="num">09</span>Evaluating Your RAG Application</a></li><li><a href="../../learn/10-document-ingestion-and-parsing/"><span class="num">10</span>Document Ingestion &amp; Parsing — The Forgotten Half</a></li></ul>
+  </details>
+</aside>
+<main id="content">
+<nav class="crumbs" aria-label="Breadcrumb"><a href="../../">Home</a> / <a href="../../learn/">Learn</a> / <span aria-current="page">Retrieval Mechanics — Finding the Needle</span></nav>
+<article class="prose">
+<h1 id="module-6-retrieval-mechanics-finding-the-needle">🎯 Module 6: Retrieval Mechanics — Finding the Needle</h1>
+<blockquote>
+<p><em>Source: <code>AI/day11/retrievalMechanism.md</code> + production best-practice research (2026)</em></p>
+</blockquote>
+<p><strong>Retrieval</strong> is the process of finding the most relevant pieces of information from a knowledge store, given a user query. It's the "R" in RAG — and the stage that most determines answer quality.</p>
+<hr />
+<h2 id="the-4-stages-of-retrieval">🔄 The 4 Stages of Retrieval</h2>
+<h3 id="1-query-processing">1. Query Processing</h3>
+<ul>
+<li><strong>Tokenization</strong> — split into tokens/words.</li>
+<li><strong>Lowercasing</strong> — consistent matching.</li>
+<li><strong>Stop-word removal</strong> — drop "the", "a", "is".</li>
+<li><strong>Stemming</strong> (sparse) — <code>running</code> → <code>run</code>.</li>
+<li><strong>Embedding generation</strong> (dense) — turn the query into a vector.</li>
+</ul>
+<h3 id="2-knowledge-base-representation">2. Knowledge Base Representation</h3>
+<ul>
+<li><strong>Chunking</strong> — small, self-contained units (Module 4).</li>
+<li><strong>Indexing</strong> — data structure for fast search:</li>
+<li><strong>Inverted index</strong> → keyword→chunk map (sparse)</li>
+<li><strong>Vector index</strong> → ANN search over embeddings (dense)</li>
+<li><strong>Graph structure</strong> → entities &amp; relationships (nodes/edges)</li>
+</ul>
+<h3 id="3-matching-scoring">3. Matching / Scoring</h3>
+<ul>
+<li><strong>Sparse</strong> — term overlap; scored by <strong>TF-IDF</strong> or <strong>BM25</strong>.</li>
+<li><strong>Dense</strong> — vector comparison via <strong>cosine similarity</strong> / dot product.</li>
+<li><strong>Graph</strong> — traverse connected nodes; score by similarity, path length, relation type.</li>
+</ul>
+<h3 id="4-ranking-selection">4. Ranking &amp; Selection</h3>
+<p>Score every chunk, rank, and return the <strong>top-k</strong>.</p>
+<hr />
+<h2 id="hybrid-retrieval-sparse-dense">🏅 Hybrid Retrieval (Sparse + Dense) ⭐</h2>
+<p>The 2026 production standard: run <strong>both</strong> methods in parallel and merge.</p>
+<pre><code>Query ──┬── BM25 (keyword)  ──┐
+        └── Vector (semantic) ──┴── Reciprocal Rank Fusion (RRF) ──→ ranked list
+</code></pre>
+<p><strong>Why hybrid?</strong> Dense vectors miss exact identifiers (e.g., <code>SKU-992</code>, <code>ERR_4297</code>), while BM25 misses synonyms. Each covers the other's blind spot.</p>
+<p><strong>RRF merge formula:</strong> a chunk's fused score = Σ <code>1 / (k + rank_i)</code> across both lists (k ≈ 60). Simple, no score normalization needed.</p>
+<hr />
+<h2 id="reranking-the-not-optional-stage">🔁 Reranking — the "not optional" stage ⭐</h2>
+<p>First-stage search is a <em>fast approximation</em>. A <strong>reranker (cross-encoder)</strong> reads query+chunk <em>together</em> and outputs one precise relevance score.</p>
+<p><strong>Two-stage pattern:</strong>
+1. Fast retrieval → top ~30 candidates (milliseconds)
+2. Reranker scores all 30 (150–300 ms)
+3. Top 4–6 chunks go into the LLM prompt</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Reranker type</th>
+<th>How it works</th>
+<th>Trade-off</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Syntactic proximity</strong></td>
+<td>Query keywords close together in the chunk score higher</td>
+<td>Free, fast, interpretable</td>
+</tr>
+<tr>
+<td><strong>Neural cross-encoder</strong> (e.g., <code>ms-marco-MiniLM-L-6-v2</code>, Cohere Rerank, Voyage)</td>
+<td>Model trained on query-passage relevance</td>
+<td>Slower, but far more accurate</td>
+</tr>
+<tr>
+<td><strong>LLM reranker</strong> (RankZephyr, Qwen3-Reranker)</td>
+<td>"yes/no" relevance probability</td>
+<td>Best quality; costly — route only hard queries</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>Reranking also fights <strong>context rot</strong>: it moves the best chunks to the <em>start/end</em> of the prompt, where LLMs pay the most attention.</p>
+</blockquote>
+<hr />
+<h2 id="query-rewriting-before-you-search">✍️ Query Rewriting (before you search)</h2>
+<ul>
+<li><strong>Decompose</strong> multi-part questions into sub-queries.</li>
+<li><strong>HyDE</strong> (Hypothetical Document Embeddings): ask the LLM to <em>write a hypothetical answer</em>, embed <em>that</em>, and search with it.</li>
+<li><strong>Multi-query</strong>: generate 2–3 phrasings of the same question, retrieve, merge.</li>
+</ul>
+<hr />
+<h2 id="specialized-techniques">🧩 Specialized techniques</h2>
+<ul>
+<li><strong>Multi-vector retrieval</strong> — one document gets <em>several</em> embeddings (per sentence/aspect) for fine-grained matching.</li>
+<li><strong>Graph-based retrieval</strong> — follow entity relationships (great for "who worked on X that depends on Y").</li>
+</ul>
+<hr />
+<h2 id="choosing-a-method">📊 Choosing a Method</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Strength</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Sparse (BM25)</strong></td>
+<td>Efficiency + exact keyword matching</td>
+</tr>
+<tr>
+<td><strong>Dense (vector)</strong></td>
+<td>Semantic understanding</td>
+</tr>
+<tr>
+<td><strong>Hybrid</strong></td>
+<td>Best balance — the default for production</td>
+</tr>
+<tr>
+<td><strong>Graph / multi-vector</strong></td>
+<td>Specialized, evolving approaches</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="key-takeaways">✅ Key Takeaways</h2>
+<ul>
+<li>Retrieval = query processing → indexing → matching → ranking.</li>
+<li><strong>Hybrid + rerank</strong> is the modern default, not a luxury.</li>
+<li>Rewrite hard queries <em>before</em> searching.</li>
+<li>Top-k is a dial: too low = missing facts, too high = noise + cost.</li>
+</ul>
+<p>➡️ Next: <a href="../../learn/07-agentic-rag-and-tools/">Agentic RAG &amp; Tool Calling</a></p>
+</article>
+<nav class="pager" aria-label="Module navigation"><a class="pager-link" href="../../learn/05-vector-databases/" rel="prev"><small>Previous</small>Vector Databases — Your AI&#x27;s Memory</a><a class="pager-link next" href="../../learn/07-agentic-rag-and-tools/" rel="next"><small>Next</small>Agentic RAG &amp; Tool Calling</a></nav>
+<p class="edit"><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/notes/06_retrieval_mechanics.md" rel="noopener">View this page’s source on GitHub</a></p>
+
+</main>
+</div>
+<footer class="site-footer">
+  <p>RAG from Scratch · free and open source on <a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a> · built from <code>notes/</code>, <code>data/raw/</code> and <code>src/pipeline/</code></p>
+</footer>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

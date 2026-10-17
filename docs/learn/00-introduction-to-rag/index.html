@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Introduction to RAG | RAG from Scratch</title>
+<meta name="description" content="Welcome to the world of RAG! If you&#x27;ve ever used ChatGPT and wished it knew about your private documents, or wished it wouldn&#x27;t &quot;hallucinate&quot; (make things…">
+<link rel="canonical" href="https://chadasaiteja.github.io/rag-from-scratch/learn/00-introduction-to-rag/">
+<meta name="robots" content="index, follow">
+<meta property="og:site_name" content="RAG from Scratch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Introduction to RAG | RAG from Scratch">
+<meta property="og:description" content="Welcome to the world of RAG! If you&#x27;ve ever used ChatGPT and wished it knew about your private documents, or wished it wouldn&#x27;t &quot;hallucinate&quot; (make things…">
+<meta property="og:url" content="https://chadasaiteja.github.io/rag-from-scratch/learn/00-introduction-to-rag/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Introduction to RAG | RAG from Scratch">
+<meta name="twitter:description" content="Welcome to the world of RAG! If you&#x27;ve ever used ChatGPT and wished it knew about your private documents, or wished it wouldn&#x27;t &quot;hallucinate&quot; (make things…">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Introduction to RAG", "name": "Introduction to RAG", "description": "Welcome to the world of RAG! If you've ever used ChatGPT and wished it knew about your private documents, or wished it wouldn't \"hallucinate\" (make things…", "url": "https://chadasaiteja.github.io/rag-from-scratch/learn/00-introduction-to-rag/", "inLanguage": "en", "author": {"@type": "Person", "name": "ChadaSaiteja", "url": "https://github.com/ChadaSaiteja"}, "dateModified": "2026-10-04", "educationalLevel": "Beginner", "isPartOf": {"@type": "Course", "name": "RAG from Scratch", "url": "https://chadasaiteja.github.io/rag-from-scratch/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "Learn", "item": "https://chadasaiteja.github.io/rag-from-scratch/learn/"}, {"@type": "ListItem", "position": 3, "name": "Introduction to RAG", "item": "https://chadasaiteja.github.io/rag-from-scratch/learn/00-introduction-to-rag/"}]}</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../../">RAG <span>from Scratch</span></a>
+  <nav class="topnav" aria-label="Main"><a href="../../">Home</a><a href="../../learn/" aria-current="page">Learn</a><a href="../../implementation/">Implementation</a><a href="../../lessons/">Lessons</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+</header>
+<div class="layout with-sidebar">
+<aside class="sidebar" aria-label="Course modules">
+  <details class="sidebar-box" open>
+    <summary>Course modules</summary>
+    <ul><li><a href="../../learn/"><span class="num">★</span>How to use these notes</a></li><li><a href="../../learn/00-introduction-to-rag/" aria-current="page"><span class="num">00</span>Introduction to RAG</a></li><li><a href="../../learn/01-foundations-transformers/"><span class="num">01</span>Foundations — Transformers, Tokens &amp; LLM Settings</a></li><li><a href="../../learn/02-embeddings-and-vectors/"><span class="num">02</span>Embeddings — Turning Words into Numbers</a></li><li><a href="../../learn/03-prompting-techniques/"><span class="num">03</span>Prompting Techniques — Talking to the LLM</a></li><li><a href="../../learn/04-chunking-strategies/"><span class="num">04</span>Chunking Strategies — Breaking Documents into Bites</a></li><li><a href="../../learn/05-vector-databases/"><span class="num">05</span>Vector Databases — Your AI&#x27;s Memory</a></li><li><a href="../../learn/06-retrieval-mechanics/"><span class="num">06</span>Retrieval Mechanics — Finding the Needle</a></li><li><a href="../../learn/07-agentic-rag-and-tools/"><span class="num">07</span>Agentic RAG &amp; Tool Calling</a></li><li><a href="../../learn/08-building-your-first-rag-app/"><span class="num">08</span>Build Your First RAG Application</a></li><li><a href="../../learn/09-rag-evaluation/"><span class="num">09</span>Evaluating Your RAG Application</a></li><li><a href="../../learn/10-document-ingestion-and-parsing/"><span class="num">10</span>Document Ingestion &amp; Parsing — The Forgotten Half</a></li></ul>
+  </details>
+</aside>
+<main id="content">
+<nav class="crumbs" aria-label="Breadcrumb"><a href="../../">Home</a> / <a href="../../learn/">Learn</a> / <span aria-current="page">Introduction to RAG</span></nav>
+<article class="prose">
+<h1 id="introduction-to-rag-retrieval-augmented-generation">🚀 Introduction to RAG (Retrieval-Augmented Generation)</h1>
+<p>Welcome to the world of RAG! If you've ever used ChatGPT and wished it knew about your private documents, or wished it wouldn't "hallucinate" (make things up), then <strong>RAG is the solution you've been looking for.</strong></p>
+<h2 id="what-is-rag">❓ What is RAG?</h2>
+<p><strong>RAG</strong> stands for <strong>Retrieval-Augmented Generation</strong>. </p>
+<p>Think of a Large Language Model (LLM) like a very smart student who has read almost everything on the internet but doesn't have access to your personal files or today's news. If you ask them about your private company policy, they might guess (and potentially lie).</p>
+<p><strong>RAG gives that student an open textbook.</strong></p>
+<p>Instead of relying solely on what they already know (their training data), the student:
+1. <strong>Retrieves</strong> relevant information from a provided textbook (your documents).
+2. <strong>Augments</strong> their knowledge with that information.
+3. <strong>Generates</strong> a response based on the retrieved facts.</p>
+<hr />
+<h2 id="the-rag-workflow-the-big-picture">🛠️ The RAG Workflow (The Big Picture)</h2>
+<p>Here is how a RAG application actually works under the hood:</p>
+<ol>
+<li>
+<p><strong>Data Ingestion (The Preparation Phase):</strong></p>
+<ul>
+<li><strong>Load:</strong> Take your documents (PDFs, Text, Markdown, etc.).</li>
+<li><strong>Chunk:</strong> Break long documents into smaller, manageable pieces called "chunks".</li>
+<li><strong>Embed:</strong> Convert these chunks into mathematical vectors (numbers) using an <strong>Embedding Model</strong>.</li>
+<li><strong>Store:</strong> Save these vectors in a special database called a <strong>Vector Database</strong>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Retrieval (The Search Phase):</strong></p>
+<ul>
+<li><strong>User Query:</strong> A user asks a question (e.g., <em>"What is our company's vacation policy?"</em>).</li>
+<li><strong>Query Embedding:</strong> Convert the user's question into a vector using the <em>same</em> embedding model used before.</li>
+<li><strong>Similarity Search:</strong> Look into the Vector Database to find the chunks whose vectors are "closest" (most similar) to the query vector.</li>
+</ul>
+</li>
+<li>
+<p><strong>Generation (The Answer Phase):</strong></p>
+<ul>
+<li><strong>Prompt Augmentation:</strong> Combine the user's original question + the retrieved chunks into one big prompt.</li>
+<li><strong>LLM Generation:</strong> Send this augmented prompt to the LLM.</li>
+<li><strong>Final Answer:</strong> The LLM reads the context and provides a factual, grounded response.</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="why-use-rag">🌟 Why use RAG?</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th style="text-align: left;">Feature</th>
+<th style="text-align: left;">Without RAG (Standard LLM)</th>
+<th style="text-align: left;">With RAG</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Knowledge</strong></td>
+<td style="text-align: left;">Limited to training data (cutoff date)</td>
+<td style="text-align: left;">Access to real-time &amp; private data</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Accuracy</strong></td>
+<td style="text-align: left;">Prone to hallucinations</td>
+<td style="text-align: left;">Grounded in provided facts</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Cost</strong></td>
+<td style="text-align: left;">High (if you try to fine-tune)</td>
+<td style="text-align: left;">Low (just add new documents)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Transparency</strong></td>
+<td style="text-align: left;">"Trust me, I'm an AI"</td>
+<td style="text-align: left;">"According to document X..."</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="whats-next">📚 What's Next?</h2>
+<p>In this series of notes, we will break down every single component of this process. We will go from the mathematical foundations of how AI "reads" (Transformers) to building a full-scale agentic RAG system.</p>
+<p><strong>The Learning Path:</strong>
+1.  <a href="../../learn/01-foundations-transformers/">Foundations: Transformers &amp; Tokens</a>
+2.  <a href="../../learn/02-embeddings-and-vectors/">Embeddings: The Language of Numbers</a>
+3.  <a href="../../learn/03-prompting-techniques/">Prompting: Talking to AI</a>
+4.  <a href="../../learn/04-chunking-strategies/">Chunking: Breaking Down Info</a>
+5.  <a href="../../learn/05-vector-databases/">Vector Databases: Your AI's Memory</a>
+6.  <a href="../../learn/06-retrieval-mechanics/">Retrieval Mechanics: Finding the Needle</a>
+7.  <a href="../../learn/07-agentic-rag-and-tools/">Agentic RAG: Tools &amp; Actions</a>
+8.  <a href="../../learn/08-building-your-first-rag-app/">Final Project: Building Your App</a></p>
+<p><strong>Happy Learning! 🚀</strong></p>
+</article>
+<nav class="pager" aria-label="Module navigation"><a class="pager-link" href="../../learn/" rel="prev"><small>Previous</small>Notes — Building a RAG Application</a><a class="pager-link next" href="../../learn/01-foundations-transformers/" rel="next"><small>Next</small>Foundations — Transformers, Tokens &amp; LLM Settings</a></nav>
+<p class="edit"><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/notes/00_introduction_to_rag.md" rel="noopener">View this page’s source on GitHub</a></p>
+
+</main>
+</div>
+<footer class="site-footer">
+  <p>RAG from Scratch · free and open source on <a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a> · built from <code>notes/</code>, <code>data/raw/</code> and <code>src/pipeline/</code></p>
+</footer>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

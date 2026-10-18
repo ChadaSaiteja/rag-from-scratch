@@ -37,7 +37,7 @@ REPO_URL = "https://github.com/ChadaSaiteja/rag-from-scratch"
 SITE_NAME = "RAG from Scratch"
 AUTHOR = {"@type": "Person", "name": "ChadaSaiteja", "url": "https://github.com/ChadaSaiteja"}
 # Paste the content value from Google Search Console's "HTML tag" verification method.
-GOOGLE_SITE_VERIFICATION = ""
+GOOGLE_SITE_VERIFICATION = "rGwrTPLvkbtgUMk4zVAgc5VU0xutNGpT8NvMHbrYLF0"
 
 HOME_TITLE = "RAG from Scratch — Learn Retrieval-Augmented Generation Step by Step"
 HOME_DESCRIPTION = (

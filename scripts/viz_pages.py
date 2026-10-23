@@ -11,6 +11,7 @@ THREE_VERSION = "0.160.0"
 ASSETS_SRC = Path(__file__).resolve().parent / "site_assets" / "viz"
 
 NOTE_LINKS = {  # note stem -> visualization slug, for "See it in 3D" callouts
+    "01_foundations_transformers": "playground",
     "04_chunking_strategies": "chunking",
     "02_embeddings_and_vectors": "embedding-and-storage",
     "05_vector_databases": "embedding-and-storage",
@@ -84,6 +85,78 @@ PAGES = [
 ]
 
 
+PLAYGROUND = {
+    "slug": "playground", "stage": "Playground · Try your own sentence",
+    "title": "Sentence to Vector Playground",
+    "seo_title": "Text to Vector Playground: See How a Sentence Becomes Tokens and an Embedding",
+    "description": "Type any sentence and watch it become tokens, vocabulary IDs, a vector of numbers, a point in vector space, and a ranked list of the closest RAG lesson chunks.",
+    "examples": [
+        "How does chunk overlap help retrieval?",
+        "Which vector database is best for prototyping?",
+        "Why score retrieval and generation separately?",
+        "What is the capital of France?",
+    ],
+    "steps": [
+        ("sentence", "Your sentence", "Exactly what a user would type as a question."),
+        ("tokens", "Split into tokens",
+         "The text is lowercased and split into pieces. Very common words like <em>how</em> and <em>the</em> carry little meaning, so this representation drops them. "
+         "Real LLM tokenizers go further and split rare words into sub-word pieces such as <code>retriev</code> + <code>al</code>."),
+        ("ids", "Look up token IDs",
+         "Every remaining word is replaced by its position in the vocabulary, a fixed list of known words. Words the vocabulary has never seen can't be represented."),
+        ("vector", "Build the vector",
+         "The sentence becomes one list of numbers, one slot per vocabulary word. Each lit cell is a word from your sentence; brighter means rarer in the corpus, so more distinctive (TF-IDF weighting). "
+         "Real embedding models instead produce a few hundred to a few thousand dense numbers where every slot is used."),
+        ("space", "Place it in space",
+         "The long vector is projected down to 3 dimensions so it can be drawn next to the 21 stored chunks. Drag to orbit, hover a point to read its chunk."),
+        ("nearest", "Find the nearest chunks",
+         "Similarity is the cosine between your vector and each chunk's vector. These top matches are what retrieval would hand to the LLM."),
+    ],
+}
+
+
+def playground_html(data, rel, repo_url):
+    p = PLAYGROUND
+    examples = "".join(f'<button type="button" class="pg-ex" data-example="{html.escape(e)}">{html.escape(e)}</button>' for e in p["examples"])
+    steps = []
+    for i, (key, title, text) in enumerate(p["steps"], start=1):
+        extra = ""
+        if key == "vector":
+            extra = '<div class="pg-grid" role="img" aria-label="One cell per vocabulary word; lit cells are words in your sentence"></div><p class="pg-vector-meta pg-meta"></p>'
+        if key == "space":
+            extra = ('<div class="pg-stage viz-stage"><div class="viz-tooltip" hidden></div>'
+                     '<p class="viz-fallback" hidden>3D needs WebGL, which this browser does not support. The position is listed below.</p></div>'
+                     '<p class="pg-space-meta pg-meta"></p>')
+        steps.append(
+            f'<li class="pg-step" data-stage="{key}"><div class="pg-step-head"><span class="pg-num">{i}</span>'
+            f'<div><h2>{html.escape(title)}</h2><p>{text}</p></div></div><div class="pg-out">{extra}</div></li>')
+    return f"""
+<header class="viz-head">
+  <p class="eyebrow">{html.escape(p["stage"])}</p>
+  <h1>{html.escape(p["title"])}</h1>
+  <p class="lede">Type a question and follow it through every transformation a RAG system applies before it can search: tokens, IDs, a vector, a position in space, and the closest chunks.</p>
+</header>
+<div class="pg">
+  <form class="pg-input" role="search">
+    <label for="pg-text">Your sentence</label>
+    <div class="pg-input-row"><input id="pg-text" class="pg-text" type="text" maxlength="200" autocomplete="off" value="{html.escape(p["examples"][0])}"><button type="submit">Run ▶</button></div>
+    <div class="pg-examples"><span>Try:</span>{examples}</div>
+  </form>
+  <p class="viz-badge">No AI model runs here. This is a keyword representation (TF-IDF over the {data["settings"]["vocab"]}-word vocabulary of this repo's {len(data["chunks"])} chunks),
+  computed in your browser with the same math as the other visualizations. It shows the shape of each step; real embedding models capture meaning, not just shared words.</p>
+  <ol class="pg-flow">
+{chr(10).join(steps)}
+  </ol>
+</div>
+<section class="viz-links">
+  <div><h2>Learn the concepts</h2><ul>
+    <li><a href="{rel}learn/01-foundations-transformers/">Module 01 · Tokens and context windows</a></li>
+    <li><a href="{rel}learn/02-embeddings-and-vectors/">Module 02 · Embeddings & Vectors</a></li>
+    <li><a href="{rel}learn/06-retrieval-mechanics/">Module 06 · Retrieval Mechanics</a></li></ul></div>
+  <div><h2>See the other stages</h2><ul>{"".join(f'<li><a href="{rel}visualize/{x["slug"]}/">{html.escape(x["title"])}</a></li>' for x in PAGES)}</ul></div>
+</section>
+"""
+
+
 def page_html(p, data, rel, repo_url, idx):
     picker = ""
     if p["picker"] == "lesson":
@@ -147,6 +220,9 @@ def hub_html(data, rel):
         f'<a class="viz-card" href="{rel}visualize/{p["slug"]}/"><span class="eyebrow">{html.escape(p["stage"])}</span>'
         f'<h3>{html.escape(p["title"])}</h3><p>{html.escape(p["description"])}</p><span class="viz-card-go">Open the 3D view →</span></a>'
         for p in PAGES)
+    pg = PLAYGROUND
+    cards = (f'<a class="viz-card viz-card-feature" href="{rel}visualize/{pg["slug"]}/"><span class="eyebrow">{html.escape(pg["stage"])}</span>'
+             f'<h3>{html.escape(pg["title"])}</h3><p>{html.escape(pg["description"])}</p><span class="viz-card-go">Try it →</span></a>') + cards
     s = data["settings"]
     return f"""
 <header class="viz-head">
@@ -176,7 +252,7 @@ def callout(note_stem, rel):
     slug = NOTE_LINKS.get(note_stem)
     if not slug:
         return ""
-    p = next(x for x in PAGES if x["slug"] == slug)
+    p = next(x for x in PAGES + [PLAYGROUND] if x["slug"] == slug)
     return (f'<a class="viz-callout" href="{rel}visualize/{slug}/"><span>▶ See it in 3D</span>'
             f'<strong>{html.escape(p["title"])}</strong></a>')
 
@@ -207,6 +283,21 @@ def render(*, page, breadcrumbs_html, breadcrumb_ld, out_dir: Path, lessons_dir:
     entries.append(("visualize/", today, "0.9"))
 
     rel = "../../"
+    pg = PLAYGROUND
+    path = f"visualize/{pg['slug']}/"
+    crumbs = [("Home", ""), ("Visualize", "visualize/"), (pg["title"], path)]
+    ld = [{"@context": "https://schema.org", "@type": "LearningResource", "name": pg["title"], "description": pg["description"],
+           "url": site_url + path, "learningResourceType": "Interactive simulation", "educationalLevel": "Beginner",
+           "inLanguage": "en", "isPartOf": {"@type": "Course", "name": site_name, "url": site_url}},
+          breadcrumb_ld(crumbs)]
+    out = out_dir / path / "index.html"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(page(path=path, title=f"{pg['seo_title']} | {site_name}", description=pg["description"],
+                        body=breadcrumbs_html(crumbs, rel) + playground_html(data, rel, repo_url), rel=rel, og_type="article",
+                        ld=ld, active="visualize/", wide=True, scripts=scripts_html(rel, "playground")),
+                   encoding="utf-8", newline="\n")
+    entries.append((path, today, "0.8"))
+
     for i, p in enumerate(PAGES):
         path = f"visualize/{p['slug']}/"
         crumbs = [("Home", ""), ("Visualize", "visualize/"), (p["title"], path)]

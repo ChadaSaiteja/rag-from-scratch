@@ -25,7 +25,7 @@ WEIGHTS = (0.5, 0.5)    # (bm25, vector), as in hybrid_search.py
 
 # One distinct colour per lesson, readable on a dark background.
 PALETTE = ["#5eead4", "#93c5fd", "#fbbf24", "#f472b6", "#a78bfa",
-           "#4ade80", "#fb923c", "#38bdf8", "#f87171", "#e2e8f0"]
+           "#4ade80", "#fb923c", "#38bdf8", "#f87171", "#e879f9"]
 
 STOPWORDS = set("""a an and are as at be by can for from has have how if in into is it its
 of on or that the their them then there these this to was what when where which while
@@ -168,8 +168,20 @@ def build(lessons_dir: Path):
             "hit": any(chunks[cid]["filename"] == expected for cid, _ in fused_list),
         })
 
+    # Everything the browser needs to turn any sentence into the same representation:
+    # vocabulary, idf weights, the PCA projection, and each chunk's sparse vector.
+    space = {
+        "stopwords": sorted(STOPWORDS),
+        "vocab": vocab,
+        "idf": [round(float(x), 5) for x in idf],
+        "mean": [round(float(x), 6) for x in mean],
+        "comps": [[round(float(x), 6) for x in row] for row in comps],
+        "scale": round(float(scale), 6),
+        "chunkVecs": [[[int(i), round(float(v[i]), 5)] for i in np.nonzero(v)[0]] for v in X],
+    }
+
     return {
         "settings": {"chunkSize": CHUNK_SIZE, "chunkOverlap": CHUNK_OVERLAP, "k": RETRIEVAL_K,
                      "rrfC": RRF_C, "weights": list(WEIGHTS), "vocab": len(vocab)},
-        "lessons": lessons, "chunks": chunks, "queries": queries,
+        "lessons": lessons, "chunks": chunks, "queries": queries, "space": space,
     }

@@ -26,7 +26,7 @@
 <a class="skip" href="#content">Skip to content</a>
 <header class="topbar">
   <a class="brand" href="">RAG <span>from Scratch</span></a>
-  <nav class="topnav" aria-label="Main"><a href="" aria-current="page">Home</a><a href="learn/">Learn</a><a href="implementation/">Implementation</a><a href="lessons/">Lessons</a><a href="learn/faq/">FAQ</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <nav class="topnav" aria-label="Main"><a href="" aria-current="page">Home</a><a href="learn/">Learn</a><a href="visualize/">Visualize</a><a href="implementation/">Implementation</a><a href="lessons/">Lessons</a><a href="learn/faq/">FAQ</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
   <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
 </header>
 <div class="layout no-sidebar">
@@ -68,6 +68,15 @@
   <div class="module-grid"><a class="module-card" href="learn/00-introduction-to-rag/"><span class="num">00</span><h3>Introduction to RAG</h3><p>Welcome to the world of RAG! If you&#x27;ve ever used ChatGPT and wished it knew about your private documents, or wished it wouldn&#x27;t &quot;hallucinate&quot; (make things…</p></a><a class="module-card" href="learn/01-foundations-transformers/"><span class="num">01</span><h3>Foundations — Transformers, Tokens &amp; LLM Settings</h3><p>Before you build a RAG app, you need to understand the engine inside every LLM: the Transformer.</p></a><a class="module-card" href="learn/02-embeddings-and-vectors/"><span class="num">02</span><h3>Embeddings — Turning Words into Numbers</h3><p>Computers don&#x27;t understand language — they understand numbers. An embedding is a numerical representation (a vector) that captures the meaning of a word…</p></a><a class="module-card" href="learn/03-prompting-techniques/"><span class="num">03</span><h3>Prompting Techniques — Talking to the LLM</h3><p>Combine few-shot prompting with step-by-step reasoning. Ask the LLM to explain its thinking. Great for complex logic and math.</p></a><a class="module-card" href="learn/04-chunking-strategies/"><span class="num">04</span><h3>Chunking Strategies — Breaking Documents into Bites</h3><p>1. What kind of data? (PDF, HTML, Markdown, code, tables) 2. Which embedding model? (domain-specific models chunk differently) 3. How long/complex are user…</p></a><a class="module-card" href="learn/05-vector-databases/"><span class="num">05</span><h3>Vector Databases — Your AI&#x27;s Memory</h3><p>A Vector Database stores data as embeddings — numerical representations of meaning, not keywords. It solves the three things a raw LLM can&#x27;t do:</p></a><a class="module-card" href="learn/06-retrieval-mechanics/"><span class="num">06</span><h3>Retrieval Mechanics — Finding the Needle</h3><p>The 2026 production standard: run both methods in parallel and merge.</p></a><a class="module-card" href="learn/07-agentic-rag-and-tools/"><span class="num">07</span><h3>Agentic RAG &amp; Tool Calling</h3><p>Constraining the LLM&#x27;s output to a predictable, type-safe format instead of free-form text.</p></a><a class="module-card" href="learn/08-building-your-first-rag-app/"><span class="num">08</span><h3>Build Your First RAG Application</h3><p>Everything you&#x27;ve learned, wired into one working pipeline.</p></a><a class="module-card" href="learn/09-rag-evaluation/"><span class="num">09</span><h3>Evaluating Your RAG Application</h3><p>A RAG app has two moving parts, and either can fail silently:</p></a><a class="module-card" href="learn/10-document-ingestion-and-parsing/"><span class="num">10</span><h3>Document Ingestion &amp; Parsing — The Forgotten Half</h3><p>Most RAG tutorials skip this stage and hand you a .txt file. Real applications start with messy enterprise documents — and that&#x27;s where RAG pipelines…</p></a><a class="module-card" href="learn/11-production-rag/"><span class="num">11</span><h3>Production RAG — Security, Cost, Latency &amp; Monitoring</h3><p>A demo RAG app answers questions. A production RAG app answers them safely, quickly, affordably and observably for many users at once. This module covers…</p></a></div>
 </section>
 
+<section class="home-viz">
+  <a class="viz-banner" href="visualize/">
+    <span class="eyebrow">New · interactive 3D</span>
+    <strong>See RAG happen, stage by stage</strong>
+    <span>Watch a real lesson split into chunks, chunks become points in vector space, and a question find its answers through hybrid search.</span>
+    <span class="viz-card-go">Open the visualizations →</span>
+  </a>
+</section>
+
 <section>
   <h2>Quick reference</h2>
   <div class="module-grid"><a class="module-card" href="learn/faq/"><span class="num">❓</span><h3>RAG FAQ: Answers to Common Questions</h3><p>Short, direct answers to the questions people most often ask when learning and building RAG. Each answer links to the module that goes deeper.</p></a><a class="module-card" href="learn/glossary/"><span class="num">📖</span><h3>RAG Glossary</h3><p>Plain-English definitions of the terms used throughout these notes, in alphabetical order. Each entry points to the module that explains it in depth.</p></a></div>
@@ -93,5 +102,6 @@
   <p>RAG from Scratch · free and open source on <a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a> · built from <code>notes/</code>, <code>data/raw/</code> and <code>src/pipeline/</code></p>
 </footer>
 <script src="assets/site.js" defer></script>
+
 </body>
 </html>

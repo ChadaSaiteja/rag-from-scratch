@@ -26,6 +26,8 @@ from pathlib import Path
 
 import markdown
 
+import viz_pages  # the /visualize/ section (3D scenes)
+
 ROOT = Path(__file__).resolve().parents[1]
 NOTES_DIR = ROOT / "notes"
 LESSONS_DIR = ROOT / "data" / "raw"
@@ -261,18 +263,18 @@ def render_lesson_text(text):
 
 # ---------------------------------------------------------------- page shell
 
-def page(*, path, title, description, body, rel, og_type="website", ld=(), active="", sidebar=""):
+def page(*, path, title, description, body, rel, og_type="website", ld=(), active="", sidebar="", wide=False, scripts=""):
     canonical = SITE_URL + path
     verify = (f'<meta name="google-site-verification" content="{html.escape(GOOGLE_SITE_VERIFICATION)}">\n'
               if GOOGLE_SITE_VERIFICATION else "")
-    nav = [("", "Home"), ("learn/", "Learn"), ("implementation/", "Implementation"), ("lessons/", "Lessons"),
-           ("learn/faq/", "FAQ")]
+    nav = [("", "Home"), ("learn/", "Learn"), ("visualize/", "Visualize"), ("implementation/", "Implementation"),
+           ("lessons/", "Lessons"), ("learn/faq/", "FAQ")]
     current = ' aria-current="page"'
     nav_html = "".join(
         f'<a href="{rel}{href}"{current if active == href else ""}>{label}</a>' for href, label in nav
     )
     lds = "\n".join(ld_json(x) for x in ld)
-    layout_cls = "with-sidebar" if sidebar else "no-sidebar"
+    layout_cls = "with-sidebar" if sidebar else ("no-sidebar wide" if wide else "no-sidebar")
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -312,6 +314,7 @@ def page(*, path, title, description, body, rel, og_type="website", ld=(), activ
   <p>{SITE_NAME} · free and open source on <a href="{REPO_URL}" rel="noopener">GitHub</a> · built from <code>notes/</code>, <code>data/raw/</code> and <code>src/pipeline/</code></p>
 </footer>
 <script src="{rel}assets/site.js" defer></script>
+{scripts}
 </body>
 </html>
 """
@@ -441,6 +444,15 @@ def build_home(guide, modules, extras, lessons):
   <div class="module-grid">{cards}</div>
 </section>
 
+<section class="home-viz">
+  <a class="viz-banner" href="visualize/">
+    <span class="eyebrow">New · interactive 3D</span>
+    <strong>See RAG happen, stage by stage</strong>
+    <span>Watch a real lesson split into chunks, chunks become points in vector space, and a question find its answers through hybrid search.</span>
+    <span class="viz-card-go">Open the visualizations →</span>
+  </a>
+</section>
+
 <section>
   <h2>Quick reference</h2>
   <div class="module-grid">{ref_cards}</div>
@@ -479,6 +491,7 @@ def build_note_page(note, guide, modules, extras, url_for_stem, prev, nxt, is_gu
 <article class="prose">
 {content}
 </article>
+{viz_pages.callout(note["stem"], rel)}
 {pager(prev, nxt, rel)}
 <p class="edit"><a href="{REPO_URL}/blob/master/notes/{note['path'].name}" rel="noopener">View this page’s source on GitHub</a></p>
 """
@@ -796,6 +809,98 @@ details pre { max-height: 520px; }
   .split { grid-template-columns: 1fr; gap: 0; }
   .pager { grid-template-columns: 1fr; }
 }
+
+/* ---------- Visualize (3D scenes) ---------- */
+.layout.wide main { max-width: 1240px; }
+.viz-head { max-width: 860px; }
+.viz-head h1 { font-size: 2.3rem; line-height: 1.15; margin: 0 0 12px; }
+.viz { margin-top: 20px; outline: none; }
+.viz-toolbar { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin-bottom: 12px; }
+.viz-pick { display: flex; gap: 8px; align-items: center; font-weight: 600; font-size: 0.9rem; }
+.viz-pick select { font: inherit; font-weight: 400; max-width: min(560px, 80vw); padding: 6px 10px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+.viz-badge { margin: 0; font-size: 0.82rem; color: var(--muted); flex: 1 1 320px; line-height: 1.5; }
+.viz-badge-wide { margin-top: 24px; max-width: 860px; }
+.viz-stage { position: relative; height: clamp(420px, 72vh, 780px); border-radius: 16px; overflow: hidden;
+  background: radial-gradient(ellipse at 50% 40%, #0b1226 0%, #04060c 70%); border: 1px solid #1e293b;
+  box-shadow: 0 20px 60px -20px rgba(2, 6, 23, 0.6); color: #e2e8f0; }
+.viz-stage canvas { display: block; touch-action: none; }
+.viz-hud { position: absolute; top: 14px; right: 14px; width: min(310px, 42%); max-height: calc(100% - 150px); overflow: auto;
+  background: rgba(8, 12, 26, 0.78); border: 1px solid rgba(148, 163, 184, 0.22); border-radius: 12px; padding: 10px 12px;
+  font-size: 0.8rem; line-height: 1.45; backdrop-filter: blur(6px); }
+.viz-hud:empty { display: none; }
+.hud-title { font-weight: 700; color: #f8fafc; margin-bottom: 6px; font-size: 0.85rem; }
+.hud-row { display: flex; justify-content: space-between; gap: 12px; padding: 2px 0; border-bottom: 1px dashed rgba(148,163,184,0.15); }
+.hud-row span { color: #94a3b8; }
+.hud-row b { font-variant-numeric: tabular-nums; color: #f1f5f9; font-weight: 600; }
+.hud-note { color: #94a3b8; margin-top: 6px; font-size: 0.76rem; }
+.hud-legend { display: flex; align-items: center; gap: 8px; color: #cbd5e1; font-size: 0.76rem; }
+.hud-legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px currentColor; }
+.hud-table { width: 100%; border-collapse: collapse; font-size: 0.74rem; margin: 2px 0; }
+.hud-table th, .hud-table td { border: 0; border-bottom: 1px solid rgba(148,163,184,0.15); padding: 3px 4px; text-align: left; background: none; color: #cbd5e1; }
+.hud-table th { color: #94a3b8; font-weight: 600; }
+.hud-table tr.hit td { color: #86efac; }
+.hud-verdict { margin-top: 8px; padding: 6px 8px; border-radius: 8px; font-weight: 600; font-size: 0.78rem; }
+.hud-verdict.ok { background: rgba(34,197,94,0.15); color: #86efac; }
+.hud-verdict.miss { background: rgba(239,68,68,0.15); color: #fca5a5; }
+.viz-caption { position: absolute; left: 14px; bottom: 14px; max-width: min(560px, calc(100% - 28px)); padding: 12px 14px;
+  background: rgba(8, 12, 26, 0.82); border: 1px solid rgba(148, 163, 184, 0.22); border-radius: 12px; backdrop-filter: blur(6px);
+  font-size: 0.9rem; line-height: 1.5; display: flex; flex-direction: column; gap: 2px; }
+.viz-caption:empty { display: none; }
+.viz-caption strong { color: #f8fafc; font-size: 1rem; }
+.viz-caption span { color: #cbd5e1; }
+.viz-caption code { background: rgba(148,163,184,0.18); color: #f8fafc; }
+.viz-caption-num { color: #5eead4 !important; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; }
+.viz-tooltip { position: absolute; top: 0; left: 0; max-width: 320px; pointer-events: none; z-index: 3; padding: 9px 11px;
+  background: rgba(2, 6, 23, 0.94); border: 1px solid rgba(148, 163, 184, 0.35); border-radius: 10px; font-size: 0.78rem; line-height: 1.45; color: #e2e8f0; }
+.viz-tip-text { display: block; margin-top: 6px; color: #94a3b8; font-family: ui-monospace, Consolas, monospace; font-size: 0.72rem; white-space: pre-wrap; }
+.viz-hint { position: absolute; top: 14px; left: 14px; font-size: 0.72rem; color: #64748b; pointer-events: none; }
+.viz-fallback { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: #cbd5e1; margin: 0; }
+.viz-fallback[hidden], .viz-tooltip[hidden] { display: none; }
+.viz-nogl .viz-hint, .viz-nogl .viz-hud, .viz-nogl .viz-caption { display: none; }
+.viz-controls { display: flex; align-items: center; gap: 8px; margin: 12px 0 4px; flex-wrap: wrap; }
+.viz-controls button { font: inherit; font-size: 0.9rem; padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--text); cursor: pointer; }
+.viz-controls button:disabled { opacity: 0.4; cursor: default; }
+.viz-controls .viz-play { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 600; min-width: 108px; }
+.viz-dots { display: flex; gap: 6px; margin-left: 6px; flex-wrap: wrap; }
+.viz-dot { width: 12px !important; height: 12px; padding: 0 !important; border-radius: 50% !important; background: var(--surface-2) !important; }
+.viz-dot.done { background: var(--accent-soft) !important; border-color: var(--accent) !important; }
+.viz-dot.active { background: var(--accent) !important; border-color: var(--accent) !important; }
+.viz-steps { list-style: none; padding: 0; margin: 14px 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; counter-reset: vs; }
+.viz-steps li { counter-increment: vs; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; cursor: pointer; transition: border-color .15s, opacity .15s; }
+.viz-steps li h3 { margin: 0 0 4px; font-size: 0.92rem; }
+.viz-steps li h3::before { content: counter(vs) ". "; color: var(--muted); }
+.viz-steps li p { margin: 0; font-size: 0.84rem; color: var(--muted); line-height: 1.5; }
+.viz-steps li.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.viz-links { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 40px; }
+.viz-links h2 { font-size: 1.1rem; margin: 0 0 8px; }
+.viz-links ul { margin: 0; padding-left: 20px; font-size: 0.93rem; }
+.viz-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 24px; }
+.viz-card, .viz-banner { display: flex; flex-direction: column; gap: 6px; padding: 20px; border-radius: 14px; text-decoration: none;
+  color: #e2e8f0; background: radial-gradient(ellipse at 20% 0%, #13224a 0%, #060a16 70%); border: 1px solid #1e293b;
+  transition: transform .15s, border-color .15s; }
+.viz-card:hover, .viz-banner:hover { transform: translateY(-2px); border-color: #5eead4; }
+.viz-card h3 { margin: 0; color: #f8fafc; font-size: 1.1rem; }
+.viz-card p, .viz-banner span { margin: 0; color: #94a3b8; font-size: 0.9rem; line-height: 1.5; }
+.viz-card .eyebrow, .viz-banner .eyebrow { color: #5eead4; }
+.viz-banner strong { font-size: 1.35rem; color: #f8fafc; }
+.viz-card-go { color: #5eead4 !important; font-weight: 600; margin-top: auto; }
+.viz-callout { display: flex; flex-direction: column; max-width: var(--content-w); margin: 32px 0 0; padding: 14px 18px; border-radius: 12px;
+  text-decoration: none; background: radial-gradient(ellipse at 10% 0%, #13224a 0%, #060a16 75%); border: 1px solid #1e293b; color: #e2e8f0; }
+.viz-callout span { color: #5eead4; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.viz-callout strong { color: #f8fafc; }
+.viz-callout:hover { border-color: #5eead4; }
+@media (max-width: 700px) {
+  .viz-head h1 { font-size: 1.7rem; }
+  .viz-stage { height: 64vh; min-height: 420px; border-radius: 12px; }
+  .viz-hud { left: 8px; right: 8px; top: 8px; width: auto; max-height: 36%; font-size: 0.74rem; padding: 8px 10px; }
+  .viz-caption { left: 8px; right: 8px; bottom: 8px; max-width: none; font-size: 0.8rem; padding: 9px 11px; }
+  .viz-caption strong { font-size: 0.9rem; }
+  .viz-hint { display: none; }
+  .viz-links { grid-template-columns: 1fr; gap: 8px; }
+  .viz-steps { grid-template-columns: 1fr; }
+}
 """
 
 SCRIPT = """(function () {
@@ -859,6 +964,13 @@ def build():
         nxt = lessons[i + 1] if i + 1 < len(lessons) else None
         write(l["url"] + "index.html", build_lesson(l, prev, nxt))
         sitemap.append((l["url"], git_lastmod(l["path"]), "0.5"))
+
+    viz_entries, _ = viz_pages.render(
+        page=page, breadcrumbs_html=breadcrumbs_html, breadcrumb_ld=breadcrumb_ld, out_dir=OUT_DIR,
+        lessons_dir=LESSONS_DIR, site_url=SITE_URL, site_name=SITE_NAME, repo_url=REPO_URL,
+        today=date.today().isoformat(),
+    )
+    sitemap.extend(viz_entries)
 
     write("404.html", build_404())
     write("assets/style.css", STYLE)

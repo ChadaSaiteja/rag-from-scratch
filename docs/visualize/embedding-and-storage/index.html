@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Embeddings &amp; Vector Databases Visualized in 3D | How RAG Stores Data | RAG from Scratch</title>
+<meta name="description" content="See text chunks become vectors and points in 3D space, cluster by topic, link to their nearest neighbours, and get stored in a vector database with metadata.">
+<link rel="canonical" href="https://chadasaiteja.github.io/rag-from-scratch/visualize/embedding-and-storage/">
+<meta name="robots" content="index, follow">
+<meta name="google-site-verification" content="rGwrTPLvkbtgUMk4zVAgc5VU0xutNGpT8NvMHbrYLF0">
+<meta property="og:site_name" content="RAG from Scratch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Embeddings &amp; Vector Databases Visualized in 3D | How RAG Stores Data | RAG from Scratch">
+<meta property="og:description" content="See text chunks become vectors and points in 3D space, cluster by topic, link to their nearest neighbours, and get stored in a vector database with metadata.">
+<meta property="og:url" content="https://chadasaiteja.github.io/rag-from-scratch/visualize/embedding-and-storage/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Embeddings &amp; Vector Databases Visualized in 3D | How RAG Stores Data | RAG from Scratch">
+<meta name="twitter:description" content="See text chunks become vectors and points in 3D space, cluster by topic, link to their nearest neighbours, and get stored in a vector database with metadata.">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "Embeddings and Vector Storage, Visualized in 3D", "description": "See text chunks become vectors and points in 3D space, cluster by topic, link to their nearest neighbours, and get stored in a vector database with metadata.", "url": "https://chadasaiteja.github.io/rag-from-scratch/visualize/embedding-and-storage/", "learningResourceType": "Interactive visualization", "educationalLevel": "Beginner", "inLanguage": "en", "isPartOf": {"@type": "Course", "name": "RAG from Scratch", "url": "https://chadasaiteja.github.io/rag-from-scratch/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "Visualize", "item": "https://chadasaiteja.github.io/rag-from-scratch/visualize/"}, {"@type": "ListItem", "position": 3, "name": "Embeddings and Vector Storage, Visualized in 3D", "item": "https://chadasaiteja.github.io/rag-from-scratch/visualize/embedding-and-storage/"}]}</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../../">RAG <span>from Scratch</span></a>
+  <nav class="topnav" aria-label="Main"><a href="../../">Home</a><a href="../../learn/">Learn</a><a href="../../visualize/" aria-current="page">Visualize</a><a href="../../implementation/">Implementation</a><a href="../../lessons/">Lessons</a><a href="../../learn/faq/">FAQ</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+</header>
+<div class="layout no-sidebar wide">
+
+<main id="content">
+<nav class="crumbs" aria-label="Breadcrumb"><a href="../../">Home</a> / <a href="../../visualize/">Visualize</a> / <span aria-current="page">Embeddings and Vector Storage, Visualized in 3D</span></nav>
+<header class="viz-head">
+  <p class="eyebrow">Stage 2 · Embedding &amp; storage</p>
+  <h1>Embeddings and Vector Storage, Visualized in 3D</h1>
+  <p class="lede">Every chunk becomes a list of numbers, and those numbers become a position. Similar chunks land close together, and the index links neighbours so search doesn't have to check everything.</p>
+</header>
+<div class="viz" data-scene="space" tabindex="0" aria-label="Interactive 3D visualization. Use the left and right arrow keys to change step.">
+  <div class="viz-toolbar"><p class="viz-badge">Approximation: positions are TF-IDF keyword vectors reduced to 3D with PCA, computed offline. Real Gemini embeddings group chunks by meaning rather than shared words, so their layout would differ.</p></div>
+  <div class="viz-stage">
+    <div class="viz-hud" aria-live="polite"></div>
+    <div class="viz-caption" aria-live="polite"></div>
+    <div class="viz-tooltip" hidden></div>
+    <p class="viz-fallback" hidden>3D needs WebGL, which this browser doesn't support. The steps below describe each stage of the animation.</p>
+    <span class="viz-hint">Drag to orbit · scroll to zoom · hover to read</span>
+  </div>
+  <div class="viz-controls">
+    <button type="button" data-action="prev" aria-label="Previous step">←</button>
+    <button type="button" data-action="play" class="viz-play">▶ Play</button>
+    <button type="button" data-action="next" aria-label="Next step">→</button>
+    <div class="viz-dots"></div>
+  </div>
+  <ol class="viz-steps">
+<li data-step="0"><h3>Chunks of text</h3><p>All 21 chunks from the 10 lessons, coloured by source lesson. Hover any card to read it.</p></li>
+<li data-step="1"><h3>Text becomes numbers</h3><p>Each chunk is turned into a long vector of numbers. The bars show each chunk's strongest dimensions; a real embedding model like <code>gemini-embedding-001</code> outputs thousands.</p></li>
+<li data-step="2"><h3>Numbers become a position</h3><p>Reduced to three dimensions, each vector becomes a point in space. Drag to orbit and scroll to zoom.</p></li>
+<li data-step="3"><h3>Similar topics land close together</h3><p>Chunks about related ideas sit near each other. This is what lets a question find relevant text even when the wording differs.</p></li>
+<li data-step="4"><h3>Nearest neighbours</h3><p>For one chunk, these are its three most similar chunks by cosine similarity: the same measure used to rank search results.</p></li>
+<li data-step="5"><h3>The index: links between neighbours</h3><p>Vector databases connect each point to its neighbours. A search hops along these links toward the target (the yellow path) instead of comparing against every stored vector. That's the idea behind HNSW.</p></li>
+<li data-step="6"><h3>Stored with metadata</h3><p>Each point is saved with its text and filename in a Chroma collection on disk. Next: asking a question.</p></li>
+  </ol>
+</div>
+<section class="viz-links">
+  <div><h2>Where this happens in the code</h2><ul><li><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/ingest.py" rel="noopener"><code>src/pipeline/ingest.py</code></a>: embeds every chunk and writes it to Chroma with its metadata</li><li><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/vector_retrieval.py" rel="noopener"><code>src/pipeline/vector_retrieval.py</code></a>: reopens the store and searches it</li></ul></div>
+  <div><h2>Learn the concepts</h2><ul><li><a href="../../learn/02-embeddings-and-vectors/">Module 02 · Embeddings &amp; Vectors</a></li><li><a href="../../learn/05-vector-databases/">Module 05 · Vector Databases</a></li></ul></div>
+</section>
+<nav class="pager" aria-label="Visualization navigation"><a class="pager-link" href="../../visualize/chunking/" rel="prev"><small>Previous stage</small>Chunking, Visualized in 3D</a><a class="pager-link next" href="../../visualize/retrieval/" rel="next"><small>Next stage</small>Hybrid Retrieval, Visualized in 3D</a></nav>
+
+</main>
+</div>
+<footer class="site-footer">
+  <p>RAG from Scratch · free and open source on <a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a> · built from <code>notes/</code>, <code>data/raw/</code> and <code>src/pipeline/</code></p>
+</footer>
+<script src="../../assets/site.js" defer></script>
+<script type="importmap">{"imports": {"three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script src="../../assets/viz/data.js"></script>
+<script type="module" src="../../assets/viz/space.js"></script>
+</body>
+</html>

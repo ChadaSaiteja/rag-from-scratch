@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://chadasaiteja.github.io/rag-from-scratch/</loc><lastmod>2026-10-18</lastmod><priority>1.0</priority></url>
+  <url><loc>https://chadasaiteja.github.io/rag-from-scratch/</loc><lastmod>2026-10-23</lastmod><priority>1.0</priority></url>
   <url><loc>https://chadasaiteja.github.io/rag-from-scratch/learn/</loc><lastmod>2026-10-17</lastmod><priority>0.9</priority></url>
   <url><loc>https://chadasaiteja.github.io/rag-from-scratch/learn/00-introduction-to-rag/</loc><lastmod>2026-10-17</lastmod><priority>0.8</priority></url>
   <url><loc>https://chadasaiteja.github.io/rag-from-scratch/learn/01-foundations-transformers/</loc><lastmod>2026-10-17</lastmod><priority>0.8</priority></url>
@@ -17,7 +17,7 @@
   <url><loc>https://chadasaiteja.github.io/rag-from-scratch/learn/faq/</loc><lastmod>2026-10-17</lastmod><priority>0.8</priority></url>
   <url><loc>https://chadasaiteja.github.io/rag-from-scratch/learn/glossary/</loc><lastmod>2026-10-17</lastmod><priority>0.8</priority></url>
   <url><loc>https://chadasaiteja.github.io/rag-from-scratch/implementation/</loc><lastmod>2026-10-03</lastmod><priority>0.8</priority></url>
-  <url><loc>https://chadasaiteja.github.io/rag-from-scratch/lessons/</loc><lastmod>2026-10-18</lastmod><priority>0.6</priority></url>
+  <url><loc>https://chadasaiteja.github.io/rag-from-scratch/lessons/</loc><lastmod>2026-10-23</lastmod><priority>0.6</priority></url>
   <url><loc>https://chadasaiteja.github.io/rag-from-scratch/lessons/01-rag-fundamentals/</loc><lastmod>2026-09-29</lastmod><priority>0.5</priority></url>
   <url><loc>https://chadasaiteja.github.io/rag-from-scratch/lessons/02-data-ingestion/</loc><lastmod>2026-09-29</lastmod><priority>0.5</priority></url>
   <url><loc>https://chadasaiteja.github.io/rag-from-scratch/lessons/03-chunking/</loc><lastmod>2026-09-29</lastmod><priority>0.5</priority></url>
@@ -28,4 +28,8 @@
   <url><loc>https://chadasaiteja.github.io/rag-from-scratch/lessons/08-rag-evaluation/</loc><lastmod>2026-09-29</lastmod><priority>0.5</priority></url>
   <url><loc>https://chadasaiteja.github.io/rag-from-scratch/lessons/09-metadata-and-filtering/</loc><lastmod>2026-09-29</lastmod><priority>0.5</priority></url>
   <url><loc>https://chadasaiteja.github.io/rag-from-scratch/lessons/10-rag-project-exercise/</loc><lastmod>2026-09-29</lastmod><priority>0.5</priority></url>
+  <url><loc>https://chadasaiteja.github.io/rag-from-scratch/visualize/</loc><lastmod>2026-10-23</lastmod><priority>0.9</priority></url>
+  <url><loc>https://chadasaiteja.github.io/rag-from-scratch/visualize/chunking/</loc><lastmod>2026-10-23</lastmod><priority>0.8</priority></url>
+  <url><loc>https://chadasaiteja.github.io/rag-from-scratch/visualize/embedding-and-storage/</loc><lastmod>2026-10-23</lastmod><priority>0.8</priority></url>
+  <url><loc>https://chadasaiteja.github.io/rag-from-scratch/visualize/retrieval/</loc><lastmod>2026-10-23</lastmod><priority>0.8</priority></url>
 </urlset>

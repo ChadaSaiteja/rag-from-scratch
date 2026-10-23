@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAG Visualized in 3D: See Each Pipeline Stage | RAG from Scratch</title>
+<meta name="description" content="Interactive 3D animations of a RAG pipeline on real data: chunking, embeddings, vector storage and hybrid retrieval, step by step.">
+<link rel="canonical" href="https://chadasaiteja.github.io/rag-from-scratch/visualize/">
+<meta name="robots" content="index, follow">
+<meta name="google-site-verification" content="rGwrTPLvkbtgUMk4zVAgc5VU0xutNGpT8NvMHbrYLF0">
+<meta property="og:site_name" content="RAG from Scratch">
+<meta property="og:type" content="website">
+<meta property="og:title" content="RAG Visualized in 3D: See Each Pipeline Stage | RAG from Scratch">
+<meta property="og:description" content="Interactive 3D animations of a RAG pipeline on real data: chunking, embeddings, vector storage and hybrid retrieval, step by step.">
+<meta property="og:url" content="https://chadasaiteja.github.io/rag-from-scratch/visualize/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="RAG Visualized in 3D: See Each Pipeline Stage | RAG from Scratch">
+<meta name="twitter:description" content="Interactive 3D animations of a RAG pipeline on real data: chunking, embeddings, vector storage and hybrid retrieval, step by step.">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "CollectionPage", "name": "RAG, Visualized", "description": "Interactive 3D visualizations of each stage of a RAG pipeline.", "url": "https://chadasaiteja.github.io/rag-from-scratch/visualize/", "hasPart": [{"@type": "LearningResource", "name": "Chunking, Visualized in 3D", "url": "https://chadasaiteja.github.io/rag-from-scratch/visualize/chunking/"}, {"@type": "LearningResource", "name": "Embeddings and Vector Storage, Visualized in 3D", "url": "https://chadasaiteja.github.io/rag-from-scratch/visualize/embedding-and-storage/"}, {"@type": "LearningResource", "name": "Hybrid Retrieval, Visualized in 3D", "url": "https://chadasaiteja.github.io/rag-from-scratch/visualize/retrieval/"}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "Visualize", "item": "https://chadasaiteja.github.io/rag-from-scratch/visualize/"}]}</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../">RAG <span>from Scratch</span></a>
+  <nav class="topnav" aria-label="Main"><a href="../">Home</a><a href="../learn/">Learn</a><a href="../visualize/" aria-current="page">Visualize</a><a href="../implementation/">Implementation</a><a href="../lessons/">Lessons</a><a href="../learn/faq/">FAQ</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+</header>
+<div class="layout no-sidebar wide">
+
+<main id="content">
+<nav class="crumbs" aria-label="Breadcrumb"><a href="../">Home</a> / <span aria-current="page">Visualize</span></nav>
+<header class="viz-head">
+  <p class="eyebrow">Interactive · 3D</p>
+  <h1>RAG, Visualized</h1>
+  <p class="lede">See what actually happens to the data at each stage of a RAG pipeline: how a document is cut into chunks, how chunks become points in space,
+  how they're stored, and how a question finds the right ones. Every scene runs on this repo's real corpus: 10 lessons,
+  21 chunks, 1,000-character chunks with 200 overlap, top 3 per retriever.</p>
+</header>
+<div class="viz-grid"><a class="viz-card" href="../visualize/chunking/"><span class="eyebrow">Stage 1 · Chunking</span><h3>Chunking, Visualized in 3D</h3><p>Watch a real document split into chunks in 3D: paragraph breaks, 1,000-character cuts, overlap and metadata, using the same splitter settings as the pipeline.</p><span class="viz-card-go">Open the 3D view →</span></a><a class="viz-card" href="../visualize/embedding-and-storage/"><span class="eyebrow">Stage 2 · Embedding &amp; storage</span><h3>Embeddings and Vector Storage, Visualized in 3D</h3><p>See text chunks become vectors and points in 3D space, cluster by topic, link to their nearest neighbours, and get stored in a vector database with metadata.</p><span class="viz-card-go">Open the 3D view →</span></a><a class="viz-card" href="../visualize/retrieval/"><span class="eyebrow">Stage 3 · Retrieval</span><h3>Hybrid Retrieval, Visualized in 3D</h3><p>Watch a question become a point, find its nearest chunks by vector search and keyword (BM25) search, and merge both rankings with Reciprocal Rank Fusion.</p><span class="viz-card-go">Open the 3D view →</span></a></div>
+<p class="viz-badge viz-badge-wide">Positions in 3D use TF-IDF keyword vectors reduced with PCA, computed offline so no API key is needed. Chunks, split points, BM25 scores
+and rank fusion are the real computations. Coming next: loading &amp; cleaning, generation, and evaluation.</p>
+
+</main>
+</div>
+<footer class="site-footer">
+  <p>RAG from Scratch · free and open source on <a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a> · built from <code>notes/</code>, <code>data/raw/</code> and <code>src/pipeline/</code></p>
+</footer>
+<script src="../assets/site.js" defer></script>
+
+</body>
+</html>

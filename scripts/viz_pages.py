@@ -226,6 +226,10 @@ def story_html(data, rel, repo_url):
   <h1>How RAG works, from documents to a cited answer</h1>
   <p class="lede">Scroll to follow this repository's real pipeline: {len(data["lessons"])} lesson files become {len(data["chunks"])} chunks, the chunks become vectors,
   and a question finds its evidence through two searches, a merge, a prompt and a check. Every number comes from the real code and corpus.</p>
+  <div class="story-actions">
+    <a class="btn primary" href="{rel}visualize/playground/">Open the playground: try your own question →</a>
+    <a class="btn" href="{rel}implementation/">Read the code</a>
+  </div>
 </header>
 <div class="story">
   <div class="story-stage-wrap">
@@ -239,6 +243,7 @@ def story_html(data, rel, repo_url):
           <button type="button" data-nav="play" class="story-play">▶ Play</button>
           <button type="button" data-nav="next" aria-label="Next step">→</button>
           <span class="story-counter">1 / {len(STORY)}</span>
+          <a class="story-pg" href="{rel}visualize/playground/">Playground ↗</a>
         </div>
       </div>
     </div>

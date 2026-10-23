@@ -930,6 +930,9 @@ details pre { max-height: 520px; }
 .story-nav { display: flex; align-items: center; gap: 6px; }
 .story-nav button { font: inherit; font-size: 0.85em; padding: 5px 10px; border-radius: 7px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; cursor: pointer; }
 .story-nav .story-play { background: #5eead4; color: #042f2e; border-color: #5eead4; font-weight: 700; min-width: 6.5em; }
+.story-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.story-pg { font-size: 0.85em; font-weight: 700; color: #5eead4; text-decoration: none; padding: 5px 10px; border: 1px solid #2f8f7a; border-radius: 7px; white-space: nowrap; }
+.story-pg:hover { background: rgba(94, 234, 212, 0.12); }
 .story-counter { color: #94a3b8; font-size: 0.8em; font-variant-numeric: tabular-nums; min-width: 3.6em; text-align: right; }
 .story-steps { padding: 20vh 0 40vh; }
 .story-step { padding: 20px 22px; margin: 0 0 32vh; border-radius: 14px; border: 1px solid var(--border); background: var(--surface); opacity: 0.45; transition: opacity .35s, border-color .35s, box-shadow .35s; }
@@ -1003,6 +1006,7 @@ details pre { max-height: 520px; }
   .story-steps { padding: 20px 0 30vh; }
   .story-step { margin-bottom: 24vh; padding: 16px; scroll-margin-top: calc(46vh + 64px); }
   .story-step h2 { font-size: 1.15rem; }
+  .story-pg { display: none; }
   .st-note { max-width: 46%; } .st-qcard { width: 42%; } .st-list, .st-table { width: 44%; top: 50%; }
   .st-prompt { font-size: 0.8em; } .st-msg { max-width: 92%; }
 }

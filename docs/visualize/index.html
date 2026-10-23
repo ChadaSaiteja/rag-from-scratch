@@ -3,24 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>RAG Visualized in 3D: See Each Pipeline Stage | RAG from Scratch</title>
-<meta name="description" content="Interactive 3D animations of a RAG pipeline on real data: chunking, embeddings, vector storage and hybrid retrieval, step by step.">
+<title>How RAG Works, Step by Step: Visual Walkthrough of a Real Pipeline | RAG from Scratch</title>
+<meta name="description" content="Scroll through a real RAG pipeline: documents become chunks and vectors, a question finds its evidence by vector and keyword search, and the model writes a cited answer.">
 <link rel="canonical" href="https://chadasaiteja.github.io/rag-from-scratch/visualize/">
 <meta name="robots" content="index, follow">
 <meta name="google-site-verification" content="rGwrTPLvkbtgUMk4zVAgc5VU0xutNGpT8NvMHbrYLF0">
 <meta property="og:site_name" content="RAG from Scratch">
 <meta property="og:type" content="website">
-<meta property="og:title" content="RAG Visualized in 3D: See Each Pipeline Stage | RAG from Scratch">
-<meta property="og:description" content="Interactive 3D animations of a RAG pipeline on real data: chunking, embeddings, vector storage and hybrid retrieval, step by step.">
+<meta property="og:title" content="How RAG Works, Step by Step: Visual Walkthrough of a Real Pipeline | RAG from Scratch">
+<meta property="og:description" content="Scroll through a real RAG pipeline: documents become chunks and vectors, a question finds its evidence by vector and keyword search, and the model writes a cited answer.">
 <meta property="og:url" content="https://chadasaiteja.github.io/rag-from-scratch/visualize/">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="RAG Visualized in 3D: See Each Pipeline Stage | RAG from Scratch">
-<meta name="twitter:description" content="Interactive 3D animations of a RAG pipeline on real data: chunking, embeddings, vector storage and hybrid retrieval, step by step.">
+<meta name="twitter:title" content="How RAG Works, Step by Step: Visual Walkthrough of a Real Pipeline | RAG from Scratch">
+<meta name="twitter:description" content="Scroll through a real RAG pipeline: documents become chunks and vectors, a question finds its evidence by vector and keyword search, and the model writes a cited answer.">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../assets/style.css">
 <script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "CollectionPage", "name": "RAG, Visualized", "description": "Interactive 3D visualizations of each stage of a RAG pipeline.", "url": "https://chadasaiteja.github.io/rag-from-scratch/visualize/", "hasPart": [{"@type": "LearningResource", "name": "Chunking, Visualized in 3D", "url": "https://chadasaiteja.github.io/rag-from-scratch/visualize/chunking/"}, {"@type": "LearningResource", "name": "Embeddings and Vector Storage, Visualized in 3D", "url": "https://chadasaiteja.github.io/rag-from-scratch/visualize/embedding-and-storage/"}, {"@type": "LearningResource", "name": "Hybrid Retrieval, Visualized in 3D", "url": "https://chadasaiteja.github.io/rag-from-scratch/visualize/retrieval/"}]}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "Visualize", "item": "https://chadasaiteja.github.io/rag-from-scratch/visualize/"}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "How RAG works, step by step", "description": "A scroll-driven visual walkthrough of a real RAG pipeline: documents, chunks, embeddings, vector store, hybrid search, fusion, prompt, cited answer and evaluation.", "url": "https://chadasaiteja.github.io/rag-from-scratch/visualize/", "learningResourceType": "Interactive visualization", "educationalLevel": "Beginner", "inLanguage": "en", "isPartOf": {"@type": "Course", "name": "RAG from Scratch", "url": "https://chadasaiteja.github.io/rag-from-scratch/"}, "hasPart": [{"@type": "LearningResource", "name": "RAG Pipeline Playground", "url": "https://chadasaiteja.github.io/rag-from-scratch/visualize/playground/"}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "How RAG works", "item": "https://chadasaiteja.github.io/rag-from-scratch/visualize/"}]}</script>
 </head>
 <body>
 <a class="skip" href="#content">Skip to content</a>
@@ -32,17 +32,122 @@
 <div class="layout no-sidebar wide">
 
 <main id="content">
-<nav class="crumbs" aria-label="Breadcrumb"><a href="../">Home</a> / <span aria-current="page">Visualize</span></nav>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="../">Home</a> / <span aria-current="page">How RAG works</span></nav>
 <header class="viz-head">
-  <p class="eyebrow">Interactive · 3D</p>
-  <h1>RAG, Visualized</h1>
-  <p class="lede">See what actually happens to the data at each stage of a RAG pipeline: how a document is cut into chunks, how chunks become points in space,
-  how they're stored, and how a question finds the right ones. Every scene runs on this repo's real corpus: 10 lessons,
-  21 chunks, 1,000-character chunks with 200 overlap, top 3 per retriever.</p>
+  <p class="eyebrow">Step by step · 15 steps</p>
+  <h1>How RAG works, from documents to a cited answer</h1>
+  <p class="lede">Scroll to follow this repository's real pipeline: 10 lesson files become 21 chunks, the chunks become vectors,
+  and a question finds its evidence through two searches, a merge, a prompt and a check. Every number comes from the real code and corpus.</p>
 </header>
-<div class="viz-grid"><a class="viz-card viz-card-feature" href="../visualize/playground/"><span class="eyebrow">Playground · The whole pipeline</span><h3>RAG Pipeline Playground</h3><p>Follow the full RAG pipeline in one page: load, clean, chunk, vectorize and store a document, then type a question and watch tokens, vectors, hybrid search, fusion and the final prompt.</p><span class="viz-card-go">Try it →</span></a><a class="viz-card" href="../visualize/chunking/"><span class="eyebrow">Stage 1 · Chunking</span><h3>Chunking, Visualized in 3D</h3><p>Watch a real document split into chunks in 3D: paragraph breaks, 1,000-character cuts, overlap and metadata, using the same splitter settings as the pipeline.</p><span class="viz-card-go">Open the 3D view →</span></a><a class="viz-card" href="../visualize/embedding-and-storage/"><span class="eyebrow">Stage 2 · Embedding &amp; storage</span><h3>Embeddings and Vector Storage, Visualized in 3D</h3><p>See text chunks become vectors and points in 3D space, cluster by topic, link to their nearest neighbours, and get stored in a vector database with metadata.</p><span class="viz-card-go">Open the 3D view →</span></a><a class="viz-card" href="../visualize/retrieval/"><span class="eyebrow">Stage 3 · Retrieval</span><h3>Hybrid Retrieval, Visualized in 3D</h3><p>Watch a question become a point, find its nearest chunks by vector search and keyword (BM25) search, and merge both rankings with Reciprocal Rank Fusion.</p><span class="viz-card-go">Open the 3D view →</span></a></div>
-<p class="viz-badge viz-badge-wide">Positions in 3D use TF-IDF keyword vectors reduced with PCA, computed offline so no API key is needed. Chunks, split points, BM25 scores
-and rank fusion are the real computations. Coming next: loading &amp; cleaning, generation, and evaluation.</p>
+<div class="story">
+  <div class="story-stage-wrap">
+    <div class="story-stage" aria-label="Animated stage">
+      <svg class="story-svg" viewBox="0 0 1000 620" role="img" aria-hidden="true"></svg>
+      <div class="story-overlay">
+<div class="st-map" data-panel="overview">
+  <div class="st-lane"><span class="st-lane-tag">Indexing · once</span>
+    <div class="st-nodes"><span>Documents</span><i>→</i><span>Load &amp; tag</span><i>→</i><span>Chunk</span><i>→</i><span>Embed</span><i>→</i><span>Store</span></div></div>
+  <div class="st-lane answer"><span class="st-lane-tag">Answering · every question</span>
+    <div class="st-nodes"><span>Question</span><i>→</i><span>Embed</span><i>→</i><span>Search ×2</span><i>→</i><span>Merge</span><i>→</i><span>Prompt</span><i>→</i><span>Answer</span><i>→</i><span>Check</span></div></div>
+</div>
+<div class="st-note st-note-br" data-panel="chunk">
+  <b>03_chunking.txt</b> → 3 chunks
+  <span>chunk 1: 936 chars ≈ 234 tokens</span><span>chunk 2: 706 chars ≈ 176 tokens</span><span>chunk 3: 462 chars ≈ 116 tokens</span>
+  <small>All 10 files → 21 chunks · chunk_size=1000 · overlap=200</small>
+</div>
+<div class="st-note st-note-br" data-panel="embed">
+  <b>Each chunk → one vector</b>
+  <span>Bars: a chunk's strongest dimensions</span>
+  <small>Real embeddings have thousands of dimensions; this page uses a 585-word keyword stand-in so it runs with no API key.</small>
+</div>
+<div class="st-note st-note-bl" data-panel="store embedq">
+  <b>Colour = source file</b>
+  <span><i style="background:#5eead4"></i>01_rag_fundamentals</span><span><i style="background:#93c5fd"></i>02_data_ingestion</span><span><i style="background:#fbbf24"></i>03_chunking</span><span><i style="background:#f472b6"></i>04_embeddings_and_vectors</span><span><i style="background:#a78bfa"></i>05_vector_database</span><span><i style="background:#4ade80"></i>06_retrieval</span><span><i style="background:#fb923c"></i>07_rag_prompt_and_generation</span><span><i style="background:#38bdf8"></i>08_rag_evaluation</span><span><i style="background:#f87171"></i>09_metadata_and_filtering</span><span><i style="background:#e879f9"></i>10_rag_project_exercise</span>
+</div>
+<div class="st-qcard" data-panel="question embedq vsearch bm25 fuse">
+  <small>Question</small>
+  <p>What is the difference between chunk size and overlap?</p>
+  <div class="st-words" data-panel-sub="bm25"><span>between</span><span>chunk</span><span>difference</span><span>overlap</span><span>size</span></div>
+</div><div class="st-list" data-panel="vsearch"><b>Vector search · top 3</b><ol><li><i style="background:#e879f9"></i>10_rag_project_exercise · chunk 1<code>cos 0.30</code></li><li><i style="background:#e879f9"></i>10_rag_project_exercise · chunk 2<code>cos 0.23</code></li><li><i style="background:#fbbf24"></i>03_chunking · chunk 1<code>cos 0.20</code></li></ol></div><div class="st-list amber" data-panel="bm25"><b>BM25 keyword search · top 3</b><ol><li><i style="background:#e879f9"></i>10_rag_project_exercise · chunk 1<code>8.8</code></li><li><i style="background:#e879f9"></i>10_rag_project_exercise · chunk 2<code>7.4</code></li><li><i style="background:#fbbf24"></i>03_chunking · chunk 1<code>5.6</code></li></ol></div>
+<div class="st-table" data-panel="fuse">
+  <b>Reciprocal Rank Fusion</b>
+  <table><tr><th>chunk</th><th>BM25 rank</th><th>vector rank</th><th>score</th></tr><tr><td><i style="background:#e879f9"></i>10_rag_project_exercise · chunk 1</td><td>1</td><td>1</td><td><code>0.0164</code></td></tr><tr><td><i style="background:#e879f9"></i>10_rag_project_exercise · chunk 2</td><td>2</td><td>2</td><td><code>0.0161</code></td></tr><tr><td><i style="background:#fbbf24"></i>03_chunking · chunk 1</td><td>3</td><td>3</td><td><code>0.0159</code></td></tr></table>
+  <small>score = 0.5/(60 + BM25 rank) + 0.5/(60 + vector rank)</small>
+</div>
+<div class="st-prompt" data-panel="prompt">
+  <pre class="st-instr">You are a helpful assistant. Answer the question using ONLY the context below.
+Each context block is tagged with its source filename in [Source: ...] form.
+After every sentence or claim you make, cite the filename(s) it came from, e.g. &#x27;Chunking improves recall (Source: 03_chunking.txt).&#x27;
+If the answer isn&#x27;t in the context, say you don&#x27;t know instead of guessing.</pre>
+  <div class="st-ctxs"><small>Context:</small><div class="st-ctx" style="border-color:#e879f9"><mark>[Source: 10_rag_project_exercise.txt]</mark><span>RAG HANDS-ON PROJECT
+
+Build a small local RAG system from the supplied learning documents.
+
+Goal:
+Ask questions and retrieve the most relevant chunks.…</span></div><div class="st-ctx" style="border-color:#e879f9"><mark>[Source: 10_rag_project_exercise.txt]</mark><span>Try:
+&quot;What is the difference between chunk size and overlap?&quot;
+
+Then try:
+&quot;Why might exact order IDs require more than semantic vector search?&quot;
+
+Stage …</span></div><div class="st-ctx" style="border-color:#fbbf24"><mark>[Source: 03_chunking.txt]</mark><span>CHUNKING IN RAG
+
+Chunking divides a large document into smaller retrieval units.
+
+Why chunk?
+Sending an entire 100-page document for every question is…</span></div></div>
+  <pre class="st-q">Question: What is the difference between chunk size and overlap?</pre>
+</div>
+<div class="st-chat" data-panel="generate">
+  <div class="st-msg user"><small>Question</small>What is the difference between chunk size and overlap?</div>
+  <div class="st-msg bot"><small>Gemini, answering only from the context</small>
+    <p data-answer="Chunk size controls how large each split of a document is, while overlap controls how much text is repeated between consecutive chunks so context isn&#x27;t lost at the boundary &lt;mark&gt;(Source: 03_chunking.txt)&lt;/mark&gt;."></p>
+    <em>Answer recorded in the README when the pipeline was run.</em></div>
+</div>
+<div class="st-score" data-panel="evaluate">
+  <table><tr><th>Test question</th><th>Retrieval<br><small>expected file found?</small></th><th>Generation<br><small>expected idea in answer?</small></th></tr><tr><td>What is the difference between chunk size and overlap?</td><td class="ok">✓</td><td class="ok">✓</td></tr><tr><td>How does a vector database find similar embeddings?</td><td class="ok">✓</td><td class="ok">✓</td></tr><tr><td>What does the retriever stage do in a RAG pipeline?</td><td class="ok">✓</td><td class="ok">✓</td></tr><tr><td>How should a prompt be constructed for the generation stage?</td><td class="ok">✓</td><td class="ok">✓</td></tr><tr><td>Why should retrieval and generation quality be evaluated separately?</td><td class="ok">✓</td><td class="ok">✓</td></tr></table>
+  <div class="st-totals"><span>Retrieval <b>5/5</b></span><span>Generation <b>5/5</b></span></div>
+</div>
+<div class="st-done" data-panel="done">
+  <h3>Documents in. Cited answers out.</h3>
+  <div class="st-cta">
+    <a class="btn primary" href="../visualize/playground/">Try it with your own question →</a>
+    <a class="btn" href="../implementation/">Read the code, stage by stage</a>
+    <a class="btn" href="../learn/">Start the course</a>
+  </div>
+</div></div>
+      <div class="story-bar">
+        <div class="story-rail" aria-label="Steps"><button type="button" class="plain" title="RAG has two halves" aria-label="Step 1: RAG has two halves"></button><button type="button" class="index" title="Start with documents" aria-label="Step 2: Start with documents"></button><button type="button" class="index" title="Load and tag each file" aria-label="Step 3: Load and tag each file"></button><button type="button" class="index" title="Cut into chunks" aria-label="Step 4: Cut into chunks"></button><button type="button" class="index" title="Turn each chunk into numbers" aria-label="Step 5: Turn each chunk into numbers"></button><button type="button" class="index" title="Store the vectors" aria-label="Step 6: Store the vectors"></button><button type="button" class="answer" title="A question arrives" aria-label="Step 7: A question arrives"></button><button type="button" class="answer" title="Embed the question the same way" aria-label="Step 8: Embed the question the same way"></button><button type="button" class="answer" title="Vector search: find the nearest meanings" aria-label="Step 9: Vector search: find the nearest meanings"></button><button type="button" class="answer" title="Keyword search: find exact words" aria-label="Step 10: Keyword search: find exact words"></button><button type="button" class="answer" title="Merge the two rankings" aria-label="Step 11: Merge the two rankings"></button><button type="button" class="answer" title="Build the prompt" aria-label="Step 12: Build the prompt"></button><button type="button" class="answer" title="Generate a cited answer" aria-label="Step 13: Generate a cited answer"></button><button type="button" class="answer" title="Check both halves separately" aria-label="Step 14: Check both halves separately"></button><button type="button" class="plain" title="That&#x27;s the whole pipeline" aria-label="Step 15: That&#x27;s the whole pipeline"></button></div>
+        <div class="story-nav">
+          <button type="button" data-nav="prev" aria-label="Previous step">←</button>
+          <button type="button" data-nav="play" class="story-play">▶ Play</button>
+          <button type="button" data-nav="next" aria-label="Next step">→</button>
+          <span class="story-counter">1 / 15</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="story-steps">
+<section class="story-step" id="overview" data-step="0"><h2><span class="story-num">1</span>RAG has two halves</h2><p class="story-what"><b>Indexing</b> runs once: documents are prepared and stored. <b>Answering</b> runs for every question: find the right pieces, hand them to the model, check the result.</p><p class="story-why"><span>Why it matters</span>Keeping the two apart is what makes RAG cheap to update (add a document, re-index only that) and easy to debug (which half failed?).</p></section>
+<section class="story-step" id="documents" data-step="1"><p class=eyebrow>Indexing · once</p><h2><span class="story-num">2</span>Start with documents</h2><p class="story-what">This pipeline's knowledge base is 10 short lesson files about RAG itself, in <code>data/raw/</code>.</p><p class="story-why"><span>Why it matters</span>Everything the system will ever answer comes from here. If a fact isn't in these files, the right answer is “I don't know”.</p><p class="story-where"><span>In this repo</span>data/raw/*.txt · 10 files</p></section>
+<section class="story-step" id="load" data-step="2"><p class=eyebrow>Indexing · once</p><h2><span class="story-num">3</span>Load and tag each file</h2><p class="story-what">Each file is read into memory and tagged with metadata: its <code>filename</code>. Nothing else changes yet.</p><p class="story-why"><span>Why it matters</span>The tag travels with every piece of the document from here on. It is what lets the final answer say <em>which file</em> a fact came from.</p><p class="story-where"><span>In this repo</span>ingest.py · ingest()</p></section>
+<section class="story-step" id="chunk" data-step="3"><p class=eyebrow>Indexing · once</p><h2><span class="story-num">4</span>Cut into chunks</h2><p class="story-what">Each document is split into pieces of about 1,000 characters, cutting at paragraph breaks where possible. 200 characters are repeated between neighbours (amber) so no sentence is lost at a cut.</p><p class="story-why"><span>Why it matters</span>A model can only read so much at once, and search works best on focused pieces. Chunk size is the single biggest lever on answer quality.</p><p class="story-where"><span>In this repo</span>ingest.py · RecursiveCharacterTextSplitter · 10 files → 21 chunks</p></section>
+<section class="story-step" id="embed" data-step="4"><p class=eyebrow>Indexing · once</p><h2><span class="story-num">5</span>Turn each chunk into numbers</h2><p class="story-what">An embedding model converts each chunk into a long list of numbers (a vector). Chunks with similar meaning get similar numbers.</p><p class="story-why"><span>Why it matters</span>Numbers can be compared mathematically; words can't. This is what lets a question find a chunk that says the same thing in different words.</p><p class="story-where"><span>In this repo</span>ingest.py · gemini-embedding-001 (shown here: a keyword stand-in)</p></section>
+<section class="story-step" id="store" data-step="5"><p class=eyebrow>Indexing · once</p><h2><span class="story-num">6</span>Store the vectors</h2><p class="story-what">Every vector is saved in a vector database together with its text and its filename tag. Nearby vectors are chunks about similar things.</p><p class="story-why"><span>Why it matters</span>Indexing is done. From now on the documents are never read again; every question is answered from this store.</p><p class="story-where"><span>In this repo</span>ingest.py · Chroma, collection gemini_collection · 21 vectors</p></section>
+<section class="story-step" id="question" data-step="6"><p class=eyebrow>Answering · every question</p><h2><span class="story-num">7</span>A question arrives</h2><p class="story-what">A user asks something. The system has no idea yet which of the 21 chunks matter.</p><p class="story-why"><span>Why it matters</span>Everything that follows happens live, in well under a second for a store this size.</p><p class="story-where"><span>In this repo</span>generation.py · input()</p></section>
+<section class="story-step" id="embedq" data-step="7"><p class=eyebrow>Answering · every question</p><h2><span class="story-num">8</span>Embed the question the same way</h2><p class="story-what">The question goes through the <em>same</em> embedding model and lands in the same space as the chunks (the white dot).</p><p class="story-why"><span>Why it matters</span>Same model, same space: that's the rule. Embed documents and questions differently and nothing is comparable.</p><p class="story-where"><span>In this repo</span>hybrid_search.py · GoogleGenerativeAIEmbeddings</p></section>
+<section class="story-step" id="vsearch" data-step="8"><p class=eyebrow>Answering · every question</p><h2><span class="story-num">9</span>Vector search: find the nearest meanings</h2><p class="story-what">The 3 chunks closest to the question are picked by cosine similarity (how aligned two vectors are).</p><p class="story-why"><span>Why it matters</span>This catches chunks that answer the question in different words, which keyword search would miss.</p><p class="story-where"><span>In this repo</span>hybrid_search.py · vector_store.as_retriever(k=3) + MultiQueryRetriever</p></section>
+<section class="story-step" id="bm25" data-step="9"><p class=eyebrow>Answering · every question</p><h2><span class="story-num">10</span>Keyword search: find exact words</h2><p class="story-what">Independently, BM25 ranks chunks by the exact words they share with the question, weighting rare words more. Its top 3 get amber rings.</p><p class="story-why"><span>Why it matters</span>Vectors blur exact terms like error codes, names and IDs. Keywords catch them. Each method covers the other's blind spot.</p><p class="story-where"><span>In this repo</span>hybrid_search.py · BM25Retriever(k=3)</p></section>
+<section class="story-step" id="fuse" data-step="10"><p class=eyebrow>Answering · every question</p><h2><span class="story-num">11</span>Merge the two rankings</h2><p class="story-what">Reciprocal Rank Fusion combines both lists by rank, not by score: each chunk scores 0.5 ÷ (60 + rank) per list, summed.</p><p class="story-why"><span>Why it matters</span>The two methods score on different scales, so ranks are the only fair thing to add. Chunks both methods like rise to the top.</p><p class="story-where"><span>In this repo</span>hybrid_search.py · EnsembleRetriever(weights=[0.5, 0.5])</p></section>
+<section class="story-step" id="prompt" data-step="11"><p class=eyebrow>Answering · every question</p><h2><span class="story-num">12</span>Build the prompt</h2><p class="story-what">The winning chunks are pasted under a fixed instruction, each tagged <code>[Source: filename]</code>, followed by the question. This exact text is sent to the model.</p><p class="story-why"><span>Why it matters</span>The model is told to use only this context, cite the file after every claim, and say “I don't know” otherwise. That instruction is the main defence against made-up answers.</p><p class="story-where"><span>In this repo</span>generation.py · format_context() + call_google_api()</p></section>
+<section class="story-step" id="generate" data-step="12"><p class=eyebrow>Answering · every question</p><h2><span class="story-num">13</span>Generate a cited answer</h2><p class="story-what">The language model (Gemini) writes the answer from the context, citing the file each claim came from.</p><p class="story-why"><span>Why it matters</span>Because the citation points at a real chunk, anyone can check the answer against the source.</p><p class="story-where"><span>In this repo</span>generation.py · gemini-3.5-flash</p></section>
+<section class="story-step" id="evaluate" data-step="13"><p class=eyebrow>Answering · every question</p><h2><span class="story-num">14</span>Check both halves separately</h2><p class="story-what">For 5 test questions the pipeline checks two things: did retrieval find the expected file, and does the answer contain the expected idea?</p><p class="story-why"><span>Why it matters</span>If an answer is wrong, this tells you which half to fix: the search or the writing. Judging only the final answer can't.</p><p class="story-where"><span>In this repo</span>evaluation.py · retrieval 5/5 · generation 5/5 (as recorded in the README)</p></section>
+<section class="story-step" id="done" data-step="14"><h2><span class="story-num">15</span>That&#x27;s the whole pipeline</h2><p class="story-what">Documents in, cited answers out, with a check at the end. Every number you saw came from this repository's real corpus and settings.</p><p class="story-why"><span>Why it matters</span>Now try it with your own question, or read the code that does each step.</p></section>
+  </div>
+</div>
+<p class="viz-badge viz-badge-wide">What is real: the files, the 21 chunks and split points, the question, the BM25 scores, the rank fusion, the prompt text and the
+recorded answer and scores. What is a stand-in: vector positions use TF-IDF keyword vectors reduced to 3D (computed offline, no API key) instead of Gemini embeddings,
+so the layout of the point cloud would differ with real embeddings.</p>
 
 </main>
 </div>
@@ -50,6 +155,8 @@ and rank fusion are the real computations. Coming next: loading &amp; cleaning, 
   <p>RAG from Scratch · free and open source on <a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a> · built from <code>notes/</code>, <code>data/raw/</code> and <code>src/pipeline/</code></p>
 </footer>
 <script src="../assets/site.js" defer></script>
+<script src="../assets/viz/data.js"></script>
+<script type="module" src="../assets/viz/story.js"></script>
 
 </body>
 </html>

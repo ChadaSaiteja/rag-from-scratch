@@ -20,7 +20,7 @@
 <link rel="stylesheet" href="../../assets/style.css">
 <script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "RAG Pipeline Playground", "description": "Follow the full RAG pipeline in one page: load, clean, chunk, vectorize and store a document, then type a question and watch tokens, vectors, hybrid search, fusion and the final prompt.", "url": "https://chadasaiteja.github.io/rag-from-scratch/visualize/playground/", "learningResourceType": "Interactive simulation", "educationalLevel": "Beginner", "inLanguage": "en", "isPartOf": {"@type": "Course", "name": "RAG from Scratch", "url": "https://chadasaiteja.github.io/rag-from-scratch/"}}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "Visualize", "item": "https://chadasaiteja.github.io/rag-from-scratch/visualize/"}, {"@type": "ListItem", "position": 3, "name": "RAG Pipeline Playground", "item": "https://chadasaiteja.github.io/rag-from-scratch/visualize/playground/"}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "How RAG works", "item": "https://chadasaiteja.github.io/rag-from-scratch/visualize/"}, {"@type": "ListItem", "position": 3, "name": "RAG Pipeline Playground", "item": "https://chadasaiteja.github.io/rag-from-scratch/visualize/playground/"}]}</script>
 </head>
 <body>
 <a class="skip" href="#content">Skip to content</a>
@@ -32,7 +32,7 @@
 <div class="layout no-sidebar wide">
 
 <main id="content">
-<nav class="crumbs" aria-label="Breadcrumb"><a href="../../">Home</a> / <a href="../../visualize/">Visualize</a> / <span aria-current="page">RAG Pipeline Playground</span></nav>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="../../">Home</a> / <a href="../../visualize/">How RAG works</a> / <span aria-current="page">RAG Pipeline Playground</span></nav>
 <header class="viz-head">
   <p class="eyebrow">Playground · The whole pipeline</p>
   <h1>RAG Pipeline Playground</h1>
@@ -88,7 +88,9 @@
     <li><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/hybrid_search.py" rel="noopener"><code>hybrid_search.py</code></a>: BM25 + vector + fusion</li>
     <li><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/generation.py" rel="noopener"><code>generation.py</code></a>: prompt and answer</li>
     <li><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/evaluation.py" rel="noopener"><code>evaluation.py</code></a>: the retrieval and generation checks</li></ul></div>
-  <div><h2>See the 3D stages</h2><ul><li><a href="../../visualize/chunking/">Chunking, Visualized in 3D</a></li><li><a href="../../visualize/embedding-and-storage/">Embeddings and Vector Storage, Visualized in 3D</a></li><li><a href="../../visualize/retrieval/">Hybrid Retrieval, Visualized in 3D</a></li></ul></div>
+  <div><h2>Keep going</h2><ul>
+    <li><a href="../../visualize/">How RAG works, step by step (the guided story)</a></li>
+    <li><a href="../../learn/">The course: 12 modules</a></li></ul></div>
 </section>
 
 </main>
@@ -100,5 +102,6 @@
 <script type="importmap">{"imports": {"three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <script src="../../assets/viz/data.js"></script>
 <script type="module" src="../../assets/viz/playground.js"></script>
+
 </body>
 </html>

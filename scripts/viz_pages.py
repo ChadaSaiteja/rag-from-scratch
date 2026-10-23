@@ -1,5 +1,5 @@
-"""The /visualize/ section: page content (steps double as captions and as indexable
-text) plus the HTML shell around each 3D scene. build_site.py calls render()."""
+"""The /visualize/ section: the scroll-driven "How RAG works" story (the section's
+front page) and the hands-on playground. build_site.py calls render()."""
 import html
 import json
 import shutil
@@ -9,81 +9,251 @@ from viz_data import build as build_data
 
 THREE_VERSION = "0.160.0"
 ASSETS_SRC = Path(__file__).resolve().parent / "site_assets" / "viz"
+STORY_SCRIPTS = ("story.js",)
+PLAYGROUND_SCRIPTS = ("core.js", "space-common.js", "playground.js")
 
-NOTE_LINKS = {  # note stem -> visualization slug, for "See it in 3D" callouts
-    "01_foundations_transformers": "playground",
-    "04_chunking_strategies": "chunking",
-    "02_embeddings_and_vectors": "embedding-and-storage",
-    "05_vector_databases": "embedding-and-storage",
-    "06_retrieval_mechanics": "retrieval",
-}
-
-PAGES = [
-    {
-        "slug": "chunking", "scene": "chunking", "stage": "Stage 1 · Chunking",
-        "title": "Chunking, Visualized in 3D",
-        "seo_title": "RAG Chunking Visualized: How Text Is Split, Step by Step",
-        "description": "Watch a real document split into chunks in 3D: paragraph breaks, 1,000-character cuts, overlap and metadata, using the same splitter settings as the pipeline.",
-        "lede": "Watch one of the course lessons go through the exact splitter this repo uses: <code>RecursiveCharacterTextSplitter</code> with 1,000-character chunks and 200 characters of overlap.",
-        "badge": "Real data: the lesson text and every split point come from running the pipeline's splitter at build time.",
-        "picker": "lesson",
-        "code": [("src/pipeline/ingest.py", "chunk() splits each document and copies its metadata to every chunk")],
-        "learn": [("learn/04-chunking-strategies/", "Module 04 · Chunking Strategies")],
-        "steps": [
-            ("One document", "A lesson file loaded from <code>data/raw/</code>. Too long to embed or retrieve as one unit, so it has to be split."),
-            ("Look for natural breaks", "The splitter tries separators in order: blank lines (paragraphs) first, then single newlines, then spaces. Grey lines mark the paragraph breaks it prefers to cut at."),
-            ("Cut at about 1,000 characters", "Scanning down the text, it closes a chunk at the last good break before 1,000 characters. The cyan lines are the real cut points for this lesson."),
-            ("Chunks separate", "Each piece becomes its own chunk. Hover a chunk to see its exact size and where it sits in the original text."),
-            ("Overlap carries context", "The amber bands are text repeated between neighbouring chunks, so a sentence near a cut is still whole in at least one chunk. The default overlap is up to 200 characters."),
-            ("Characters are not tokens", "<code>chunk_size</code> counts characters, not tokens. In English, 1,000 characters is roughly 250 tokens, which is what models and costs actually measure."),
-            ("Stamped with metadata", "Every chunk carries its source <code>filename</code>. Without it, the final answer couldn't cite where a fact came from. Next: turning each chunk into numbers."),
-        ],
-    },
-    {
-        "slug": "embedding-and-storage", "scene": "space", "stage": "Stage 2 · Embedding & storage",
-        "title": "Embeddings and Vector Storage, Visualized in 3D",
-        "seo_title": "Embeddings & Vector Databases Visualized in 3D | How RAG Stores Data",
-        "description": "See text chunks become vectors and points in 3D space, cluster by topic, link to their nearest neighbours, and get stored in a vector database with metadata.",
-        "lede": "Every chunk becomes a list of numbers, and those numbers become a position. Similar chunks land close together, and the index links neighbours so search doesn't have to check everything.",
-        "badge": "Approximation: positions are TF-IDF keyword vectors reduced to 3D with PCA, computed offline. Real Gemini embeddings group chunks by meaning rather than shared words, so their layout would differ.",
-        "picker": None,
-        "code": [("src/pipeline/ingest.py", "embeds every chunk and writes it to Chroma with its metadata"),
-                 ("src/pipeline/vector_retrieval.py", "reopens the store and searches it")],
-        "learn": [("learn/02-embeddings-and-vectors/", "Module 02 · Embeddings & Vectors"),
-                  ("learn/05-vector-databases/", "Module 05 · Vector Databases")],
-        "steps": [
-            ("Chunks of text", "All 21 chunks from the 10 lessons, coloured by source lesson. Hover any card to read it."),
-            ("Text becomes numbers", "Each chunk is turned into a long vector of numbers. The bars show each chunk's strongest dimensions; a real embedding model like <code>gemini-embedding-001</code> outputs thousands."),
-            ("Numbers become a position", "Reduced to three dimensions, each vector becomes a point in space. Drag to orbit and scroll to zoom."),
-            ("Similar topics land close together", "Chunks about related ideas sit near each other. This is what lets a question find relevant text even when the wording differs."),
-            ("Nearest neighbours", "For one chunk, these are its three most similar chunks by cosine similarity: the same measure used to rank search results."),
-            ("The index: links between neighbours", "Vector databases connect each point to its neighbours. A search hops along these links toward the target (the yellow path) instead of comparing against every stored vector. That's the idea behind HNSW."),
-            ("Stored with metadata", "Each point is saved with its text and filename in a Chroma collection on disk. Next: asking a question."),
-        ],
-    },
-    {
-        "slug": "retrieval", "scene": "retrieval", "stage": "Stage 3 · Retrieval",
-        "title": "Hybrid Retrieval, Visualized in 3D",
-        "seo_title": "Hybrid Search Visualized: Vector + BM25 + Reciprocal Rank Fusion",
-        "description": "Watch a question become a point, find its nearest chunks by vector search and keyword (BM25) search, and merge both rankings with Reciprocal Rank Fusion.",
-        "lede": "Pick one of the pipeline's evaluation questions and watch hybrid search work: two retrievers each pick their top 3, and Reciprocal Rank Fusion merges them into one ranked list.",
-        "badge": "Real rankings from the real chunks, using BM25 and weighted Reciprocal Rank Fusion (50/50, c=60) as in the pipeline. The vector side uses the same TF-IDF stand-in as the previous page, and a single query: the real pipeline also asks Gemini for 3 rephrasings.",
-        "picker": "query",
-        "code": [("src/pipeline/hybrid_search.py", "BM25Retriever + vector retriever fused by EnsembleRetriever"),
-                  ("src/pipeline/evaluation.py", "the five questions and their expected source files")],
-        "learn": [("learn/06-retrieval-mechanics/", "Module 06 · Retrieval Mechanics"),
-                  ("learn/09-rag-evaluation/", "Module 09 · RAG Evaluation")],
-        "steps": [
-            ("The stored space", "All 21 stored chunks, waiting. Choose a question above to change the search."),
-            ("The question becomes a point", "The question is embedded with the same model as the chunks, so it lands in the same space."),
-            ("Vector search", "The three chunks most similar to the question by cosine similarity. Good at matching meaning."),
-            ("Keyword search (BM25)", "BM25 scores exact shared words, weighting rare words more. Good at names, codes and precise terms that vectors can blur."),
-            ("Reciprocal Rank Fusion", "Each retriever's ranking is converted to a score of 0.5/(60 + rank) and the scores are added. Chunks both retrievers like rise to the top, and the two scoring scales never need comparing."),
-            ("Handed to the prompt", "The fused chunks go into the prompt, each tagged with its source filename so the answer can cite it. The panel shows whether the expected file was retrieved."),
-        ],
-    },
+# Example output recorded in the repository README (python generation.py / evaluation.py).
+README_ANSWER = ("Chunk size controls how large each split of a document is, while overlap controls how much "
+                 "text is repeated between consecutive chunks so context isn't lost at the boundary "
+                 "(Source: 03_chunking.txt).")
+README_EVAL = [
+    ("What is the difference between chunk size and overlap?", True, True),
+    ("How does a vector database find similar embeddings?", True, True),
+    ("What does the retriever stage do in a RAG pipeline?", True, True),
+    ("How should a prompt be constructed for the generation stage?", True, True),
+    ("Why should retrieval and generation quality be evaluated separately?", True, True),
 ]
 
+# note stem -> story step, for the "See it step by step" callouts on module pages
+NOTE_LINKS = {
+    "01_foundations_transformers": "embedq",
+    "02_embeddings_and_vectors": "embed",
+    "03_prompting_techniques": "prompt",
+    "04_chunking_strategies": "chunk",
+    "05_vector_databases": "store",
+    "06_retrieval_mechanics": "vsearch",
+    "09_rag_evaluation": "evaluate",
+    "10_document_ingestion_and_parsing": "load",
+}
+
+# (key, lane, title, what happens, why it matters, in this repo)
+STORY = [
+    ("overview", "", "RAG has two halves",
+     "<b>Indexing</b> runs once: documents are prepared and stored. <b>Answering</b> runs for every question: find the right pieces, hand them to the model, check the result.",
+     "Keeping the two apart is what makes RAG cheap to update (add a document, re-index only that) and easy to debug (which half failed?).",
+     ""),
+    ("documents", "index", "Start with documents",
+     "This pipeline's knowledge base is 10 short lesson files about RAG itself, in <code>data/raw/</code>.",
+     "Everything the system will ever answer comes from here. If a fact isn't in these files, the right answer is “I don't know”.",
+     "data/raw/*.txt · 10 files"),
+    ("load", "index", "Load and tag each file",
+     "Each file is read into memory and tagged with metadata: its <code>filename</code>. Nothing else changes yet.",
+     "The tag travels with every piece of the document from here on. It is what lets the final answer say <em>which file</em> a fact came from.",
+     "ingest.py · ingest()"),
+    ("chunk", "index", "Cut into chunks",
+     "Each document is split into pieces of about 1,000 characters, cutting at paragraph breaks where possible. 200 characters are repeated between neighbours (amber) so no sentence is lost at a cut.",
+     "A model can only read so much at once, and search works best on focused pieces. Chunk size is the single biggest lever on answer quality.",
+     "ingest.py · RecursiveCharacterTextSplitter · 10 files → 21 chunks"),
+    ("embed", "index", "Turn each chunk into numbers",
+     "An embedding model converts each chunk into a long list of numbers (a vector). Chunks with similar meaning get similar numbers.",
+     "Numbers can be compared mathematically; words can't. This is what lets a question find a chunk that says the same thing in different words.",
+     "ingest.py · gemini-embedding-001 (shown here: a keyword stand-in)"),
+    ("store", "index", "Store the vectors",
+     "Every vector is saved in a vector database together with its text and its filename tag. Nearby vectors are chunks about similar things.",
+     "Indexing is done. From now on the documents are never read again; every question is answered from this store.",
+     "ingest.py · Chroma, collection gemini_collection · 21 vectors"),
+    ("question", "answer", "A question arrives",
+     "A user asks something. The system has no idea yet which of the 21 chunks matter.",
+     "Everything that follows happens live, in well under a second for a store this size.",
+     "generation.py · input()"),
+    ("embedq", "answer", "Embed the question the same way",
+     "The question goes through the <em>same</em> embedding model and lands in the same space as the chunks (the white dot).",
+     "Same model, same space: that's the rule. Embed documents and questions differently and nothing is comparable.",
+     "hybrid_search.py · GoogleGenerativeAIEmbeddings"),
+    ("vsearch", "answer", "Vector search: find the nearest meanings",
+     "The 3 chunks closest to the question are picked by cosine similarity (how aligned two vectors are).",
+     "This catches chunks that answer the question in different words, which keyword search would miss.",
+     "hybrid_search.py · vector_store.as_retriever(k=3) + MultiQueryRetriever"),
+    ("bm25", "answer", "Keyword search: find exact words",
+     "Independently, BM25 ranks chunks by the exact words they share with the question, weighting rare words more. Its top 3 get amber rings.",
+     "Vectors blur exact terms like error codes, names and IDs. Keywords catch them. Each method covers the other's blind spot.",
+     "hybrid_search.py · BM25Retriever(k=3)"),
+    ("fuse", "answer", "Merge the two rankings",
+     "Reciprocal Rank Fusion combines both lists by rank, not by score: each chunk scores 0.5 ÷ (60 + rank) per list, summed.",
+     "The two methods score on different scales, so ranks are the only fair thing to add. Chunks both methods like rise to the top.",
+     "hybrid_search.py · EnsembleRetriever(weights=[0.5, 0.5])"),
+    ("prompt", "answer", "Build the prompt",
+     "The winning chunks are pasted under a fixed instruction, each tagged <code>[Source: filename]</code>, followed by the question. This exact text is sent to the model.",
+     "The model is told to use only this context, cite the file after every claim, and say “I don't know” otherwise. That instruction is the main defence against made-up answers.",
+     "generation.py · format_context() + call_google_api()"),
+    ("generate", "answer", "Generate a cited answer",
+     "The language model (Gemini) writes the answer from the context, citing the file each claim came from.",
+     "Because the citation points at a real chunk, anyone can check the answer against the source.",
+     "generation.py · gemini-3.5-flash"),
+    ("evaluate", "answer", "Check both halves separately",
+     "For 5 test questions the pipeline checks two things: did retrieval find the expected file, and does the answer contain the expected idea?",
+     "If an answer is wrong, this tells you which half to fix: the search or the writing. Judging only the final answer can't.",
+     "evaluation.py · retrieval 5/5 · generation 5/5 (as recorded in the README)"),
+    ("done", "", "That's the whole pipeline",
+     "Documents in, cited answers out, with a check at the end. Every number you saw came from this repository's real corpus and settings.",
+     "Now try it with your own question, or read the code that does each step.",
+     ""),
+]
+STEP_INDEX = {key: i for i, (key, *_) in enumerate(STORY)}
+
+
+def story_overlays(data, rel, repo_url):
+    q = data["queries"][0]
+    chunks = data["chunks"]
+    lessons = data["lessons"]
+    short = lambda c: f'{c["filename"].replace(".txt", "")} · chunk {c["index"] + 1}'
+    rank_of = lambda lst, cid: next((i + 1 for i, (c, _) in enumerate(lst) if c == cid), "–")
+    focus = next(l for l in lessons if l["filename"].startswith("03_"))
+    fchunks = [chunks[i] for i in focus["chunkIds"]]
+
+    overview = """
+<div class="st-map" data-panel="overview">
+  <div class="st-lane"><span class="st-lane-tag">Indexing · once</span>
+    <div class="st-nodes"><span>Documents</span><i>→</i><span>Load &amp; tag</span><i>→</i><span>Chunk</span><i>→</i><span>Embed</span><i>→</i><span>Store</span></div></div>
+  <div class="st-lane answer"><span class="st-lane-tag">Answering · every question</span>
+    <div class="st-nodes"><span>Question</span><i>→</i><span>Embed</span><i>→</i><span>Search ×2</span><i>→</i><span>Merge</span><i>→</i><span>Prompt</span><i>→</i><span>Answer</span><i>→</i><span>Check</span></div></div>
+</div>"""
+
+    chunk_stats = f"""
+<div class="st-note st-note-br" data-panel="chunk">
+  <b>{html.escape(focus["filename"])}</b> → {len(fchunks)} chunks
+  {"".join(f'<span>chunk {c["index"] + 1}: {c["chars"]} chars ≈ {c["tokens"]} tokens</span>' for c in fchunks)}
+  <small>All 10 files → {len(chunks)} chunks · chunk_size={data["settings"]["chunkSize"]} · overlap={data["settings"]["chunkOverlap"]}</small>
+</div>"""
+
+    embed_note = f"""
+<div class="st-note st-note-br" data-panel="embed">
+  <b>Each chunk → one vector</b>
+  <span>Bars: a chunk's strongest dimensions</span>
+  <small>Real embeddings have thousands of dimensions; this page uses a {data["settings"]["vocab"]}-word keyword stand-in so it runs with no API key.</small>
+</div>"""
+
+    legend = f"""
+<div class="st-note st-note-bl" data-panel="store embedq">
+  <b>Colour = source file</b>
+  {"".join(f'<span><i style="background:{l["color"]}"></i>{html.escape(l["filename"].replace(".txt", ""))}</span>' for l in lessons)}
+</div>"""
+
+    question = f"""
+<div class="st-qcard" data-panel="question embedq vsearch bm25 fuse">
+  <small>Question</small>
+  <p>{html.escape(q["question"])}</p>
+  <div class="st-words" data-panel-sub="bm25">{"".join(f"<span>{html.escape(t)}</span>" for t in q["terms"])}</div>
+</div>"""
+
+    vlist = "".join(
+        f'<li><i style="background:{lessons[chunks[cid]["lesson"]]["color"]}"></i>{html.escape(short(chunks[cid]))}<code>cos {s:.2f}</code></li>'
+        for cid, s in q["vector"])
+    blist = "".join(
+        f'<li><i style="background:{lessons[chunks[cid]["lesson"]]["color"]}"></i>{html.escape(short(chunks[cid]))}<code>{s:.1f}</code></li>'
+        for cid, s in q["bm25"])
+    vpanel = f'<div class="st-list" data-panel="vsearch"><b>Vector search · top 3</b><ol>{vlist}</ol></div>'
+    bpanel = f'<div class="st-list amber" data-panel="bm25"><b>BM25 keyword search · top 3</b><ol>{blist}</ol></div>'
+
+    fusion_rows = "".join(
+        f'<tr><td><i style="background:{lessons[chunks[cid]["lesson"]]["color"]}"></i>{html.escape(short(chunks[cid]))}</td>'
+        f'<td>{rank_of(q["bm25"], cid)}</td><td>{rank_of(q["vector"], cid)}</td><td><code>{s:.4f}</code></td></tr>'
+        for cid, s in q["fused"])
+    fusion = f"""
+<div class="st-table" data-panel="fuse">
+  <b>Reciprocal Rank Fusion</b>
+  <table><tr><th>chunk</th><th>BM25 rank</th><th>vector rank</th><th>score</th></tr>{fusion_rows}</table>
+  <small>score = 0.5/(60 + BM25 rank) + 0.5/(60 + vector rank)</small>
+</div>"""
+
+    ctx_cards = "".join(
+        f'<div class="st-ctx" style="border-color:{lessons[chunks[cid]["lesson"]]["color"]}"><mark>[Source: {html.escape(chunks[cid]["filename"])}]</mark>'
+        f'<span>{html.escape(chunks[cid]["text"][:150])}…</span></div>'
+        for cid, _ in q["fused"])
+    prompt = f"""
+<div class="st-prompt" data-panel="prompt">
+  <pre class="st-instr">{html.escape(data["promptHead"].strip())}</pre>
+  <div class="st-ctxs"><small>Context:</small>{ctx_cards}</div>
+  <pre class="st-q">Question: {html.escape(q["question"])}</pre>
+</div>"""
+
+    answer = f"""
+<div class="st-chat" data-panel="generate">
+  <div class="st-msg user"><small>Question</small>{html.escape(q["question"])}</div>
+  <div class="st-msg bot"><small>Gemini, answering only from the context</small>
+    <p data-answer="{html.escape(README_ANSWER.replace("(Source: 03_chunking.txt)", "<mark>(Source: 03_chunking.txt)</mark>"))}"></p>
+    <em>Answer recorded in the README when the pipeline was run.</em></div>
+</div>"""
+
+    rows = "".join(
+        f'<tr><td>{html.escape(qq)}</td><td class="{ "ok" if r else "bad" }">{"✓" if r else "✗"}</td><td class="{ "ok" if g else "bad" }">{"✓" if g else "✗"}</td></tr>'
+        for qq, r, g in README_EVAL)
+    score = f"""
+<div class="st-score" data-panel="evaluate">
+  <table><tr><th>Test question</th><th>Retrieval<br><small>expected file found?</small></th><th>Generation<br><small>expected idea in answer?</small></th></tr>{rows}</table>
+  <div class="st-totals"><span>Retrieval <b>{sum(r for _, r, _ in README_EVAL)}/{len(README_EVAL)}</b></span><span>Generation <b>{sum(g for _, _, g in README_EVAL)}/{len(README_EVAL)}</b></span></div>
+</div>"""
+
+    done = f"""
+<div class="st-done" data-panel="done">
+  <h3>Documents in. Cited answers out.</h3>
+  <div class="st-cta">
+    <a class="btn primary" href="{rel}visualize/playground/">Try it with your own question →</a>
+    <a class="btn" href="{rel}implementation/">Read the code, stage by stage</a>
+    <a class="btn" href="{rel}learn/">Start the course</a>
+  </div>
+</div>"""
+    return overview + chunk_stats + embed_note + legend + question + vpanel + bpanel + fusion + prompt + answer + score + done
+
+
+def story_html(data, rel, repo_url):
+    lane_name = {"index": "Indexing · once", "answer": "Answering · every question", "": ""}
+    steps = []
+    for i, (key, lane, title, what, why, where) in enumerate(STORY):
+        repo = f'<p class="story-where"><span>In this repo</span>{html.escape(where)}</p>' if where else ""
+        steps.append(
+            f'<section class="story-step" id="{key}" data-step="{i}">'
+            f'{f"<p class=eyebrow>{lane_name[lane]}</p>" if lane else ""}'
+            f'<h2><span class="story-num">{i + 1}</span>{html.escape(title)}</h2>'
+            f'<p class="story-what">{what}</p><p class="story-why"><span>Why it matters</span>{why}</p>{repo}</section>')
+    rail = "".join(
+        f'<button type="button" class="{lane or "plain"}" title="{html.escape(title)}" aria-label="Step {i + 1}: {html.escape(title)}"></button>'
+        for i, (key, lane, title, *_) in enumerate(STORY))
+    s = data["settings"]
+    return f"""
+<header class="viz-head">
+  <p class="eyebrow">Step by step · {len(STORY)} steps</p>
+  <h1>How RAG works, from documents to a cited answer</h1>
+  <p class="lede">Scroll to follow this repository's real pipeline: {len(data["lessons"])} lesson files become {len(data["chunks"])} chunks, the chunks become vectors,
+  and a question finds its evidence through two searches, a merge, a prompt and a check. Every number comes from the real code and corpus.</p>
+</header>
+<div class="story">
+  <div class="story-stage-wrap">
+    <div class="story-stage" aria-label="Animated stage">
+      <svg class="story-svg" viewBox="0 0 1000 620" role="img" aria-hidden="true"></svg>
+      <div class="story-overlay">{story_overlays(data, rel, repo_url)}</div>
+      <div class="story-bar">
+        <div class="story-rail" aria-label="Steps">{rail}</div>
+        <div class="story-nav">
+          <button type="button" data-nav="prev" aria-label="Previous step">←</button>
+          <button type="button" data-nav="play" class="story-play">▶ Play</button>
+          <button type="button" data-nav="next" aria-label="Next step">→</button>
+          <span class="story-counter">1 / {len(STORY)}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="story-steps">
+{chr(10).join(steps)}
+  </div>
+</div>
+<p class="viz-badge viz-badge-wide">What is real: the files, the 21 chunks and split points, the question, the BM25 scores, the rank fusion, the prompt text and the
+recorded answer and scores. What is a stand-in: vector positions use TF-IDF keyword vectors reduced to 3D (computed offline, no API key) instead of Gemini embeddings,
+so the layout of the point cloud would differ with real embeddings.</p>
+"""
+
+
+# ------------------------------------------------------------------ playground (unchanged)
 
 PLAYGROUND = {
     "slug": "playground", "stage": "Playground · The whole pipeline",
@@ -188,109 +358,35 @@ def playground_html(data, rel, repo_url):
     <li><a href="{repo_url}/blob/master/src/pipeline/hybrid_search.py" rel="noopener"><code>hybrid_search.py</code></a>: BM25 + vector + fusion</li>
     <li><a href="{repo_url}/blob/master/src/pipeline/generation.py" rel="noopener"><code>generation.py</code></a>: prompt and answer</li>
     <li><a href="{repo_url}/blob/master/src/pipeline/evaluation.py" rel="noopener"><code>evaluation.py</code></a>: the retrieval and generation checks</li></ul></div>
-  <div><h2>See the 3D stages</h2><ul>{"".join(f'<li><a href="{rel}visualize/{x["slug"]}/">{html.escape(x["title"])}</a></li>' for x in PAGES)}</ul></div>
+  <div><h2>Keep going</h2><ul>
+    <li><a href="{rel}visualize/">How RAG works, step by step (the guided story)</a></li>
+    <li><a href="{rel}learn/">The course: 12 modules</a></li></ul></div>
 </section>
 """
 
 
-def page_html(p, data, rel, repo_url, idx):
-    picker = ""
-    if p["picker"] == "lesson":
-        options = "".join(
-            f'<option value="{l["id"]}"{" selected" if l["filename"].startswith("03_") else ""}>{html.escape(l["filename"])}</option>'
-            for l in data["lessons"])
-        picker = f'<label class="viz-pick">Lesson <select class="viz-picker">{options}</select></label>'
-    elif p["picker"] == "query":
-        options = "".join(f'<option value="{i}">{html.escape(q["question"])}</option>' for i, q in enumerate(data["queries"]))
-        picker = f'<label class="viz-pick">Question <select class="viz-picker">{options}</select></label>'
+# ------------------------------------------------------------------ shared
 
-    steps = "\n".join(
-        f'<li data-step="{i}"><h3>{html.escape(t)}</h3><p>{d}</p></li>' for i, (t, d) in enumerate(p["steps"]))
-    code = "".join(f'<li><a href="{repo_url}/blob/master/{path}" rel="noopener"><code>{path}</code></a>: {html.escape(why)}</li>'
-                   for path, why in p["code"])
-    learn = "".join(f'<li><a href="{rel}{href}">{html.escape(label)}</a></li>' for href, label in p["learn"])
-    nxt = PAGES[idx + 1] if idx + 1 < len(PAGES) else None
-    prev = PAGES[idx - 1] if idx > 0 else None
-    pager = '<nav class="pager" aria-label="Visualization navigation">'
-    pager += (f'<a class="pager-link" href="{rel}visualize/{prev["slug"]}/" rel="prev"><small>Previous stage</small>{html.escape(prev["title"])}</a>'
-              if prev else f'<a class="pager-link" href="{rel}visualize/"><small>Back to</small>All visualizations</a>')
-    pager += (f'<a class="pager-link next" href="{rel}visualize/{nxt["slug"]}/" rel="next"><small>Next stage</small>{html.escape(nxt["title"])}</a>'
-              if nxt else f'<a class="pager-link next" href="{rel}implementation/"><small>Next</small>See the full pipeline code</a>')
-    pager += "</nav>"
-
-    return f"""
-<header class="viz-head">
-  <p class="eyebrow">{html.escape(p["stage"])}</p>
-  <h1>{html.escape(p["title"])}</h1>
-  <p class="lede">{p["lede"]}</p>
-</header>
-<div class="viz" data-scene="{p["scene"]}" tabindex="0" aria-label="Interactive 3D visualization. Use the left and right arrow keys to change step.">
-  <div class="viz-toolbar">{picker}<p class="viz-badge">{html.escape(p["badge"])}</p></div>
-  <div class="viz-stage">
-    <div class="viz-hud" aria-live="polite"></div>
-    <div class="viz-caption" aria-live="polite"></div>
-    <div class="viz-tooltip" hidden></div>
-    <p class="viz-fallback" hidden>3D needs WebGL, which this browser doesn't support. The steps below describe each stage of the animation.</p>
-    <span class="viz-hint">Drag to orbit · scroll to zoom · hover to read</span>
-  </div>
-  <div class="viz-controls">
-    <button type="button" data-action="prev" aria-label="Previous step">←</button>
-    <button type="button" data-action="play" class="viz-play">▶ Play</button>
-    <button type="button" data-action="next" aria-label="Next step">→</button>
-    <div class="viz-dots"></div>
-  </div>
-  <ol class="viz-steps">
-{steps}
-  </ol>
-</div>
-<section class="viz-links">
-  <div><h2>Where this happens in the code</h2><ul>{code}</ul></div>
-  <div><h2>Learn the concepts</h2><ul>{learn}</ul></div>
-</section>
-{pager}
-"""
-
-
-def hub_html(data, rel):
-    cards = "".join(
-        f'<a class="viz-card" href="{rel}visualize/{p["slug"]}/"><span class="eyebrow">{html.escape(p["stage"])}</span>'
-        f'<h3>{html.escape(p["title"])}</h3><p>{html.escape(p["description"])}</p><span class="viz-card-go">Open the 3D view →</span></a>'
-        for p in PAGES)
-    pg = PLAYGROUND
-    cards = (f'<a class="viz-card viz-card-feature" href="{rel}visualize/{pg["slug"]}/"><span class="eyebrow">{html.escape(pg["stage"])}</span>'
-             f'<h3>{html.escape(pg["title"])}</h3><p>{html.escape(pg["description"])}</p><span class="viz-card-go">Try it →</span></a>') + cards
-    s = data["settings"]
-    return f"""
-<header class="viz-head">
-  <p class="eyebrow">Interactive · 3D</p>
-  <h1>RAG, Visualized</h1>
-  <p class="lede">See what actually happens to the data at each stage of a RAG pipeline: how a document is cut into chunks, how chunks become points in space,
-  how they're stored, and how a question finds the right ones. Every scene runs on this repo's real corpus: {len(data["lessons"])} lessons,
-  {len(data["chunks"])} chunks, {s["chunkSize"]:,}-character chunks with {s["chunkOverlap"]} overlap, top {s["k"]} per retriever.</p>
-</header>
-<div class="viz-grid">{cards}</div>
-<p class="viz-badge viz-badge-wide">Positions in 3D use TF-IDF keyword vectors reduced with PCA, computed offline so no API key is needed. Chunks, split points, BM25 scores
-and rank fusion are the real computations. Coming next: loading &amp; cleaning, generation, and evaluation.</p>
-"""
-
-
-def scripts_html(rel, scene):
-    importmap = {"imports": {
-        "three": f"https://cdn.jsdelivr.net/npm/three@{THREE_VERSION}/build/three.module.js",
-        "three/addons/": f"https://cdn.jsdelivr.net/npm/three@{THREE_VERSION}/examples/jsm/",
-    }}
-    return (f'<script type="importmap">{json.dumps(importmap)}</script>\n'
-            f'<script src="{rel}assets/viz/data.js"></script>\n'
-            f'<script type="module" src="{rel}assets/viz/{scene}.js"></script>')
+def scripts_html(rel, scripts, importmap=False):
+    out = ""
+    if importmap:
+        im = {"imports": {
+            "three": f"https://cdn.jsdelivr.net/npm/three@{THREE_VERSION}/build/three.module.js",
+            "three/addons/": f"https://cdn.jsdelivr.net/npm/three@{THREE_VERSION}/examples/jsm/",
+        }}
+        out += f'<script type="importmap">{json.dumps(im)}</script>\n'
+    out += f'<script src="{rel}assets/viz/data.js"></script>\n'
+    out += "".join(f'<script type="module" src="{rel}assets/viz/{s}"></script>\n' for s in scripts)
+    return out
 
 
 def callout(note_stem, rel):
-    slug = NOTE_LINKS.get(note_stem)
-    if not slug:
+    key = NOTE_LINKS.get(note_stem)
+    if not key:
         return ""
-    p = next(x for x in PAGES + [PLAYGROUND] if x["slug"] == slug)
-    return (f'<a class="viz-callout" href="{rel}visualize/{slug}/"><span>▶ See it in 3D</span>'
-            f'<strong>{html.escape(p["title"])}</strong></a>')
+    title = next(t for k, _, t, *_ in STORY if k == key)
+    return (f'<a class="viz-callout" href="{rel}visualize/#{key}"><span>▶ See it step by step</span>'
+            f'<strong>{html.escape(title)}</strong></a>')
 
 
 def render(*, page, breadcrumbs_html, breadcrumb_ld, out_dir: Path, lessons_dir: Path, site_url, site_name, repo_url, today):
@@ -300,28 +396,31 @@ def render(*, page, breadcrumbs_html, breadcrumb_ld, out_dir: Path, lessons_dir:
     assets.mkdir(parents=True, exist_ok=True)
     (assets / "data.js").write_text("window.RAG_VIZ = " + json.dumps(data, ensure_ascii=False, separators=(",", ":")) + ";\n",
                                     encoding="utf-8", newline="\n")
-    for src in ASSETS_SRC.glob("*.js"):
-        shutil.copyfile(src, assets / src.name)
+    for name in STORY_SCRIPTS + PLAYGROUND_SCRIPTS:
+        shutil.copyfile(ASSETS_SRC / name, assets / name)
 
     entries = []
     rel = "../"
-    crumbs = [("Home", ""), ("Visualize", "visualize/")]
-    hub_ld = [{"@context": "https://schema.org", "@type": "CollectionPage", "name": "RAG, Visualized",
-               "description": "Interactive 3D visualizations of each stage of a RAG pipeline.", "url": site_url + "visualize/",
-               "hasPart": [{"@type": "LearningResource", "name": p["title"], "url": f"{site_url}visualize/{p['slug']}/"} for p in PAGES]},
-              breadcrumb_ld(crumbs)]
+    crumbs = [("Home", ""), ("How RAG works", "visualize/")]
+    story_ld = [{"@context": "https://schema.org", "@type": "LearningResource", "name": "How RAG works, step by step",
+                 "description": "A scroll-driven visual walkthrough of a real RAG pipeline: documents, chunks, embeddings, vector store, hybrid search, fusion, prompt, cited answer and evaluation.",
+                 "url": site_url + "visualize/", "learningResourceType": "Interactive visualization", "educationalLevel": "Beginner",
+                 "inLanguage": "en", "isPartOf": {"@type": "Course", "name": site_name, "url": site_url},
+                 "hasPart": [{"@type": "LearningResource", "name": "RAG Pipeline Playground", "url": site_url + "visualize/playground/"}]},
+                breadcrumb_ld(crumbs)]
     out = out_dir / "visualize" / "index.html"
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(page(path="visualize/", title=f"RAG Visualized in 3D: See Each Pipeline Stage | {site_name}",
-                        description="Interactive 3D animations of a RAG pipeline on real data: chunking, embeddings, vector storage and hybrid retrieval, step by step.",
-                        body=breadcrumbs_html(crumbs, rel) + hub_html(data, rel), rel=rel, ld=hub_ld, active="visualize/", wide=True),
+    out.write_text(page(path="visualize/", title=f"How RAG Works, Step by Step: Visual Walkthrough of a Real Pipeline | {site_name}",
+                        description="Scroll through a real RAG pipeline: documents become chunks and vectors, a question finds its evidence by vector and keyword search, and the model writes a cited answer.",
+                        body=breadcrumbs_html(crumbs, rel) + story_html(data, rel, repo_url), rel=rel, ld=story_ld, active="visualize/",
+                        wide=True, scripts=scripts_html(rel, STORY_SCRIPTS)),
                    encoding="utf-8", newline="\n")
     entries.append(("visualize/", today, "0.9"))
 
     rel = "../../"
     pg = PLAYGROUND
     path = f"visualize/{pg['slug']}/"
-    crumbs = [("Home", ""), ("Visualize", "visualize/"), (pg["title"], path)]
+    crumbs = [("Home", ""), ("How RAG works", "visualize/"), (pg["title"], path)]
     ld = [{"@context": "https://schema.org", "@type": "LearningResource", "name": pg["title"], "description": pg["description"],
            "url": site_url + path, "learningResourceType": "Interactive simulation", "educationalLevel": "Beginner",
            "inLanguage": "en", "isPartOf": {"@type": "Course", "name": site_name, "url": site_url}},
@@ -330,22 +429,7 @@ def render(*, page, breadcrumbs_html, breadcrumb_ld, out_dir: Path, lessons_dir:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(page(path=path, title=f"{pg['seo_title']} | {site_name}", description=pg["description"],
                         body=breadcrumbs_html(crumbs, rel) + playground_html(data, rel, repo_url), rel=rel, og_type="article",
-                        ld=ld, active="visualize/", wide=True, scripts=scripts_html(rel, "playground")),
+                        ld=ld, active="visualize/", wide=True, scripts=scripts_html(rel, ("playground.js",), importmap=True)),
                    encoding="utf-8", newline="\n")
     entries.append((path, today, "0.8"))
-
-    for i, p in enumerate(PAGES):
-        path = f"visualize/{p['slug']}/"
-        crumbs = [("Home", ""), ("Visualize", "visualize/"), (p["title"], path)]
-        ld = [{"@context": "https://schema.org", "@type": "LearningResource", "name": p["title"], "description": p["description"],
-               "url": site_url + path, "learningResourceType": "Interactive visualization", "educationalLevel": "Beginner",
-               "inLanguage": "en", "isPartOf": {"@type": "Course", "name": site_name, "url": site_url}},
-              breadcrumb_ld(crumbs)]
-        body = breadcrumbs_html(crumbs, rel) + page_html(p, data, rel, repo_url, i)
-        out = out_dir / path / "index.html"
-        out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(page(path=path, title=f"{p['seo_title']} | {site_name}", description=p["description"], body=body, rel=rel,
-                            og_type="article", ld=ld, active="visualize/", wide=True, scripts=scripts_html(rel, p["scene"])),
-                       encoding="utf-8", newline="\n")
-        entries.append((path, today, "0.8"))
     return entries, data

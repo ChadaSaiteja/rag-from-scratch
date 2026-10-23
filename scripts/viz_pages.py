@@ -86,73 +86,105 @@ PAGES = [
 
 
 PLAYGROUND = {
-    "slug": "playground", "stage": "Playground · Try your own sentence",
-    "title": "Sentence to Vector Playground",
-    "seo_title": "Text to Vector Playground: See How a Sentence Becomes Tokens and an Embedding",
-    "description": "Type any sentence and watch it become tokens, vocabulary IDs, a vector of numbers, a point in vector space, and a ranked list of the closest RAG lesson chunks.",
+    "slug": "playground", "stage": "Playground · The whole pipeline",
+    "title": "RAG Pipeline Playground",
+    "seo_title": "RAG Pipeline Playground: From Documents to a Grounded Prompt, Step by Step",
+    "description": "Follow the full RAG pipeline in one page: load, clean, chunk, vectorize and store a document, then type a question and watch tokens, vectors, hybrid search, fusion and the final prompt.",
     "examples": [
-        "How does chunk overlap help retrieval?",
+        "What is the difference between chunk size and overlap?",
         "Which vector database is best for prototyping?",
-        "Why score retrieval and generation separately?",
+        "Why should retrieval and generation quality be evaluated separately?",
         "What is the capital of France?",
     ],
-    "steps": [
-        ("sentence", "Your sentence", "Exactly what a user would type as a question."),
+    "part_a": [
+        ("load", "Load the document", "A raw lesson file is read from <code>data/raw/</code>. Pick any of the 10 lessons above."),
+        ("clean", "Clean the text", "Normalise whitespace and strip invisible characters so chunks and vectors aren't polluted by noise. "
+         "This repo's <code>ingest.py</code> skips this step because the lessons are already clean."),
+        ("chunk", "Split into chunks", "The text is cut into pieces of at most 1,000 characters. Shaded colours are chunks; amber text appears in two chunks (overlap). Hover to see which."),
+        ("vectorize", "Turn each chunk into a vector", "Every chunk becomes a list of numbers, one per vocabulary word, weighted so rare, distinctive words count most (TF-IDF here; a real embedding model in production)."),
+        ("store", "Store with metadata", "Each chunk is saved with an id, its text, its vector and its filename. The filename is what makes citations possible later."),
+    ],
+    "part_b": [
+        ("sentence", "Your question", "Exactly what a user would type."),
         ("tokens", "Split into tokens",
-         "The text is lowercased and split into pieces. Very common words like <em>how</em> and <em>the</em> carry little meaning, so this representation drops them. "
+         "Lowercased and split into pieces. Very common words like <em>how</em> and <em>the</em> carry little meaning, so this representation drops them. "
          "Real LLM tokenizers go further and split rare words into sub-word pieces such as <code>retriev</code> + <code>al</code>."),
-        ("ids", "Look up token IDs",
-         "Every remaining word is replaced by its position in the vocabulary, a fixed list of known words. Words the vocabulary has never seen can't be represented."),
-        ("vector", "Build the vector",
-         "The sentence becomes one list of numbers, one slot per vocabulary word. Each lit cell is a word from your sentence; brighter means rarer in the corpus, so more distinctive (TF-IDF weighting). "
-         "Real embedding models instead produce a few hundred to a few thousand dense numbers where every slot is used."),
-        ("space", "Place it in space",
-         "The long vector is projected down to 3 dimensions so it can be drawn next to the 21 stored chunks. Drag to orbit, hover a point to read its chunk."),
-        ("nearest", "Find the nearest chunks",
-         "Similarity is the cosine between your vector and each chunk's vector. These top matches are what retrieval would hand to the LLM."),
+        ("ids", "Look up token IDs", "Each word is replaced by its position in the vocabulary. Words the vocabulary has never seen can't be represented."),
+        ("vector", "Build the query vector",
+         "One slot per vocabulary word, the same layout as the chunk vectors in Part A. Brighter cells are rarer, more distinctive words. "
+         "Real embedding models produce a few hundred to a few thousand dense numbers instead."),
+        ("space", "Place it in space", "Projected to 3D next to the 21 stored chunks. Drag to orbit, hover a point to read its chunk."),
+        ("vsearch", "Vector search", "Rank every stored chunk by cosine similarity to the query vector and keep the top 3."),
+        ("bm25", "Keyword search (BM25)", "Independently, rank chunks by exact shared words. This catches names and codes that vectors can blur."),
+        ("fusion", "Merge with Reciprocal Rank Fusion", "Combine both rankings into one list, as LangChain's <code>EnsembleRetriever</code> does in <code>hybrid_search.py</code>."),
+        ("prompt", "Build the prompt", "The fused chunks are tagged with <code>[Source: filename]</code> and placed under the instructions from <code>generation.py</code>. This is the exact text that would be sent to Gemini."),
+        ("ground", "Grounding preview", "No model runs here, so there is no generated answer. These are the context sentences that share the most words with your question: the evidence a grounded answer would cite."),
+        ("check", "Check the result", "Before trusting an answer, check the evidence: is it relevant enough, can every claim be cited, and for test questions, was the expected source retrieved?"),
     ],
 }
 
 
+def _step(i, key, title, text, extra=""):
+    return (f'<li class="pg-step" data-stage="{key}"><div class="pg-step-head"><span class="pg-num">{i}</span>'
+            f'<div><h2>{html.escape(title)}</h2><p>{text}</p></div></div><div class="pg-out">{extra}</div></li>')
+
+
 def playground_html(data, rel, repo_url):
     p = PLAYGROUND
-    examples = "".join(f'<button type="button" class="pg-ex" data-example="{html.escape(e)}">{html.escape(e)}</button>' for e in p["examples"])
-    steps = []
-    for i, (key, title, text) in enumerate(p["steps"], start=1):
+    lesson_opts = "".join(
+        f'<option value="{l["id"]}"{" selected" if l["filename"].startswith("03_") else ""}>{html.escape(l["filename"])}</option>'
+        for l in data["lessons"])
+    part_a = "\n".join(_step(i, *s) for i, s in enumerate(p["part_a"], start=1))
+    part_b = []
+    for i, (key, title, text) in enumerate(p["part_b"], start=len(p["part_a"]) + 1):
         extra = ""
         if key == "vector":
-            extra = '<div class="pg-grid" role="img" aria-label="One cell per vocabulary word; lit cells are words in your sentence"></div><p class="pg-vector-meta pg-meta"></p>'
+            extra = '<div class="pg-grid" role="img" aria-label="One cell per vocabulary word; lit cells are words in your question"></div><p class="pg-vector-meta pg-meta"></p>'
         if key == "space":
             extra = ('<div class="pg-stage viz-stage"><div class="viz-tooltip" hidden></div>'
                      '<p class="viz-fallback" hidden>3D needs WebGL, which this browser does not support. The position is listed below.</p></div>'
                      '<p class="pg-space-meta pg-meta"></p>')
-        steps.append(
-            f'<li class="pg-step" data-stage="{key}"><div class="pg-step-head"><span class="pg-num">{i}</span>'
-            f'<div><h2>{html.escape(title)}</h2><p>{text}</p></div></div><div class="pg-out">{extra}</div></li>')
+        part_b.append(_step(i, key, title, text, extra))
+    examples = "".join(f'<button type="button" class="pg-ex" data-example="{html.escape(e)}">{html.escape(e)}</button>' for e in p["examples"])
     return f"""
 <header class="viz-head">
   <p class="eyebrow">{html.escape(p["stage"])}</p>
   <h1>{html.escape(p["title"])}</h1>
-  <p class="lede">Type a question and follow it through every transformation a RAG system applies before it can search: tokens, IDs, a vector, a position in space, and the closest chunks.</p>
+  <p class="lede">Every step of Retrieval-Augmented Generation on one page. Part A prepares the documents once. Part B runs for every question:
+  from your sentence to the exact prompt an LLM would receive.</p>
 </header>
 <div class="pg">
-  <form class="pg-input" role="search">
-    <label for="pg-text">Your sentence</label>
-    <div class="pg-input-row"><input id="pg-text" class="pg-text" type="text" maxlength="200" autocomplete="off" value="{html.escape(p["examples"][0])}"><button type="submit">Run ▶</button></div>
-    <div class="pg-examples"><span>Try:</span>{examples}</div>
-  </form>
-  <p class="viz-badge">No AI model runs here. This is a keyword representation (TF-IDF over the {data["settings"]["vocab"]}-word vocabulary of this repo's {len(data["chunks"])} chunks),
-  computed in your browser with the same math as the other visualizations. It shows the shape of each step; real embedding models capture meaning, not just shared words.</p>
-  <ol class="pg-flow">
-{chr(10).join(steps)}
-  </ol>
+  <p class="viz-badge">No AI model runs here. Vectors are TF-IDF keyword representations over this repo's {data["settings"]["vocab"]}-word vocabulary,
+  computed in your browser with the same math as the other visualizations. Chunks, BM25, rank fusion and the prompt template are the real ones.</p>
+  <nav class="pg-parts" aria-label="Parts"><a href="#part-a">A · Indexing (once)</a><a href="#part-b">B · Answering (per question)</a></nav>
+
+  <section class="pg-part pg-part-a" id="part-a">
+    <div class="pg-part-head"><span class="pg-part-tag">Part A</span><h2>Indexing: prepare the documents</h2>
+      <label class="viz-pick">Lesson <select class="pg-lesson viz-picker">{lesson_opts}</select></label></div>
+    <ol class="pg-flow">
+{part_a}
+    </ol>
+  </section>
+
+  <section class="pg-part pg-part-b" id="part-b">
+    <div class="pg-part-head"><span class="pg-part-tag">Part B</span><h2>Answering: one question, end to end</h2></div>
+    <form class="pg-input" role="search">
+      <label for="pg-text">Your question</label>
+      <div class="pg-input-row"><input id="pg-text" class="pg-text" type="text" maxlength="200" autocomplete="off" value="{html.escape(p["examples"][0])}"><button type="submit">Run ▶</button></div>
+      <div class="pg-examples"><span>Try:</span>{examples}</div>
+    </form>
+    <ol class="pg-flow">
+{chr(10).join(part_b)}
+    </ol>
+  </section>
 </div>
 <section class="viz-links">
-  <div><h2>Learn the concepts</h2><ul>
-    <li><a href="{rel}learn/01-foundations-transformers/">Module 01 · Tokens and context windows</a></li>
-    <li><a href="{rel}learn/02-embeddings-and-vectors/">Module 02 · Embeddings & Vectors</a></li>
-    <li><a href="{rel}learn/06-retrieval-mechanics/">Module 06 · Retrieval Mechanics</a></li></ul></div>
-  <div><h2>See the other stages</h2><ul>{"".join(f'<li><a href="{rel}visualize/{x["slug"]}/">{html.escape(x["title"])}</a></li>' for x in PAGES)}</ul></div>
+  <div><h2>Where this happens in the code</h2><ul>
+    <li><a href="{repo_url}/blob/master/src/pipeline/ingest.py" rel="noopener"><code>ingest.py</code></a>: load, chunk, embed, store</li>
+    <li><a href="{repo_url}/blob/master/src/pipeline/hybrid_search.py" rel="noopener"><code>hybrid_search.py</code></a>: BM25 + vector + fusion</li>
+    <li><a href="{repo_url}/blob/master/src/pipeline/generation.py" rel="noopener"><code>generation.py</code></a>: prompt and answer</li>
+    <li><a href="{repo_url}/blob/master/src/pipeline/evaluation.py" rel="noopener"><code>evaluation.py</code></a>: the retrieval and generation checks</li></ul></div>
+  <div><h2>See the 3D stages</h2><ul>{"".join(f'<li><a href="{rel}visualize/{x["slug"]}/">{html.escape(x["title"])}</a></li>' for x in PAGES)}</ul></div>
 </section>
 """
 

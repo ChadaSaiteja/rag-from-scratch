@@ -43,6 +43,21 @@ EVAL_CASES = [
 ]
 
 
+def read_prompt_head(generation_py: Path):
+    """The fixed instruction text of the prompt in generation.py (the part before
+    'Context:'), read from the source so the visualization never drifts from it."""
+    import ast
+    lines = generation_py.read_text(encoding="utf-8").splitlines()
+    start = next(i for i, ln in enumerate(lines) if "prompt = (" in ln)
+    head = []
+    for ln in lines[start + 1:]:
+        s = ln.strip()
+        if s.startswith('f"Context:'):
+            break
+        head.append(ast.literal_eval(s))
+    return "".join(head)
+
+
 def tokenize(text):
     return [t for t in re.findall(r"[a-z0-9]+", text.lower()) if t not in STOPWORDS and len(t) > 1]
 
@@ -178,10 +193,19 @@ def build(lessons_dir: Path):
         "comps": [[round(float(x), 6) for x in row] for row in comps],
         "scale": round(float(scale), 6),
         "chunkVecs": [[[int(i), round(float(v[i]), 5)] for i in np.nonzero(v)[0]] for v in X],
+        # BM25 needs raw term counts and lengths, not TF-IDF weights
+        "bm25": {
+            "k1": k1, "b": b, "avgdl": round(avgdl, 4),
+            "idf": [round(bm25_idf[t], 5) for t in vocab],
+            "counts": [[[index[t], c] for t, c in sorted(Counter(d).items())] for d in docs],
+            "lengths": [len(d) for d in docs],
+        },
     }
 
+    generation_py = lessons_dir.parents[1] / "src" / "pipeline" / "generation.py"
     return {
         "settings": {"chunkSize": CHUNK_SIZE, "chunkOverlap": CHUNK_OVERLAP, "k": RETRIEVAL_K,
                      "rrfC": RRF_C, "weights": list(WEIGHTS), "vocab": len(vocab)},
         "lessons": lessons, "chunks": chunks, "queries": queries, "space": space,
+        "promptHead": read_prompt_head(generation_py),
     }

@@ -836,7 +836,9 @@ details pre { max-height: 520px; }
 .hud-note { color: #94a3b8; margin-top: 6px; font-size: 0.76rem; }
 .hud-legend { display: flex; align-items: center; gap: 8px; color: #cbd5e1; font-size: 0.76rem; }
 .hud-legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px currentColor; }
-.hud-table { width: 100%; border-collapse: collapse; font-size: 0.74rem; margin: 2px 0; }
+.hud-table { width: 100%; border-collapse: collapse; font-size: 0.74rem; margin: 2px 0; table-layout: fixed; }
+.hud-table th:first-child, .hud-table td:first-child { width: 52%; overflow-wrap: anywhere; }
+.viz-hud { overflow-x: hidden; }
 .hud-table th, .hud-table td { border: 0; border-bottom: 1px solid rgba(148,163,184,0.15); padding: 3px 4px; text-align: left; background: none; color: #cbd5e1; }
 .hud-table th { color: #94a3b8; font-weight: 600; }
 .hud-table tr.hit td { color: #86efac; }

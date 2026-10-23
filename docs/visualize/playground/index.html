@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAG Pipeline Playground: From Documents to a Grounded Prompt, Step by Step | RAG from Scratch</title>
+<meta name="description" content="Follow the full RAG pipeline in one page: load, clean, chunk, vectorize and store a document, then type a question and watch tokens, vectors, hybrid search, fusion and the final prompt.">
+<link rel="canonical" href="https://chadasaiteja.github.io/rag-from-scratch/visualize/playground/">
+<meta name="robots" content="index, follow">
+<meta name="google-site-verification" content="rGwrTPLvkbtgUMk4zVAgc5VU0xutNGpT8NvMHbrYLF0">
+<meta property="og:site_name" content="RAG from Scratch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RAG Pipeline Playground: From Documents to a Grounded Prompt, Step by Step | RAG from Scratch">
+<meta property="og:description" content="Follow the full RAG pipeline in one page: load, clean, chunk, vectorize and store a document, then type a question and watch tokens, vectors, hybrid search, fusion and the final prompt.">
+<meta property="og:url" content="https://chadasaiteja.github.io/rag-from-scratch/visualize/playground/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="RAG Pipeline Playground: From Documents to a Grounded Prompt, Step by Step | RAG from Scratch">
+<meta name="twitter:description" content="Follow the full RAG pipeline in one page: load, clean, chunk, vectorize and store a document, then type a question and watch tokens, vectors, hybrid search, fusion and the final prompt.">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "RAG Pipeline Playground", "description": "Follow the full RAG pipeline in one page: load, clean, chunk, vectorize and store a document, then type a question and watch tokens, vectors, hybrid search, fusion and the final prompt.", "url": "https://chadasaiteja.github.io/rag-from-scratch/visualize/playground/", "learningResourceType": "Interactive simulation", "educationalLevel": "Beginner", "inLanguage": "en", "isPartOf": {"@type": "Course", "name": "RAG from Scratch", "url": "https://chadasaiteja.github.io/rag-from-scratch/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chadasaiteja.github.io/rag-from-scratch/"}, {"@type": "ListItem", "position": 2, "name": "How RAG works", "item": "https://chadasaiteja.github.io/rag-from-scratch/visualize/"}, {"@type": "ListItem", "position": 3, "name": "RAG Pipeline Playground", "item": "https://chadasaiteja.github.io/rag-from-scratch/visualize/playground/"}]}</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../../">RAG <span>from Scratch</span></a>
+  <nav class="topnav" aria-label="Main"><a href="../../">Home</a><a href="../../learn/">Learn</a><a href="../../visualize/" aria-current="page">Visualize</a><a href="../../implementation/">Implementation</a><a href="../../lessons/">Lessons</a><a href="../../learn/faq/">FAQ</a><a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a></nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+</header>
+<div class="layout no-sidebar wide">
+
+<main id="content">
+<nav class="crumbs" aria-label="Breadcrumb"><a href="../../">Home</a> / <a href="../../visualize/">How RAG works</a> / <span aria-current="page">RAG Pipeline Playground</span></nav>
+<header class="viz-head">
+  <p class="eyebrow">Playground · The whole pipeline</p>
+  <h1>RAG Pipeline Playground</h1>
+  <p class="lede">Every step of Retrieval-Augmented Generation on one page. Part A prepares the documents once. Part B runs for every question:
+  from your sentence to the exact prompt an LLM would receive.</p>
+</header>
+<div class="pg">
+  <p class="viz-badge">No AI model runs here. Vectors are TF-IDF keyword representations over this repo's 585-word vocabulary,
+  computed in your browser with the same math as the other visualizations. Chunks, BM25, rank fusion and the prompt template are the real ones.</p>
+  <div class="pg-tabs" role="tablist" aria-label="Pipeline part">
+    <button type="button" role="tab" class="pg-tab" id="tab-part-a" data-part="a" aria-controls="part-a" aria-selected="false"><b>A · Indexing</b><small>steps 1–5 · once per document</small></button>
+    <button type="button" role="tab" class="pg-tab" id="tab-part-b" data-part="b" aria-controls="part-b" aria-selected="true"><b>B · Answering</b><small>steps 6–16 · every question</small></button>
+  </div>
+
+  <section class="pg-part pg-part-a" id="part-a" role="tabpanel" aria-labelledby="tab-part-a" hidden>
+    <div class="pg-part-head"><span class="pg-part-tag">Part A</span><h2>Indexing: prepare the documents</h2>
+      <label class="viz-pick">Lesson <select class="pg-lesson viz-picker"><option value="0">01_rag_fundamentals.txt</option><option value="1">02_data_ingestion.txt</option><option value="2" selected>03_chunking.txt</option><option value="3">04_embeddings_and_vectors.txt</option><option value="4">05_vector_database.txt</option><option value="5">06_retrieval.txt</option><option value="6">07_rag_prompt_and_generation.txt</option><option value="7">08_rag_evaluation.txt</option><option value="8">09_metadata_and_filtering.txt</option><option value="9">10_rag_project_exercise.txt</option></select></label></div>
+    <ol class="pg-flow">
+<li class="pg-step" data-stage="load"><div class="pg-step-head"><span class="pg-num">1</span><div><h2>Load the document</h2><p>A raw lesson file is read from <code>data/raw/</code>. Pick any of the 10 lessons above.</p></div></div><div class="pg-out"></div></li>
+<li class="pg-step" data-stage="clean"><div class="pg-step-head"><span class="pg-num">2</span><div><h2>Clean the text</h2><p>Normalise whitespace and strip invisible characters so chunks and vectors aren't polluted by noise. This repo's <code>ingest.py</code> skips this step because the lessons are already clean.</p></div></div><div class="pg-out"></div></li>
+<li class="pg-step" data-stage="chunk"><div class="pg-step-head"><span class="pg-num">3</span><div><h2>Split into chunks</h2><p>The text is cut into pieces of at most 1,000 characters. Shaded colours are chunks; amber text appears in two chunks (overlap). Hover to see which.</p></div></div><div class="pg-out"></div></li>
+<li class="pg-step" data-stage="vectorize"><div class="pg-step-head"><span class="pg-num">4</span><div><h2>Turn each chunk into a vector</h2><p>Every chunk becomes a list of numbers, one per vocabulary word, weighted so rare, distinctive words count most (TF-IDF here; a real embedding model in production).</p></div></div><div class="pg-out"></div></li>
+<li class="pg-step" data-stage="store"><div class="pg-step-head"><span class="pg-num">5</span><div><h2>Store with metadata</h2><p>Each chunk is saved with an id, its text, its vector and its filename. The filename is what makes citations possible later.</p></div></div><div class="pg-out"></div></li>
+    </ol>
+  </section>
+
+  <section class="pg-part pg-part-b" id="part-b" role="tabpanel" aria-labelledby="tab-part-b">
+    <div class="pg-part-head"><span class="pg-part-tag">Part B</span><h2>Answering: one question, end to end</h2>
+      <span class="pg-part-note">Uses the 21 chunks prepared in Part A</span></div>
+    <form class="pg-input" role="search">
+      <label for="pg-text">Your question</label>
+      <div class="pg-input-row"><input id="pg-text" class="pg-text" type="text" maxlength="200" autocomplete="off" value="What is the difference between chunk size and overlap?"><button type="submit">Run ▶</button></div>
+      <div class="pg-examples"><span>Try:</span><button type="button" class="pg-ex" data-example="What is the difference between chunk size and overlap?">What is the difference between chunk size and overlap?</button><button type="button" class="pg-ex" data-example="Which vector database is best for prototyping?">Which vector database is best for prototyping?</button><button type="button" class="pg-ex" data-example="Why should retrieval and generation quality be evaluated separately?">Why should retrieval and generation quality be evaluated separately?</button><button type="button" class="pg-ex" data-example="What is the capital of France?">What is the capital of France?</button></div>
+    </form>
+    <ol class="pg-flow">
+<li class="pg-step" data-stage="sentence"><div class="pg-step-head"><span class="pg-num">6</span><div><h2>Your question</h2><p>Exactly what a user would type.</p></div></div><div class="pg-out"></div></li>
+<li class="pg-step" data-stage="tokens"><div class="pg-step-head"><span class="pg-num">7</span><div><h2>Split into tokens</h2><p>Lowercased and split into pieces. Very common words like <em>how</em> and <em>the</em> carry little meaning, so this representation drops them. Real LLM tokenizers go further and split rare words into sub-word pieces such as <code>retriev</code> + <code>al</code>.</p></div></div><div class="pg-out"></div></li>
+<li class="pg-step" data-stage="ids"><div class="pg-step-head"><span class="pg-num">8</span><div><h2>Look up token IDs</h2><p>Each word is replaced by its position in the vocabulary. Words the vocabulary has never seen can't be represented.</p></div></div><div class="pg-out"></div></li>
+<li class="pg-step" data-stage="vector"><div class="pg-step-head"><span class="pg-num">9</span><div><h2>Build the query vector</h2><p>One slot per vocabulary word, the same layout as the chunk vectors in Part A. Brighter cells are rarer, more distinctive words. Real embedding models produce a few hundred to a few thousand dense numbers instead.</p></div></div><div class="pg-out"><div class="pg-grid" role="img" aria-label="One cell per vocabulary word; lit cells are words in your question"></div><p class="pg-vector-meta pg-meta"></p></div></li>
+<li class="pg-step" data-stage="space"><div class="pg-step-head"><span class="pg-num">10</span><div><h2>Place it in space</h2><p>Projected to 3D next to the 21 stored chunks. Drag to orbit, hover a point to read its chunk.</p></div></div><div class="pg-out"><div class="pg-stage viz-stage"><div class="viz-tooltip" hidden></div><p class="viz-fallback" hidden>3D needs WebGL, which this browser does not support. The position is listed below.</p></div><p class="pg-space-meta pg-meta"></p></div></li>
+<li class="pg-step" data-stage="vsearch"><div class="pg-step-head"><span class="pg-num">11</span><div><h2>Vector search</h2><p>Rank every stored chunk by cosine similarity to the query vector and keep the top 3.</p></div></div><div class="pg-out"></div></li>
+<li class="pg-step" data-stage="bm25"><div class="pg-step-head"><span class="pg-num">12</span><div><h2>Keyword search (BM25)</h2><p>Independently, rank chunks by exact shared words. This catches names and codes that vectors can blur.</p></div></div><div class="pg-out"></div></li>
+<li class="pg-step" data-stage="fusion"><div class="pg-step-head"><span class="pg-num">13</span><div><h2>Merge with Reciprocal Rank Fusion</h2><p>Combine both rankings into one list, as LangChain's <code>EnsembleRetriever</code> does in <code>hybrid_search.py</code>.</p></div></div><div class="pg-out"></div></li>
+<li class="pg-step" data-stage="prompt"><div class="pg-step-head"><span class="pg-num">14</span><div><h2>Build the prompt</h2><p>The fused chunks are tagged with <code>[Source: filename]</code> and placed under the instructions from <code>generation.py</code>. This is the exact text that would be sent to Gemini.</p></div></div><div class="pg-out"></div></li>
+<li class="pg-step" data-stage="ground"><div class="pg-step-head"><span class="pg-num">15</span><div><h2>Grounding preview</h2><p>No model runs here, so there is no generated answer. These are the context sentences that share the most words with your question: the evidence a grounded answer would cite.</p></div></div><div class="pg-out"></div></li>
+<li class="pg-step" data-stage="check"><div class="pg-step-head"><span class="pg-num">16</span><div><h2>Check the result</h2><p>Before trusting an answer, check the evidence: is it relevant enough, can every claim be cited, and for test questions, was the expected source retrieved?</p></div></div><div class="pg-out"></div></li>
+    </ol>
+  </section>
+</div>
+<section class="viz-links">
+  <div><h2>Where this happens in the code</h2><ul>
+    <li><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/ingest.py" rel="noopener"><code>ingest.py</code></a>: load, chunk, embed, store</li>
+    <li><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/hybrid_search.py" rel="noopener"><code>hybrid_search.py</code></a>: BM25 + vector + fusion</li>
+    <li><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/generation.py" rel="noopener"><code>generation.py</code></a>: prompt and answer</li>
+    <li><a href="https://github.com/ChadaSaiteja/rag-from-scratch/blob/master/src/pipeline/evaluation.py" rel="noopener"><code>evaluation.py</code></a>: the retrieval and generation checks</li></ul></div>
+  <div><h2>Keep going</h2><ul>
+    <li><a href="../../visualize/">How RAG works, step by step (the guided story)</a></li>
+    <li><a href="../../learn/">The course: 12 modules</a></li></ul></div>
+</section>
+
+</main>
+</div>
+<footer class="site-footer">
+  <p>RAG from Scratch · free and open source on <a href="https://github.com/ChadaSaiteja/rag-from-scratch" rel="noopener">GitHub</a> · built from <code>notes/</code>, <code>data/raw/</code> and <code>src/pipeline/</code></p>
+</footer>
+<script src="../../assets/site.js" defer></script>
+<script type="importmap">{"imports": {"three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script src="../../assets/viz/data.js"></script>
+<script type="module" src="../../assets/viz/playground.js"></script>
+
+</body>
+</html>

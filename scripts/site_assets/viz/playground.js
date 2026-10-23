@@ -30,19 +30,17 @@ const dot = (c) => `<i class="pg-dot" style="background:${DATA.lessons[c.lesson]
 function cleanText(text) {
   const rules = [];
   let t = text.replace(/\r\n?/g, "\n");
-  const count = (re, s) => (s.match(re) || []).length;
-  const apply = (label, re, rep) => {
-    const n = count(re, t);
-    t = t.replace(re, rep);
-    rules.push([label, n]);
+  // Every rule reports characters removed, so the rules add up to the total.
+  const apply = (label, fn) => {
+    const before = t.length;
+    t = fn(t);
+    rules.push([label, before - t.length]);
   };
-  apply("invisible / control characters removed", /[\u0000-\u0008\u000B\u000C\u000E-\u001F​-‍﻿]/g, "");
-  apply("trailing spaces trimmed", /[ \t]+$/gm, "");
-  apply("repeated spaces collapsed", / {2,}/g, " ");
-  apply("runs of blank lines collapsed", /\n{3,}/g, "\n\n");
-  const before = t.length;
-  t = t.trim();
-  rules.push(["leading / trailing whitespace characters trimmed", before - t.length]);
+  apply("invisible / control characters", (s) => s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F​-‍﻿]/g, ""));
+  apply("trailing spaces at line ends", (s) => s.replace(/[ \t]+$/gm, ""));
+  apply("repeated spaces collapsed to one", (s) => s.replace(/ {2,}/g, " "));
+  apply("extra blank lines", (s) => s.replace(/\n{3,}/g, "\n\n"));
+  apply("whitespace at the start and end", (s) => s.trim());
   return { text: t, rules };
 }
 
@@ -61,6 +59,7 @@ function renderIndexing(lessonId) {
   const removed = lesson.chars - cleaned.text.length;
   out("clean").innerHTML =
     `<ul class="pg-rules">${cleaned.rules.map(([label, n]) => `<li class="${n ? "hit" : ""}"><b>${n}</b> ${label}</li>`).join("")}</ul>` +
+    `<p class="pg-meta">Numbers are characters removed by each rule.</p>` +
     `<p class="pg-meta">${lesson.chars.toLocaleString()} → ${cleaned.text.length.toLocaleString()} characters (${removed} removed). ` +
     `These lessons are already clean text. Real documents (PDFs, web pages) need much more here: headers, footers, page numbers, broken lines.</p>`;
 

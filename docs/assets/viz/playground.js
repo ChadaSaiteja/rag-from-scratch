@@ -387,4 +387,30 @@ root.querySelectorAll("[data-example]").forEach((b) => b.addEventListener("click
   input.value = b.dataset.example;
   runQuery(input.value);
 }));
-runQuery(input.value);
+
+// Tabs: show one part at a time. Answering (B) opens by default so the question
+// box is at the top; its animation replays whenever the tab is shown.
+const tabs = [...root.querySelectorAll(".pg-tab")];
+function showPart(part, { focus = false } = {}) {
+  tabs.forEach((t) => {
+    const on = t.dataset.part === part;
+    t.setAttribute("aria-selected", String(on));
+    t.tabIndex = on ? 0 : -1;
+    root.querySelector(`#${t.getAttribute("aria-controls")}`).hidden = !on;
+    if (on && focus) t.focus();
+  });
+  if (part === "b") runQuery(input.value);
+  else runIndexing(lessonPick.value);
+}
+tabs.forEach((t) => t.addEventListener("click", () => {
+  showPart(t.dataset.part);
+  history.replaceState(null, "", `#part-${t.dataset.part}`);
+}));
+root.querySelector(".pg-tabs").addEventListener("keydown", (e) => {
+  if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+  const next = tabs.find((t) => t.getAttribute("aria-selected") !== "true");
+  showPart(next.dataset.part, { focus: true });
+});
+const partFromHash = () => (location.hash === "#part-a" ? "a" : "b");
+window.addEventListener("hashchange", () => showPart(partFromHash()));
+showPart(partFromHash());

@@ -962,9 +962,18 @@ details pre { max-height: 520px; }
 .pg-res-head { display: flex; gap: 6px; align-items: baseline; font-weight: 600; font-size: 0.92rem; flex-wrap: wrap; }
 .pg-res-head code { margin-left: auto; }
 .pg-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; align-self: center; margin-right: 2px; }
-.pg-parts { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0 6px; }
-.pg-parts a { padding: 6px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); text-decoration: none; font-weight: 600; font-size: 0.88rem; }
-.pg-part { margin-top: 28px; }
+.pg-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin: 16px 0 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.pg-tab { font: inherit; text-align: left; padding: 12px 16px; border: 0; background: var(--surface); color: var(--text); cursor: pointer;
+  display: flex; flex-direction: column; gap: 2px; border-bottom: 3px solid transparent; }
+.pg-tab + .pg-tab { border-left: 1px solid var(--border); }
+.pg-tab b { font-size: 1rem; }
+.pg-tab small { color: var(--muted); font-size: 0.8rem; }
+.pg-tab[aria-selected="true"] { background: var(--accent-soft); border-bottom-color: var(--accent); }
+.pg-tab[aria-selected="true"] b { color: var(--accent); }
+.pg-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.pg-part { margin-top: 22px; }
+.pg-part[hidden] { display: none; }
+.pg-part-note { color: var(--muted); font-size: 0.85rem; }
 .pg-part-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-bottom: 14px; }
 .pg-part-head h2 { margin: 0; font-size: 1.4rem; border: 0; padding: 0; }
 .pg-part-tag { background: var(--accent); color: var(--bg); font-weight: 800; font-size: 0.78rem; letter-spacing: 0.06em;
@@ -1019,6 +1028,9 @@ details pre { max-height: 520px; }
   .pg-input-row { flex-direction: column; }
   .pg-grid { grid-template-columns: repeat(auto-fill, minmax(8px, 1fr)); gap: 1px; padding: 6px; }
   .pg-vecrow { grid-template-columns: 1fr; gap: 4px; }
+  .pg-tab { padding: 10px 12px; }
+  .pg-tab small { display: none; }
+  .pg .viz-badge { font-size: 0.76rem; }
   .pg-part-head h2 { font-size: 1.15rem; }
 }
 @media (prefers-reduced-motion: reduce) {

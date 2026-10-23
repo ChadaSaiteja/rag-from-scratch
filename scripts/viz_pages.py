@@ -156,9 +156,12 @@ def playground_html(data, rel, repo_url):
 <div class="pg">
   <p class="viz-badge">No AI model runs here. Vectors are TF-IDF keyword representations over this repo's {data["settings"]["vocab"]}-word vocabulary,
   computed in your browser with the same math as the other visualizations. Chunks, BM25, rank fusion and the prompt template are the real ones.</p>
-  <nav class="pg-parts" aria-label="Parts"><a href="#part-a">A · Indexing (once)</a><a href="#part-b">B · Answering (per question)</a></nav>
+  <div class="pg-tabs" role="tablist" aria-label="Pipeline part">
+    <button type="button" role="tab" class="pg-tab" id="tab-part-a" data-part="a" aria-controls="part-a" aria-selected="false"><b>A · Indexing</b><small>steps 1–5 · once per document</small></button>
+    <button type="button" role="tab" class="pg-tab" id="tab-part-b" data-part="b" aria-controls="part-b" aria-selected="true"><b>B · Answering</b><small>steps 6–16 · every question</small></button>
+  </div>
 
-  <section class="pg-part pg-part-a" id="part-a">
+  <section class="pg-part pg-part-a" id="part-a" role="tabpanel" aria-labelledby="tab-part-a" hidden>
     <div class="pg-part-head"><span class="pg-part-tag">Part A</span><h2>Indexing: prepare the documents</h2>
       <label class="viz-pick">Lesson <select class="pg-lesson viz-picker">{lesson_opts}</select></label></div>
     <ol class="pg-flow">
@@ -166,8 +169,9 @@ def playground_html(data, rel, repo_url):
     </ol>
   </section>
 
-  <section class="pg-part pg-part-b" id="part-b">
-    <div class="pg-part-head"><span class="pg-part-tag">Part B</span><h2>Answering: one question, end to end</h2></div>
+  <section class="pg-part pg-part-b" id="part-b" role="tabpanel" aria-labelledby="tab-part-b">
+    <div class="pg-part-head"><span class="pg-part-tag">Part B</span><h2>Answering: one question, end to end</h2>
+      <span class="pg-part-note">Uses the 21 chunks prepared in Part A</span></div>
     <form class="pg-input" role="search">
       <label for="pg-text">Your question</label>
       <div class="pg-input-row"><input id="pg-text" class="pg-text" type="text" maxlength="200" autocomplete="off" value="{html.escape(p["examples"][0])}"><button type="submit">Run ▶</button></div>
